@@ -551,7 +551,11 @@ class ModelBandPlot(object):
         ax.get_yaxis().set_visible(False)
         ax.autoscale(False)
 
-        scale_bar(ax, self._frame_size, dist=1, text='1"', font_size=font_size)
+        if 'scale_text' not in kwargs:
+            scale_text = '1"'
+
+        scale_bar(ax, self._frame_size, dist=1, text=scale_text,
+                  font_size=font_size)
         text_description(ax, self._frame_size, text=text, color="w",
                          backgroundcolor='k', font_size=font_size)
 
@@ -585,7 +589,9 @@ class ModelBandPlot(object):
         ax.get_xaxis().set_visible(False)
         ax.get_yaxis().set_visible(False)
         ax.autoscale(False)
-        scale_bar(ax, self._frame_size, dist=1, text='1"', font_size=font_size)
+        if 'scale_text' not in kwargs:
+            scale_text = '1"'
+        scale_bar(ax, self._frame_size, dist=1, text=scale_text, font_size=font_size)
         text_description(ax, self._frame_size, text=text, color="w",
                          backgroundcolor='k', font_size=font_size)
         if 'no_arrow' not in kwargs or not kwargs['no_arrow']:
@@ -625,7 +631,10 @@ class ModelBandPlot(object):
         ax.get_xaxis().set_visible(False)
         ax.get_yaxis().set_visible(False)
         ax.autoscale(False)
-        scale_bar(ax, self._frame_size, dist=1, text='1"', color='w', font_size=font_size)
+        if 'scale_text' not in kwargs:
+            scale_text = '1"'
+        scale_bar(ax, self._frame_size, dist=1, text=scale_text, color='w',
+                  font_size=font_size)
         if 'no_arrow' not in kwargs or not kwargs['no_arrow']:
             coordinate_arrows(ax, self._frame_size, self._coords, color='w',
                               arrow_size=self._arrow_size, font_size=font_size)
@@ -657,7 +666,9 @@ class ModelBandPlot(object):
         ax.get_xaxis().set_visible(False)
         ax.get_yaxis().set_visible(False)
         ax.autoscale(False)
-        scale_bar(ax, self._frame_size, dist=1, text='1"', color='k',
+        if 'scale_text' not in kwargs:
+            scale_text = '1"'
+        scale_bar(ax, self._frame_size, dist=1, text=scale_text, color='k',
                   font_size=font_size)
         text_description(ax, self._frame_size, text=text, color="k",
                          backgroundcolor='w', font_size=font_size)
@@ -673,7 +684,8 @@ class ModelBandPlot(object):
 
     def absolute_residual_plot(self, ax, v_min=-1, v_max=1, font_size=15,
                                text="Residuals",
-                               colorbar_label=r'(f$_{model}$-f$_{data}$)'):
+                               colorbar_label=r'(f$_{model}$-f$_{data}$)',
+                               **kwargs):
         """
 
         :param ax:
@@ -685,7 +697,9 @@ class ModelBandPlot(object):
         ax.get_xaxis().set_visible(False)
         ax.get_yaxis().set_visible(False)
         ax.autoscale(False)
-        scale_bar(ax, self._frame_size, dist=1, text='1"', color='k',
+        if 'scale_text' not in kwargs:
+            scale_text = '1"'
+        scale_bar(ax, self._frame_size, dist=1, text=scale_text, color='k',
                   font_size=font_size)
         text_description(ax, self._frame_size, text=text, color="k",
                          backgroundcolor='w', font_size=font_size)
@@ -782,7 +796,9 @@ class ModelBandPlot(object):
             ra_caustic_list, dec_caustic_list = self._caustics()
             plot_line_set(ax, coords_source, ra_caustic_list,
                           dec_caustic_list, color=caustic_color)
-        scale_bar(ax, d_s, dist=scale_size, text='{:.1f}"'.format(scale_size),
+        if 'scale_text' not in kwargs:
+            scale_text = '{:.1f}"'.format(scale_size)
+        scale_bar(ax, d_s, dist=scale_size, text=scale_text,
                   color='w',
                   flipped=False,
                   font_size=font_size)
@@ -795,7 +811,8 @@ class ModelBandPlot(object):
         return ax
 
     def error_map_source_plot(self, ax, numPix, deltaPix_source, v_min=None,
-                              v_max=None, with_caustics=False, font_size=15):
+                              v_max=None, with_caustics=False, font_size=15,
+                              **kwargs):
         x_grid_source, y_grid_source = util.make_grid_transformed(numPix,
                                                                   self._coords.transform_pix2angle * deltaPix_source / self._deltaPix)
         x_center = self._kwargs_source_partial[0]['center_x']
@@ -819,7 +836,10 @@ class ModelBandPlot(object):
         if with_caustics:
             ra_caustic_list, dec_caustic_list = self._caustics()
             plot_line_set(ax, coords_source, ra_caustic_list, dec_caustic_list, color='b')
-        scale_bar(ax, d_s, dist=0.1, text='0.1"', color='w', flipped=False, font_size=font_size)
+        if 'scale_text' not in kwargs:
+            scale_text = '0.1"'
+        scale_bar(ax, d_s, dist=0.1, text=scale_text, color='w', flipped=False,
+                  font_size=font_size)
         coordinate_arrows(ax, d_s, coords_source,
                           arrow_size=self._arrow_size, color='w', font_size=font_size)
         text_description(ax, d_s, text="Error map in source", color="w",
@@ -851,7 +871,10 @@ class ModelBandPlot(object):
         ax.get_xaxis().set_visible(False)
         ax.get_yaxis().set_visible(False)
         ax.autoscale(False)
-        scale_bar(ax, self._frame_size, dist=1, text='1"', color='k', font_size=font_size)
+        if 'scale_text' not in kwargs:
+            scale_text = '0.1"'
+        scale_bar(ax, self._frame_size, dist=1, text=scale_text, color='k',
+                  font_size=font_size)
         if not no_arrow:
             coordinate_arrows(ax, self._frame_size, self._coords, color='k',
                               arrow_size=self._arrow_size, font_size=font_size)
@@ -869,7 +892,7 @@ class ModelBandPlot(object):
     def deflection_plot(self, ax, v_min=None, v_max=None, axis=0,
                         with_caustics=False, image_name_list=None,
                         text="Deflection model", font_size=15,
-                        colorbar_label=r'arcsec'):
+                        colorbar_label=r'arcsec', **kwargs):
         """
 
         :param kwargs_lens:
@@ -889,7 +912,10 @@ class ModelBandPlot(object):
         ax.get_xaxis().set_visible(False)
         ax.get_yaxis().set_visible(False)
         ax.autoscale(False)
-        scale_bar(ax, self._frame_size, dist=1, text='1"', color='k', font_size=font_size)
+        if 'scale_text' not in kwargs:
+            scale_text = '0.1"'
+        scale_bar(ax, self._frame_size, dist=1, text=scale_text, color='k',
+                  font_size=font_size)
         coordinate_arrows(ax, self._frame_size, self._coords, color='k',
                           arrow_size=self._arrow_size, font_size=font_size)
         text_description(ax, self._frame_size, text=text, color="k",
