@@ -35,14 +35,14 @@ def scale_bar(ax, d, dist=1., text='1"', color='w', font_size=15, flipped=False)
     else:
         p0 = d / 15.
         ax.plot([p0, p0 + dist], [p0, p0], linewidth=2, color=color)
-        ax.text(p0 + dist / 2., p0 + 0.01 * d, text, fontsize=font_size, \
+        ax.text(p0 + dist / 2., p0 + 0.02 * d, text, fontsize=font_size, \
                                                     color=color, ha='center')
 
 
 def coordinate_arrows(ax, d, coords, color='w', font_size=15, arrow_size=0.05):
     d0 = d / 8.
     p0 = d / 15.
-    pt = d / 9.
+    pt = d / 9
     deltaPix = coords.pixel_width
     ra0, dec0 = coords.map_pix2coord((d - d0) / deltaPix, d0 / deltaPix)
     xx_, yy_ = coords.map_coord2pix(ra0, dec0)
@@ -52,12 +52,16 @@ def coordinate_arrows(ax, d, coords, color='w', font_size=15, arrow_size=0.05):
     xx_dec_t, yy_dec_t = coords.map_coord2pix(ra0, dec0 + pt)
 
     ax.arrow(xx_ * deltaPix, yy_ * deltaPix, (xx_ra - xx_) * deltaPix, (yy_ra - yy_) * deltaPix,
-             head_width=arrow_size * d, head_length=arrow_size * d, fc=color, ec=color, linewidth=1)
-    ax.text(xx_ra_t * deltaPix, yy_ra_t * deltaPix, "E", color=color, fontsize=font_size, ha='center')
+             head_width=arrow_size * d, head_length=arrow_size * d,
+             fc=color, ec=color, linewidth=1.5)
+    ax.text(xx_ra_t * deltaPix * .98, yy_ra_t*deltaPix*((font_size-15.)/3.9-1),
+            "E", color=color, fontsize=font_size, ha='center')
     ax.arrow(xx_ * deltaPix, yy_ * deltaPix, (xx_dec - xx_) * deltaPix, (yy_dec - yy_) * deltaPix,
-             head_width=arrow_size * d, head_length=arrow_size * d, fc
-             =color, ec=color, linewidth=1)
-    ax.text(xx_dec_t * deltaPix, yy_dec_t * deltaPix, "N", color=color, fontsize=font_size, ha='center')
+             head_width=arrow_size * d, head_length=arrow_size * d, fc=color, ec=color, linewidth=1.5)
+    ax.text(xx_dec_t * deltaPix,
+            yy_dec_t * deltaPix, "N",
+            color=color,
+            fontsize=font_size, ha='center')
 
 
 def plot_line_set(ax, coords, ra_caustic_list, dec_caustic_list, shift=0., color='g'):
@@ -198,7 +202,9 @@ def arrival_time_surface(ax, lensModel, kwargs_lens, numPix=500, deltaPix=0.01, 
     return ax
 
 
-def image_position_plot(ax, coords, ra_image, dec_image, color='w', image_name_list=None):
+def image_position_plot(ax, coords, ra_image, dec_image, color='w',
+                        font_size=20,
+                        image_name_list=None):
     """
 
     :param ax:
@@ -216,7 +222,9 @@ def image_position_plot(ax, coords, ra_image, dec_image, color='w', image_name_l
                 x_ = (x_image[i] + 0.5) * deltaPix
                 y_ = (y_image[i] + 0.5) * deltaPix
                 ax.plot(x_, y_, 'or')
-                ax.text(x_, y_, image_name_list[i], fontsize=20, color=color)
+                ax.text(x_+ 1.5*deltaPix, y_ + 1.5*deltaPix,
+                        image_name_list[i],
+                        fontsize=font_size, color=color)
     return ax
 
 
@@ -553,7 +561,8 @@ class ModelBandPlot(object):
 
         if 'scale_text' not in kwargs:
             scale_text = '1"'
-
+        else:
+            scale_text = kwargs['scale_text']
         scale_bar(ax, self._frame_size, dist=1, text=scale_text,
                   font_size=font_size)
         text_description(ax, self._frame_size, text=text, color="w",
@@ -591,6 +600,8 @@ class ModelBandPlot(object):
         ax.autoscale(False)
         if 'scale_text' not in kwargs:
             scale_text = '1"'
+        else:
+            scale_text = kwargs['scale_text']
         scale_bar(ax, self._frame_size, dist=1, text=scale_text, font_size=font_size)
         text_description(ax, self._frame_size, text=text, color="w",
                          backgroundcolor='k', font_size=font_size)
@@ -633,6 +644,8 @@ class ModelBandPlot(object):
         ax.autoscale(False)
         if 'scale_text' not in kwargs:
             scale_text = '1"'
+        else:
+            scale_text = kwargs['scale_text']
         scale_bar(ax, self._frame_size, dist=1, text=scale_text, color='w',
                   font_size=font_size)
         if 'no_arrow' not in kwargs or not kwargs['no_arrow']:
@@ -660,14 +673,17 @@ class ModelBandPlot(object):
         """
         if not 'cmap' in kwargs:
             kwargs['cmap'] = 'bwr'
+        if 'scale_text' not in kwargs:
+            scale_text = '1"'
+        else:
+            scale_text = kwargs['scale_text']
+        kwargs.pop('scale_text', None)
         im = ax.matshow(self._norm_residuals, vmin=v_min, vmax=v_max,
                         extent=[0, self._frame_size, 0, self._frame_size], origin='lower',
                         **kwargs)
         ax.get_xaxis().set_visible(False)
         ax.get_yaxis().set_visible(False)
         ax.autoscale(False)
-        if 'scale_text' not in kwargs:
-            scale_text = '1"'
         scale_bar(ax, self._frame_size, dist=1, text=scale_text, color='k',
                   font_size=font_size)
         text_description(ax, self._frame_size, text=text, color="k",
@@ -699,6 +715,8 @@ class ModelBandPlot(object):
         ax.autoscale(False)
         if 'scale_text' not in kwargs:
             scale_text = '1"'
+        else:
+            scale_text = kwargs['scale_text']
         scale_bar(ax, self._frame_size, dist=1, text=scale_text, color='k',
                   font_size=font_size)
         text_description(ax, self._frame_size, text=text, color="k",
@@ -798,6 +816,8 @@ class ModelBandPlot(object):
                           dec_caustic_list, color=caustic_color)
         if 'scale_text' not in kwargs:
             scale_text = '{:.1f}"'.format(scale_size)
+        else:
+            scale_text = kwargs['scale_text']
         scale_bar(ax, d_s, dist=scale_size, text=scale_text,
                   color='w',
                   flipped=False,
@@ -838,6 +858,8 @@ class ModelBandPlot(object):
             plot_line_set(ax, coords_source, ra_caustic_list, dec_caustic_list, color='b')
         if 'scale_text' not in kwargs:
             scale_text = '0.1"'
+        else:
+            scale_text = kwargs['scale_text']
         scale_bar(ax, d_s, dist=0.1, text=scale_text, color='w', flipped=False,
                   font_size=font_size)
         coordinate_arrows(ax, d_s, coords_source,
@@ -872,7 +894,9 @@ class ModelBandPlot(object):
         ax.get_yaxis().set_visible(False)
         ax.autoscale(False)
         if 'scale_text' not in kwargs:
-            scale_text = '0.1"'
+            scale_text = '1"'
+        else:
+            scale_text = kwargs['scale_text']
         scale_bar(ax, self._frame_size, dist=1, text=scale_text, color='k',
                   font_size=font_size)
         if not no_arrow:
@@ -885,7 +909,9 @@ class ModelBandPlot(object):
         cb = plt.colorbar(im, cax=cax)
         cb.set_label(colorbar_label, fontsize=font_size)
         ra_image, dec_image = self.bandmodel.PointSource.image_position(self._kwargs_ps_partial, self._kwargs_lens_partial)
-        image_position_plot(ax, self._coords, ra_image, dec_image, color='k', image_name_list=image_name_list)
+        image_position_plot(ax, self._coords, ra_image, dec_image, color='k',
+                            font_size=font_size,
+                            image_name_list=image_name_list)
         source_position_plot(ax, self._coords, self._kwargs_source_partial)
         return ax
 
@@ -914,6 +940,8 @@ class ModelBandPlot(object):
         ax.autoscale(False)
         if 'scale_text' not in kwargs:
             scale_text = '0.1"'
+        else:
+            scale_text = kwargs['scale_text']
         scale_bar(ax, self._frame_size, dist=1, text=scale_text, color='k',
                   font_size=font_size)
         coordinate_arrows(ax, self._frame_size, self._coords, color='k',
