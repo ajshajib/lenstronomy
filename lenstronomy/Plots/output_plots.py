@@ -832,7 +832,8 @@ class ModelBandPlot(object):
         return ax
 
     def error_map_source_plot(self, ax, numPix, deltaPix_source, v_min=None,
-                              v_max=None, with_caustics=False, font_size=15, point_source_position=True)
+                              v_max=None, with_caustics=False, font_size=15,
+                              point_source_position=True):
         x_grid_source, y_grid_source = util.make_grid_transformed(numPix,
                                                                   self._coords.transform_pix2angle * deltaPix_source / self._deltaPix)
         x_center = self._kwargs_source_partial[0]['center_x']
