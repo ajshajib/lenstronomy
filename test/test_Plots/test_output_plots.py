@@ -140,7 +140,7 @@ class TestOutputPlots(object):
         plt.close()
 
     def test_external_shear_direction(self):
-        lensModel = LensModel(lens_model_list=['SHEAR', 'FOREGROUND_SHEAR'])
+        lensModel = LensModel(lens_model_list=['SHEAR'])
         kwargs_lens = [{'e1': 0.1, 'e2': -0.1}, {'e1': 0.1, 'e2': -0.1}]
         f, ax = output_plots.ext_shear_direction(data_class=self.data_class, lens_model_class=lensModel,
                                                  kwargs_lens=kwargs_lens, strength_multiply=10)
@@ -238,7 +238,10 @@ class TestOutputPlots(object):
     def test_source(self):
         multi_band_list = [[self.kwargs_data, self.kwargs_psf, self.kwargs_numerics]]
         lensPlot = ModelPlot(multi_band_list, self.kwargs_model, self.kwargs_params, arrow_size=0.02, cmap_string="gist_heat")
-        source, coords_source = lensPlot.source(band_index=0, numPix=10, deltaPix=0.1)
+        source, coords_source = lensPlot.source(band_index=0, numPix=10, deltaPix=0.1, image_orientation=True)
+        assert len(source) == 10
+
+        source, coords_source = lensPlot.source(band_index=0, numPix=10, deltaPix=0.1, image_orientation=False)
         assert len(source) == 10
 
         source, coords_source = lensPlot.source(band_index=0, numPix=10, deltaPix=0.1, center=[0, 0])

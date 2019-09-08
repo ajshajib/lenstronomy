@@ -38,7 +38,6 @@ def scale_bar(ax, d, dist=1., text='1"', color='w', font_size=15, flipped=False)
         ax.text(p0 + dist / 2., p0 + 0.02 * d, text, fontsize=font_size, \
                                                     color=color, ha='center')
 
-
 def coordinate_arrows(ax, d, coords, color='w', font_size=15, arrow_size=0.05):
     d0 = d / 8.
     p0 = d / 15.
@@ -228,7 +227,7 @@ def image_position_plot(ax, coords, ra_image, dec_image, color='w',
     return ax
 
 
-def source_position_plot(ax, coords, kwargs_source):
+def source_position_plot(ax, coords, ra_pos, dec_pos):
     """
 
     :param ax:
@@ -237,10 +236,9 @@ def source_position_plot(ax, coords, kwargs_source):
     :return:
     """
     deltaPix = coords.pixel_width
-    if len(kwargs_source) > 0:
-        if 'center_x' in kwargs_source[0]:
-            x_source, y_source = coords.map_coord2pix(kwargs_source[0]['center_x'], kwargs_source[0]['center_y'])
-            ax.plot((x_source + 0.5) * deltaPix, (y_source + 0.5) * deltaPix, '*', markersize=10)
+    if len(ra_pos) > 0:
+        x_source, y_source = coords.map_coord2pix(ra_pos, dec_pos)
+        ax.plot((x_source + 0.5) * deltaPix, (y_source + 0.5) * deltaPix, '*', markersize=10)
     return ax
 
 
@@ -249,7 +247,7 @@ class ModelPlot(object):
     class that manages the summary plots of a lens model
     """
     def __init__(self, multi_band_list, kwargs_model, kwargs_params, arrow_size=0.02, cmap_string="gist_heat", likelihood_mask_list=None,
-                 bands_compute=None, multi_band_type='multi-linear', band_index=0):
+                 bands_compute=None, multi_band_type='multi-linear', band_index=0, source_marg=False, linear_prior=None):
         """
 
         :param kwargs_options:
@@ -267,10 +265,12 @@ class ModelPlot(object):
                                                        band_index=band_index)
 
         model, error_map, cov_param, param = self._imageModel.image_linear_solve(inv_bool=True, **kwargs_params)
-        #self._kwargs_lens = kwargs_lens
-        #self._kwargs_source = kwargs_source
-        #self._kwargs_lens_light = kwargs_lens_light
-        #self._kwargs_else = kwargs_ps
+        logL = self._imageModel.likelihood_data_given_model(source_marg=source_marg, linear_prior=linear_prior, **kwargs_params)
+
+        n_data = self._imageModel.num_data_evaluate
+        if n_data > 0:
+            print(logL * 2 / n_data, 'reduced X^2 of all evaluated imaging data combined.')
+
         self._band_plot_list = []
         self._index_list = []
         index = 0
@@ -469,7 +469,6 @@ class ModelPlot(object):
         plot_band = self._select_band(band_index)
         return plot_band.plot_extinction_map(**kwargs)
 
-
     def source(self, band_index=0, **kwargs):
         """
 
@@ -497,7 +496,7 @@ class ModelBandPlot(object):
         self._kwargs_lens_partial, self._kwargs_source_partial, self._kwargs_lens_light_partial, self._kwargs_ps_partial = self.bandmodel.update_linear_kwargs(param, kwarks_lens_partial, kwargs_source_partial, kwargs_lens_light_partial, kwargs_ps_partial)
         self._norm_residuals = self.bandmodel.reduced_residuals(model, error_map=error_map)
         self._reduced_x2 = self.bandmodel.reduced_chi2(model, error_map=error_map)
-        print("reduced chi^2 = ", self._reduced_x2)
+        print("reduced chi^2 of data ", band_index, "= ", self._reduced_x2)
 
         self._model = model
         self._cov_param = cov_param
@@ -768,7 +767,7 @@ class ModelBandPlot(object):
                     font_size=15, plot_scale='log',
                     scale_size=0.1,
                     text="Reconstructed source",
-                    colorbar_label=r'log$_{10}$ flux',
+                    colorbar_label=r'log$_{10}$ flux', point_source_position=True,
                     **kwargs):
         """
 
@@ -827,12 +826,13 @@ class ModelBandPlot(object):
                               arrow_size=self._arrow_size, font_size=font_size)
         text_description(ax, d_s, text=text, color="w", backgroundcolor='k',
                          flipped=False, font_size=font_size)
-        source_position_plot(ax, coords_source, self._kwargs_source_partial)
+        if point_source_position is True:
+            ra_source, dec_source = self.bandmodel.PointSource.source_position(self._kwargs_ps_partial, self._kwargs_lens_partial)
+            source_position_plot(ax, coords_source, ra_source, dec_source)
         return ax
 
     def error_map_source_plot(self, ax, numPix, deltaPix_source, v_min=None,
-                              v_max=None, with_caustics=False, font_size=15,
-                              **kwargs):
+                              v_max=None, with_caustics=False, font_size=15, point_source_position=True)
         x_grid_source, y_grid_source = util.make_grid_transformed(numPix,
                                                                   self._coords.transform_pix2angle * deltaPix_source / self._deltaPix)
         x_center = self._kwargs_source_partial[0]['center_x']
@@ -866,7 +866,9 @@ class ModelBandPlot(object):
                           arrow_size=self._arrow_size, color='w', font_size=font_size)
         text_description(ax, d_s, text="Error map in source", color="w",
                          backgroundcolor='k', flipped=False, font_size=font_size)
-        source_position_plot(ax, coords_source, self._kwargs_source_partial)
+        if point_source_position is True:
+            ra_source, dec_source = self.bandmodel.PointSource.source_position(self._kwargs_ps_partial, self._kwargs_lens_partial)
+            source_position_plot(ax, coords_source, ra_source, dec_source)
         return ax
 
     def magnification_plot(self, ax, v_min=-10, v_max=10,
@@ -909,10 +911,12 @@ class ModelBandPlot(object):
         cb = plt.colorbar(im, cax=cax)
         cb.set_label(colorbar_label, fontsize=font_size)
         ra_image, dec_image = self.bandmodel.PointSource.image_position(self._kwargs_ps_partial, self._kwargs_lens_partial)
+
         image_position_plot(ax, self._coords, ra_image, dec_image, color='k',
                             font_size=font_size,
                             image_name_list=image_name_list)
         source_position_plot(ax, self._coords, self._kwargs_source_partial)
+
         return ax
 
     def deflection_plot(self, ax, v_min=None, v_max=None, axis=0,
@@ -959,7 +963,6 @@ class ModelBandPlot(object):
             plot_line_set(ax, self._coords, ra_crit_list, dec_crit_list, color='r')
         ra_image, dec_image = self.bandmodel.PointSource.image_position(self._kwargs_ps_partial, self._kwargs_lens_partial)
         image_position_plot(ax, self._coords, ra_image, dec_image, image_name_list=image_name_list)
-        source_position_plot(ax, self._coords, self._kwargs_source_partial)
         return ax
 
     def decomposition_plot(self, ax, text='Reconstructed', v_min=None, v_max=None,
@@ -1108,7 +1111,6 @@ class ModelBandPlot(object):
         return ax
 
 
-
 def plot_chain_list(chain_list, index=0, num_average=100):
     """
     plots the output of a chain of samples (MCMC or PSO) with the some diagnostics of convergence.
@@ -1220,24 +1222,13 @@ def ext_shear_direction(data_class, lens_model_class, kwargs_lens, strength_mult
     x_shear = x_grid - f_x_shear
     y_shear = y_grid - f_y_shear
 
-    f_x_foreground, f_y_foreground = 0, 0
-    for i, lens_model in enumerate(lens_model_class.lens_model_list):
-        if lens_model == 'FOREGROUND_SHEAR':
-            kwargs = kwargs_lens[i]
-            f_x_foreground, f_y_foreground = shear.derivatives(x_grid, y_grid, e1=kwargs['e1'] * strength_multiply,
-                                                     e2=kwargs['e2'] * strength_multiply)
-    x_foreground = x_grid - f_x_foreground
-    y_foreground = y_grid - f_y_foreground
-
     center_x = np.mean(x_grid)
     center_y = np.mean(y_grid)
     radius = (np.max(x_grid) - np.min(x_grid))/4
     circle_shear = util_mask.mask_sphere(x_shear, y_shear, center_x, center_y, radius)
-    circle_foreground = util_mask.mask_sphere(x_foreground, y_foreground, center_x, center_y, radius)
     f, ax = plt.subplots(1, 1, figsize=(16, 8))
     im = ax.matshow(np.log10(data_class.data), origin='lower', alpha=0.5)
     im = ax.matshow(util.array2image(circle_shear), origin='lower', alpha=0.5, cmap="jet")
-    im = ax.matshow(util.array2image(circle_foreground), origin='lower', alpha=0.5)
     #f.show()
     return f, ax
 

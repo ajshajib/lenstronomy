@@ -144,6 +144,10 @@ class TestFittingSequence(object):
         print(logL, 'test')
         #print(lens_temp, source_temp, lens_light_temp, ps_temp, cosmo_temp)
         assert logL < 0
+        bic = fittingSequence.bic
+        assert bic > 0
+        #npt.assert_almost_equal(bic, 20000000220.29376, decimal=-4)
+        
         #npt.assert_almost_equal(logL, -10000000061.792593, decimal=-4)
 
         n_p = 2
@@ -242,6 +246,12 @@ class TestFittingSequence(object):
         npt.assert_almost_equal(kwargs_fixed[0][1]['e1'], 0.01, decimal=2)
         assert fittingSequence._updateManager._lower_kwargs[1][0]['n_sersic'] == 2.9
         assert fittingSequence._updateManager._upper_kwargs[1][0]['n_sersic'] == 3.1
+
+        kwargs_test = {'kwargs_lens': 1}
+        fittingSequence.update_state(kwargs_test)
+        kwargs_out = fittingSequence.best_fit(bijective=True)
+        assert kwargs_out['kwargs_lens'] == 1
+
 
 
 if __name__ == '__main__':
