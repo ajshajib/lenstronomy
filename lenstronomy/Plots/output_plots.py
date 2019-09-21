@@ -916,7 +916,6 @@ class ModelBandPlot(object):
         image_position_plot(ax, self._coords, ra_image, dec_image, color='k',
                             font_size=font_size,
                             image_name_list=image_name_list)
-        source_position_plot(ax, self._coords, self._kwargs_source_partial)
 
         return ax
 
