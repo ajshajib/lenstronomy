@@ -12,7 +12,7 @@ from lenstronomy.LensModel.lens_model_extensions import LensModelExtensions
 import lenstronomy.Util.class_creator as class_creator
 from lenstronomy.Data.coord_transforms import Coordinates
 from lenstronomy.Data.imaging_data import ImageData
-
+from matplotlib import ticker
 
 def text_description(ax, d, text, color='w', backgroundcolor='k',
                      flipped=False, font_size=15):
@@ -21,7 +21,8 @@ def text_description(ax, d, text, color='w', backgroundcolor='k',
                 fontsize=font_size,
                 backgroundcolor=backgroundcolor)
     else:
-        ax.text(d / 40., d - d * font_size / 15.**2, text, color=color, fontsize=font_size,
+        ax.text(d / 30., d - 1.6 * d * font_size / 15.**2, text, color=color, \
+                                                                  fontsize=font_size,
                 backgroundcolor=backgroundcolor)
 
 
@@ -53,7 +54,7 @@ def coordinate_arrows(ax, d, coords, color='w', font_size=15, arrow_size=0.05):
     ax.arrow(xx_ * deltaPix, yy_ * deltaPix, (xx_ra - xx_) * deltaPix, (yy_ra - yy_) * deltaPix,
              head_width=arrow_size * d, head_length=arrow_size * d,
              fc=color, ec=color, linewidth=1.5)
-    ax.text(xx_ra_t * deltaPix * .98, yy_ra_t*deltaPix*((font_size-15.)/3.9-1),
+    ax.text(xx_ra_t * deltaPix * .98, yy_ra_t*deltaPix-0.2,
             "E", color=color, fontsize=font_size, ha='center')
     ax.arrow(xx_ * deltaPix, yy_ * deltaPix, (xx_dec - xx_) * deltaPix, (yy_dec - yy_) * deltaPix,
              head_width=arrow_size * d, head_length=arrow_size * d, fc=color, ec=color, linewidth=1.5)
@@ -221,7 +222,13 @@ def image_position_plot(ax, coords, ra_image, dec_image, color='w',
                 x_ = (x_image[i] + 0.5) * deltaPix
                 y_ = (y_image[i] + 0.5) * deltaPix
                 ax.plot(x_, y_, 'or')
-                ax.text(x_+ 1.5*deltaPix, y_ + 1.5*deltaPix,
+
+                if i == 3:
+                    ax.text(x_ - 10 * deltaPix, y_ + 4.5 * deltaPix,
+                            image_name_list[i],
+                            fontsize=font_size, color=color)
+                else:
+                    ax.text(x_+ 2*deltaPix, y_ + 2*deltaPix,
                         image_name_list[i],
                         fontsize=font_size, color=color)
     return ax
@@ -572,9 +579,12 @@ class ModelBandPlot(object):
                               arrow_size=self._arrow_size, font_size=font_size)
 
         divider = make_axes_locatable(ax)
+        tick_locator = ticker.MaxNLocator(nbins=5)
         cax = divider.append_axes("right", size="5%", pad=0.05)
         cb = plt.colorbar(im, cax=cax, orientation='vertical')
         cb.set_label(colorbar_label, fontsize=font_size)
+        cb.locator = tick_locator
+        cb.update_ticks()
         return ax
 
     def model_plot(self, ax, v_min=None, v_max=None, image_names=False,
@@ -609,9 +619,12 @@ class ModelBandPlot(object):
                               color='w', arrow_size=self._arrow_size,
                               font_size=font_size)
         divider = make_axes_locatable(ax)
+        tick_locator = ticker.MaxNLocator(nbins=5)
         cax = divider.append_axes("right", size="5%", pad=0.05)
         cb = plt.colorbar(im, cax=cax)
         cb.set_label(colorbar_label, fontsize=font_size)
+        cb.locator = tick_locator
+        cb.update_ticks()
 
         #plot_line_set(ax, self._coords, self._ra_caustic_list, self._dec_caustic_list, color='b')
         #plot_line_set(ax, self._coords, self._ra_crit_list, self._dec_crit_list, color='r')
@@ -654,9 +667,12 @@ class ModelBandPlot(object):
                          color="w", backgroundcolor='k', flipped=False,
                          font_size=font_size)
         divider = make_axes_locatable(ax)
+        tick_locator = ticker.MaxNLocator(nbins=5)
         cax = divider.append_axes("right", size="5%", pad=0.05)
         cb = plt.colorbar(im, cax=cax)
         cb.set_label(colorbar_label, fontsize=font_size)
+        cb.locator = tick_locator
+        cb.update_ticks()
         return ax
 
     def normalized_residual_plot(self, ax, v_min=-6, v_max=6, font_size=15, text="Normalized Residuals",
@@ -804,17 +820,18 @@ class ModelBandPlot(object):
         ax.autoscale(False)
         divider = make_axes_locatable(ax)
         cax = divider.append_axes("right", size="5%", pad=0.05)
+        tick_locator = ticker.MaxNLocator(nbins=5)
         cb = plt.colorbar(im, cax=cax)
         cb.set_label(colorbar_label, fontsize=font_size)
-
-
+        cb.locator = tick_locator
+        cb.update_ticks()
 
         if with_caustics is True:
             ra_caustic_list, dec_caustic_list = self._caustics()
             plot_line_set(ax, coords_source, ra_caustic_list,
                           dec_caustic_list, color=caustic_color)
         if 'scale_text' not in kwargs:
-            scale_text = '{:.1f}"'.format(scale_size)
+            scale_text = '{:.0f}"'.format(scale_size)
         else:
             scale_text = kwargs['scale_text']
         scale_bar(ax, d_s, dist=scale_size, text=scale_text,
@@ -908,9 +925,12 @@ class ModelBandPlot(object):
         text_description(ax, self._frame_size, text=text, color="k",
                          backgroundcolor='w', font_size=font_size)
         divider = make_axes_locatable(ax)
+        tick_locator = ticker.MaxNLocator(nbins=5)
         cax = divider.append_axes("right", size="5%", pad=0.05)
         cb = plt.colorbar(im, cax=cax)
         cb.set_label(colorbar_label, fontsize=font_size)
+        cb.locator = tick_locator
+        cb.update_ticks()
         ra_image, dec_image = self.bandmodel.PointSource.image_position(self._kwargs_ps_partial, self._kwargs_lens_partial)
 
         image_position_plot(ax, self._coords, ra_image, dec_image, color='k',
