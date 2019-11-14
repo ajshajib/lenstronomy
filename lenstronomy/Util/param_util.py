@@ -83,7 +83,7 @@ def transform_e1e2(x, y, e1, e2, center_x, center_y):
     :param e2: eccentricity
     :param center_x: center of distortion
     :param center_y: center of distortion
-    :return: distorted coordinates x_, y_
+    :return: distorted coordinates x', y'
     """
     phi_G, q = ellipticity2phi_q(e1, e2)
     x_shift = x - center_x
@@ -105,7 +105,6 @@ def ellipticity2phi_q(e1, e2):
     """
     phi = np.arctan2(e2, e1)/2
     c = np.sqrt(e1**2+e2**2)
-    if c > 0.9999:
-        c = 0.9999
+    c = np.minimum(c, 0.9999)
     q = (1-c)/(1+c)
     return phi, q
