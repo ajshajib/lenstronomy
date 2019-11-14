@@ -57,8 +57,8 @@ def azimuthalAverage(image, center=None):
 
     image - The 2D image
     center - The [x,y] pixel coordinates used as the center. The default is None, which then uses the center of the
-    image (including fracitonal pixels).
-
+    image (including fractional pixels).
+    :return: I(r) (averaged), r of bin edges
     """
     # Calculate the indices from the image
     y, x = np.indices(image.shape)
@@ -84,10 +84,9 @@ def azimuthalAverage(image, center=None):
     # Cumulative sum to figure out sums for each radius bin
     csim = np.cumsum(i_sorted, dtype=float)
     tbin = csim[rind[1:]] - csim[rind[:-1]]
-
+    r_bin = np.linspace(start=1, stop=len(tbin) + 1 - 0.5, num=len(tbin))
     radial_prof = tbin / nr
-
-    return radial_prof
+    return radial_prof, r_bin
 
 
 def moments(I_xy_input, x, y):
@@ -128,13 +127,14 @@ def ellipticities(I_xy, x, y):
     return e1 / (1+bkg), e2 / (1+bkg)
 
 
-
-def bic_model(logL,num_data,num_param):
+def bic_model(logL, num_data, num_param):
     """
+    Bayesian information criteria
+
     :param logL: log likelihood value
     :param num_data: numbers of data
     :param num_param: numbers of model parameters
-    :return:
+    :return: BIC value
     """
     bic = -2 * logL + (np.log(num_data) * num_param)
     return bic

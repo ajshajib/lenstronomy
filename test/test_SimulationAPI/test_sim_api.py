@@ -19,15 +19,15 @@ class TestModelAPI(object):
                         'source_redshift_list': None}
         kwargs_numerics = {'supersampling_factor': 2}
 
-        self.api = SimAPI(numpix, kwargs_single_band, kwargs_model, kwargs_numerics)
+        self.api = SimAPI(numpix, kwargs_single_band, kwargs_model)
 
     def test_image_model_class(self):
-        model = self.api.image_model_class
+        model = self.api.image_model_class()
         assert model.LensModel.lens_model_list[0] == 'SIS'
 
     def test_magnitude2amplitude(self):
         kwargs_lens_light_mag = [{'magnitude': 28, 'R_sersic': 1., 'n_sersic': 2, 'center_x': 0, 'center_y': 0}]
-        kwargs_source_mag = [{'magnitude': 30, 'sigma_x': 0.3, 'sigma_y': 0.6, 'center_x': 0, 'center_y': 0}]
+        kwargs_source_mag = [{'magnitude': 30, 'sigma': 0.3, 'center_x': 0, 'center_y': 0}]
         kwargs_ps_mag = [{'magnitude': [30], 'ra_image': [0], 'dec_image': [0]}]
         kwargs_lens_light, kwargs_source, kwargs_ps = self.api.magnitude2amplitude(kwargs_lens_light_mag, kwargs_source_mag,
                                                                         kwargs_ps_mag)

@@ -198,7 +198,7 @@ class ImageLinearFit(ImageModel):
                                                  kwargs_special=kwargs_special)
         lens_light_response, n_lens_light = self.LensLightModel.functions_split(x_grid, y_grid, kwargs_lens_light)
 
-        ra_pos, dec_pos, amp, n_points = self.PointSource.linear_response_set(kwargs_ps, kwargs_lens, with_amp=False)
+        ra_pos, dec_pos, amp, n_points = self.point_source_linear_response_set(kwargs_ps, kwargs_lens, kwargs_special, with_amp=False)
         num_param = n_points + n_lens_light + n_source
 
         num_response = self.num_data_evaluate
@@ -219,7 +219,7 @@ class ImageLinearFit(ImageModel):
             n += 1
         # response of point sources
         for i in range(0, n_points):
-            image = self.ImageNumerics.point_source_rendering(ra_pos[i], dec_pos[i], amp[i], kwargs_special=kwargs_special)
+            image = self.ImageNumerics.point_source_rendering(ra_pos[i], dec_pos[i], amp[i])
             A[n, :] = self.image2array_masked(image)
             n += 1
         return np.nan_to_num(A)
@@ -296,7 +296,7 @@ class ImageLinearFit(ImageModel):
         grid2d = util.array2image(grid1d, nx, ny)
         return grid2d
 
-    def _error_map_psf(self, kwargs_lens, kwargs_ps, kwargs_special):
+    def _error_map_psf(self, kwargs_lens, kwargs_ps, kwargs_special=None):
         """
 
         :param kwargs_lens:
@@ -307,10 +307,10 @@ class ImageLinearFit(ImageModel):
         if self._psf_error_map is True:
             for k, bool in enumerate(self._psf_error_map_bool_list):
                 if bool is True:
-                    ra_pos, dec_pos, amp, n_points = self.PointSource.linear_response_set(kwargs_ps, kwargs_lens, k=k)
-                    for i in range(0, n_points):
-                        error_map_add = self.ImageNumerics.psf_error_map(ra_pos[i], dec_pos[i], amp[i], self.Data.data, kwargs_special=kwargs_special)
-                        error_map += error_map_add
+                    ra_pos, dec_pos, amp = self.PointSource.point_source_list(kwargs_ps, kwargs_lens=kwargs_lens, k=k)
+                    if len(ra_pos) > 0:
+                        ra_pos, dec_pos = self._displace_astrometry(ra_pos, dec_pos, kwargs_special=kwargs_special)
+                        error_map += self.ImageNumerics.psf_error_map(ra_pos, dec_pos, amp, self.Data.data)
         return error_map
 
     def error_map_source(self, kwargs_source, x_grid, y_grid, cov_param):
@@ -348,3 +348,29 @@ class ImageLinearFit(ImageModel):
             for i in range(len(error_map)):
                 error_map[i] = basis_functions[:, i].T.dot(cov_param[:n_source, :n_source]).dot(basis_functions[:, i])
         return error_map
+
+    def point_source_linear_response_set(self, kwargs_ps, kwargs_lens, kwargs_special, with_amp=True):
+        """
+
+        :param kwargs_ps: point source keyword argument list
+        :param kwargs_lens: lens model keyword argument list
+        :param kwargs_special: special keyword argument list, may include 'delta_x_image' and 'delta_y_image'
+        :param with_amp: bool, if True, relative magnification between multiply imaged point sources are held fixed.
+        :return: list of positions and amplitudes split in different basis components with applied astrometric corrections
+        """
+
+        ra_pos, dec_pos, amp, n_points = self.PointSource.linear_response_set(kwargs_ps, kwargs_lens, with_amp=with_amp)
+
+        if kwargs_special is not None:
+            if 'delta_x_image' in kwargs_special:
+                delta_x, delta_y = kwargs_special['delta_x_image'], kwargs_special['delta_y_image']
+                k = 0
+                n = len(delta_x)
+                for i in range(n_points):
+                    for j in range(len(ra_pos[i])):
+                        if k >= n:
+                            break
+                        ra_pos[i][j] = ra_pos[i][j] + delta_x[k]
+                        dec_pos[i][j] = dec_pos[i][j] + delta_y[k]
+                        k += 1
+        return ra_pos, dec_pos, amp, n_points

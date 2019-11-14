@@ -1,21 +1,24 @@
 import numpy as np
 
 
-def cart2polar(x, y, center=np.array([0, 0])):
+def cart2polar(x, y, center_x=0, center_y=0):
     """
     transforms cartesian coords [x,y] into polar coords [r,phi] in the frame of the lense center
 
-    :param coord: set of coordinates
-    :type coord: array of size (n,2)
-    :param center: rotation point
-    :type center: array of size (2)
+    :param x: set of x-coordinates
+    :type x: array of size (n)
+    :param y: set of x-coordinates
+    :type y: array of size (n)
+    :param center_x: rotation point
+    :type center_x: float
+    :param center_y: rotation point
+    :type center_y: float
     :returns:  array of same size with coords [r,phi]
-    :raises: AttributeError, KeyError
     """
-    coordShift_x = x - center[0]
-    coordShift_y = y - center[1]
-    r = np.sqrt(coordShift_x**2+coordShift_y**2)
-    phi = np.arctan2(coordShift_y, coordShift_x)
+    coord_shift_x = x - center_x
+    coord_shift_y = y - center_y
+    r = np.sqrt(coord_shift_x**2+coord_shift_y**2)
+    phi = np.arctan2(coord_shift_y, coord_shift_x)
     return r, phi
 
 
@@ -40,7 +43,7 @@ def phi_gamma_ellipticity(phi, gamma):
 
     :param phi: angel
     :param gamma: ellipticity
-    :return:
+    :return: eccentricity components e1 and e2
     """
     e1 = gamma*np.cos(2*phi)
     e2 = gamma*np.sin(2*phi)
@@ -63,31 +66,35 @@ def phi_q2_ellipticity(phi, q):
 
     :param phi: angle of orientation (in radian)
     :param q: axis ratio minor axis / major axis
-    :return: excentricities e1 and e2
+    :return: eccentricities e1 and e2
     """
     e1 = (1.-q)/(1.+q)*np.cos(2*phi)
     e2 = (1.-q)/(1.+q)*np.sin(2*phi)
     return e1, e2
 
 
-def transform_e1e2(x, y, e1, e2, center_x=0, center_y=0):
+def transform_e1e2(x, y, e1, e2, center_x, center_y):
     """
-    maps the coordinates x, y with eccentricities e1 e2 into a new elliptical coordiante system
+    maps the coordinates x, y with eccentricities e1 e2 into a new elliptical coordianate system
 
-    :param x:
-    :param y:
-    :param e1:
-    :param e2:
-    :param center_x:
-    :param center_y:
-    :return:
+    :param x: x-coordinate
+    :param y: y-coordinate
+    :param e1: eccentricity
+    :param e2: eccentricity
+    :param center_x: center of distortion
+    :param center_y: center of distortion
+    :return: distorted coordinates x_, y_
     """
+    phi_G, q = ellipticity2phi_q(e1, e2)
     x_shift = x - center_x
     y_shift = y - center_y
-    x_ = (1-e1) * x_shift - e2 * y_shift
-    y_ = -e2 * x_shift + (1 + e1) * y_shift
-    det = np.sqrt((1-e1)*(1+e1) + e2**2)
-    return x_ / det, y_ / det
+
+    cos_phi = np.cos(phi_G)
+    sin_phi = np.sin(phi_G)
+
+    xt1 = cos_phi * x_shift + sin_phi * y_shift
+    xt2 = -sin_phi * x_shift + cos_phi * y_shift
+    return xt1 * np.sqrt(q), xt2 / np.sqrt(q)
 
 
 def ellipticity2phi_q(e1, e2):
@@ -98,7 +105,7 @@ def ellipticity2phi_q(e1, e2):
     """
     phi = np.arctan2(e2, e1)/2
     c = np.sqrt(e1**2+e2**2)
-    if c > 0.999:
-        c = 0.999
+    if c > 0.9999:
+        c = 0.9999
     q = (1-c)/(1+c)
     return phi, q

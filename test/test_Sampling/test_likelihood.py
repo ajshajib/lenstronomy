@@ -113,7 +113,7 @@ class TestLikelihoodModule(object):
         args = self.param_class.kwargs2args(kwargs_lens=self.kwargs_lens, kwargs_source=self.kwargs_source,
                                             kwargs_lens_light=self.kwargs_lens_light, kwargs_ps=self.kwargs_ps, kwargs_special=self.kwargs_cosmo)
 
-        logL, _ = self.Likelihood.logL(args, verbose=True)
+        logL = self.Likelihood.logL(args, verbose=True)
         num_data_evaluate = self.Likelihood.num_data
         npt.assert_almost_equal(logL/num_data_evaluate, -1/2., decimal=1)
 
@@ -124,7 +124,7 @@ class TestLikelihoodModule(object):
         args = self.param_class.kwargs2args(kwargs_lens=self.kwargs_lens, kwargs_source=self.kwargs_source,
                                             kwargs_lens_light=self.kwargs_lens_light, kwargs_ps=self.kwargs_ps, kwargs_special=self.kwargs_cosmo)
 
-        logL, _ = likelihood.logL(args, verbose=True)
+        logL = likelihood.logL(args, verbose=True)
         npt.assert_almost_equal(logL, -3080.29, decimal=-1)
 
     #def test_solver(self):
@@ -153,7 +153,7 @@ class TestLikelihoodModule(object):
         kwargs_constraints = {}
         param_class = Param(kwargs_model, **kwargs_constraints)
 
-        kwargs_data = sim_util.data_configure_simple(numPix=10, deltaPix=0.1, exposure_time=1, sigma_bkg=0.1)
+        kwargs_data = sim_util.data_configure_simple(numPix=10, deltaPix=0.1, exposure_time=1, background_rms=0.1)
         data_class = ImageData(**kwargs_data)
         kwargs_psf = {'psf_type': 'NONE'}
         psf_class = PSF(**kwargs_psf)
@@ -170,7 +170,7 @@ class TestLikelihoodModule(object):
         kwargs_data_joint = {'multi_band_list': [[kwargs_data, kwargs_psf, {}]], 'multi_band_type': 'single-band'}
         likelihood = LikelihoodModule(kwargs_data_joint=kwargs_data_joint, kwargs_model=kwargs_model, param_class=param_class, **kwargs_likelihood)
 
-        logL, _ = likelihood.logL(args=param_class.kwargs2args(kwargs_source=kwargs_source), verbose=True)
+        logL = likelihood.logL(args=param_class.kwargs2args(kwargs_source=kwargs_source), verbose=True)
         assert logL <= -10**10
 
 

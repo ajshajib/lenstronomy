@@ -7,15 +7,13 @@ import lenstronomy.Util.param_util as param_util
 from lenstronomy.PointSource.point_source import PointSource
 from lenstronomy.LensModel.lens_model import LensModel
 from lenstronomy.LightModel.light_model import LightModel
-from lenstronomy.Plots.output_plots import ModelPlot
-import lenstronomy.Plots.output_plots as output_plots
+from lenstronomy.Plots.model_plot import ModelPlot
 from lenstronomy.Data.imaging_data import ImageData
 from lenstronomy.Data.psf import PSF
 
 import matplotlib
 matplotlib.use('agg')
 import matplotlib.pyplot as plt
-import numpy as np
 import unittest
 
 
@@ -131,100 +129,6 @@ class TestOutputPlots(object):
         lensPlot.plot_extinction_map(ax=ax)
         plt.close()
 
-    def test_psf_iteration_compare(self):
-        kwargs_psf = self.kwargs_psf
-        kwargs_psf['kernel_point_source_init'] = kwargs_psf['kernel_point_source']
-        f, ax = output_plots.psf_iteration_compare(kwargs_psf=kwargs_psf, vmin=-1, vmax=1)
-        plt.close()
-        f, ax = output_plots.psf_iteration_compare(kwargs_psf=kwargs_psf)
-        plt.close()
-
-    def test_external_shear_direction(self):
-        lensModel = LensModel(lens_model_list=['SHEAR'])
-        kwargs_lens = [{'e1': 0.1, 'e2': -0.1}, {'e1': 0.1, 'e2': -0.1}]
-        f, ax = output_plots.ext_shear_direction(data_class=self.data_class, lens_model_class=lensModel,
-                                                 kwargs_lens=kwargs_lens, strength_multiply=10)
-        plt.close()
-
-    def test_plot_chain(self):
-        X2_list = [1, 1, 2]
-        pos_list = [[1, 0], [2, 0], [3, 0]]
-        vel_list = [[-1, 0], [0, 0], [1, 0]]
-        param_list = ['test1', 'test2']
-        chain = X2_list, pos_list, vel_list, None
-        output_plots.plot_chain(chain=chain, param_list=param_list)
-        plt.close()
-
-    def test_plot_mcmc_behaviour(self):
-        f, ax = plt.subplots(1, 1, figsize=(4, 4))
-        param_mcmc = ['a', 'b']
-        samples_mcmc = np.random.random((10, 1000))
-        dist_mcmc = np.random.random(1000)
-        output_plots.plot_mcmc_behaviour(ax, samples_mcmc, param_mcmc, dist_mcmc, num_average=10)
-        plt.close()
-
-    def test_chain_list(self):
-        param = ['a', 'b']
-
-        X2_list = [1, 1, 2]
-        pos_list = [[1, 0], [2, 0], [3, 0]]
-        vel_list = [[-1, 0], [0, 0], [1, 0]]
-        chain = X2_list, pos_list, vel_list, None
-
-        samples_mcmc = np.random.random((10, 1000))
-        dist_mcmc = np.random.random(1000)
-
-        chain_list = [['PSO', chain, param],
-                      ['COSMOHAMMER', samples_mcmc, param, dist_mcmc],
-                      ['EMCEE', samples_mcmc, param],
-                      ['MULTINEST', samples_mcmc, param, dist_mcmc]
-                      ]
-
-        output_plots.plot_chain_list(chain_list, index=0)
-        plt.close()
-        output_plots.plot_chain_list(chain_list, index=1, num_average=10)
-        plt.close()
-        output_plots.plot_chain_list(chain_list, index=2, num_average=10)
-        plt.close()
-        output_plots.plot_chain_list(chain_list, index=3, num_average=10)
-        plt.close()
-
-    def test_scale_bar(self):
-        f, ax = plt.subplots(1, 1, figsize=(4, 4))
-        output_plots.scale_bar(ax, 3, dist=1, text='1"', flipped=True)
-        plt.close()
-        f, ax = plt.subplots(1, 1, figsize=(4, 4))
-        output_plots.text_description(ax, d=3, text='test', color='w', backgroundcolor='k', flipped=True)
-        plt.close()
-
-    def test_lens_model_plot(self):
-        f, ax = plt.subplots(1, 1, figsize=(4, 4))
-        lensModel = LensModel(lens_model_list=['SIS'])
-        kwargs_lens = [{'theta_E': 1., 'center_x': 0, 'center_y': 0}]
-        output_plots.lens_model_plot(ax, lensModel, kwargs_lens, numPix=10, deltaPix=0.5, sourcePos_x=0, sourcePos_y=0,
-                    point_source=True, with_caustics=True)
-        plt.close()
-
-    def test_arrival_time_surface(self):
-        f, ax = plt.subplots(1, 1, figsize=(4, 4))
-        lensModel = LensModel(lens_model_list=['SIS'])
-        kwargs_lens = [{'theta_E': 1., 'center_x': 0, 'center_y': 0}]
-        output_plots.arrival_time_surface(ax, lensModel, kwargs_lens, numPix=10, deltaPix=0.5, sourcePos_x=0,
-                                          sourcePos_y=0, point_source=True, with_caustics=True,
-                                          image_color_list=['k', 'k', 'k', 'r'])
-        plt.close()
-        output_plots.arrival_time_surface(ax, lensModel, kwargs_lens, numPix=10, deltaPix=0.5, sourcePos_x=0,
-                                          sourcePos_y=0, point_source=True, with_caustics=False,
-                                          image_color_list=None)
-        plt.close()
-        f, ax = plt.subplots(1, 1, figsize=(4, 4))
-        lensModel = LensModel(lens_model_list=['SIS'])
-        kwargs_lens = [{'theta_E': 1., 'center_x': 0, 'center_y': 0}]
-        output_plots.arrival_time_surface(ax, lensModel, kwargs_lens, numPix=10, deltaPix=0.5, sourcePos_x=0,
-                                          sourcePos_y=0,
-                                          point_source=False, with_caustics=False)
-        plt.close()
-
     def test_source_plot(self):
         multi_band_list = [[self.kwargs_data, self.kwargs_psf, self.kwargs_numerics]]
         lensPlot = ModelPlot(multi_band_list, self.kwargs_model, self.kwargs_params, arrow_size=0.02, cmap_string="gist_heat")
@@ -279,15 +183,29 @@ class TestOutputPlots(object):
         ax = lensPlot.decomposition_plot(ax=ax)
         plt.close()
 
+    def test_reconstruction_all_bands(self):
+        multi_band_list = [[self.kwargs_data, self.kwargs_psf, self.kwargs_numerics],
+                           [self.kwargs_data, self.kwargs_psf, self.kwargs_numerics]]
+        lensPlot = ModelPlot(multi_band_list, self.kwargs_model, self.kwargs_params, arrow_size=0.02,
+                             cmap_string="gist_heat",
+                             multi_band_type='joint-linear', bands_compute=[True, True])
+        f, axes = lensPlot.reconstruction_all_bands()
+        assert len(axes) == 2
+        assert len(axes[0]) == 3
+        plt.close()
+
+
+
+
 
 class TestRaise(unittest.TestCase):
 
     def test_raise(self):
         with self.assertRaises(ValueError):
-            kwargs_data = sim_util.data_configure_simple(numPix=10, deltaPix=1, sigma_bkg=1)
+            kwargs_data = sim_util.data_configure_simple(numPix=10, deltaPix=1, background_rms=1)
             #kwargs_data['image_data'] = np.zeros((10, 10))
             kwargs_model = {'source_light_model_list': ['GAUSSIAN']}
-            kwargs_params = {'kwargs_lens': [], 'kwargs_source': [{'amp': 1, 'sigma_x': 1, 'sigma_y': 1, 'center_x': 0, 'center_y': 0}],
+            kwargs_params = {'kwargs_lens': [], 'kwargs_source': [{'amp': 1, 'sigma': 1, 'center_x': 0, 'center_y': 0}],
                              'kwargs_ps': [], 'kwargs_lens_light': []}
             lensPlot = ModelPlot(multi_band_list=[[kwargs_data, {'psf_type': 'NONE'}, {}]],
                                  kwargs_model=kwargs_model, kwargs_params=kwargs_params,
@@ -298,18 +216,16 @@ class TestRaise(unittest.TestCase):
                                       fsize=15, plot_scale='bad')
             plt.close()
         with self.assertRaises(ValueError):
-            kwargs_data = sim_util.data_configure_simple(numPix=10, deltaPix=1, sigma_bkg=1)
+            kwargs_data = sim_util.data_configure_simple(numPix=10, deltaPix=1, background_rms=1)
             # kwargs_data['image_data'] = np.zeros((10, 10))
             kwargs_model = {'source_light_model_list': ['GAUSSIAN']}
             kwargs_params = {'kwargs_lens': [],
-                             'kwargs_source': [{'amp': 1, 'sigma_x': 1, 'sigma_y': 1, 'center_x': 0, 'center_y': 0}],
+                             'kwargs_source': [{'amp': 1, 'sigma': 1, 'center_x': 0, 'center_y': 0}],
                              'kwargs_ps': [], 'kwargs_lens_light': []}
             lensPlot = ModelPlot(multi_band_list=[[kwargs_data, {'psf_type': 'NONE'}, {}]],
                                  kwargs_model=kwargs_model, kwargs_params=kwargs_params, bands_compute=[False],
                                  arrow_size=0.02, cmap_string="gist_heat")
             lensPlot._select_band(band_index=0)
-        with self.assertRaises(ValueError):
-            output_plots.plot_chain_list(chain_list=[['WRONG']], index=0)
 
 
 if __name__ == '__main__':

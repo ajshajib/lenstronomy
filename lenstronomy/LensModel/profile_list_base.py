@@ -89,8 +89,8 @@ class ProfileListBase(object):
             from lenstronomy.LensModel.Profiles.nie import NIE
             return NIE()
         elif lens_type == 'NIE_SIMPLE':
-            from lenstronomy.LensModel.Profiles.nie import NIE_simple
-            return NIE_simple()
+            from lenstronomy.LensModel.Profiles.nie import NIESimple
+            return NIESimple()
         elif lens_type == 'CHAMELEON':
             from lenstronomy.LensModel.Profiles.chameleon import Chameleon
             return Chameleon()
@@ -124,6 +124,9 @@ class ProfileListBase(object):
         elif lens_type == 'CNFW':
             from lenstronomy.LensModel.Profiles.cnfw import CNFW
             return CNFW()
+        elif lens_type == 'CNFW_ELLIPSE':
+            from lenstronomy.LensModel.Profiles.cnfw_ellipse import CNFW_ELLIPSE
+            return CNFW_ELLIPSE()
         elif lens_type == 'CTNFW_GAUSS_DEC':
             from lenstronomy.LensModel.Profiles.gauss_decomposition import CTNFWGaussDec
             return CTNFWGaussDec()
@@ -191,6 +194,9 @@ class ProfileListBase(object):
         elif lens_type == 'CURVED_ARC':
             from lenstronomy.LensModel.Profiles.curved_arc import CurvedArc
             return CurvedArc()
+        elif lens_type == 'ARC_PERT':
+            from lenstronomy.LensModel.Profiles.arc_perturbations import ArcPerturbations
+            return ArcPerturbations()
         elif lens_type == 'coreBURKERT':
             from lenstronomy.LensModel.Profiles.coreBurkert import CoreBurkert
             return CoreBurkert()

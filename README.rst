@@ -23,9 +23,9 @@ lenstronomy - gravitational lensing software package
 
 ``lenstronomy`` is a multi-purpose package to model strong gravitational lenses. The software package is presented in
 `Birrer & Amara 2018 <https://arxiv.org/abs/1803.09746v1>`_ and is based on `Birrer et al 2015 <http://adsabs.harvard.edu/abs/2015ApJ...813..102B>`_.
-``lenstronomy`` finds application in e.g. `Birrer et al 2016 <http://adsabs.harvard.edu/abs/2016JCAP...08..020B>`_ and
-`Birrer et al 2018 <http://adsabs.harvard.edu/abs/2018arXiv180901274B>`_ for time-delay cosmography and measuring
-the expansion rate of the universe and `Birrer et al 2017 <http://adsabs.harvard.edu/abs/2017JCAP...05..037B>`_ for
+``lenstronomy`` finds application in e.g. `Birrer et al 2016 <http://adsabs.harvard.edu/abs/2016JCAP...08..020B>`_,
+`Birrer et al 2018 <http://adsabs.harvard.edu/abs/2018arXiv180901274B>`_ and `Shajib et al 2019 <https://arxiv.org/abs/1910.06306>`_ for time-delay cosmography and measuring
+the expansion rate of the universe and `Birrer et al 2017 <http://adsabs.harvard.edu/abs/2017JCAP...05..037B>`_ and `Gilman et al. 2019 <https://ui.adsabs.harvard.edu/abs/2019arXiv190806983G/abstract>`_ for
 quantifying lensing substructure to infer dark matter properties.
 
 
@@ -48,14 +48,20 @@ Requirements
 To run lens models with elliptical mass distributions, the fastell4py package, originally from Barkana (fastell),
 is also required and can be cloned from: `https://github.com/sibirrer/fastell4py <https://github.com/sibirrer/fastell4py>`_ (needs a fortran compiler)
 
+.. code-block:: bash
+    $ sudo apt-get install gfortran
+    $ git clone https://github.com/sibirrer/fastell4py.git <desired location>
+    $ cd <desired location>
+    $ python setup.py install --user
+
 Additional python libraries:
 
-* ``CosmoHammer`` (through PyPi)
 * ``astropy``
 * ``dynesty``
 * ``pymultinest``
 * ``pypolychord``
 * ``nestcheck``
+* ``CosmoHammer``
 * standard python libraries (``numpy``, ``scipy``)
 
 
@@ -63,21 +69,17 @@ Additional python libraries:
 Modelling Features
 ------------------
 
-* a variety of lens models to use in arbitrary superposition
-* lens equation solver
-* multi-plane ray-tracing
-* Extended source reconstruction with basis sets (shapelets) and analytic light profiles
-* Point sources
+* a variety of analytic lens model profiles
+* various lensing computation tools (lens equation solver, ray-tracing etc)
+* integrated support for multi-lens plane and multi-source plane modelling
+* API to conveniently simulate mock lenses
+* Extended source reconstruction with basis sets (shapelets)
 * numerical options for sub-grid ray-tracing and sub-pixel convolution
-* non-linear line-of-sight description
-* iterative point spread function reconstruction
-* linear and non-linear optimization modules
-* Pre-defined plotting and illustration routines
 * Particle swarm optimization for parameter fitting
-* MCMC (emcee from CosmoHammer) for parameter inferences
-* Nested Sampling (MultiNest, DyPolyChord, or Dynesty) for evidence computation and parameter inferences
-* Kinematic modelling
+* MCMC (emcee) and nested sampling (MultiNest, DyPolyChord, or Dynesty)
+* Kinematic modelling (Jeans equation) of lens deflector galaxy
 * Cosmographic inference tools
+* ...and much more
 
 
 
@@ -116,6 +118,7 @@ Mailing list
 
 You can join the **lenstronomy** mailing list by signing up on the
 `google groups page <https://groups.google.com/forum/#!forum/lenstronomy>`_.
+
 
 The email list is meant to provide a communication platform between users and developers. You can ask questions,
 and suggest new features. New releases will be announced via this mailing list.
