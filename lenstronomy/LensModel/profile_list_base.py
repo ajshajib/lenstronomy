@@ -30,6 +30,7 @@ class ProfileListBase(object):
 
             # those models require a new instance per profile as certain pre-computations are relevant per individual profile
             if lens_type in ['NFW_MC', 'CHAMELEON', 'DOUBLE_CHAMELEON', 'TRIPLE_CHAMELEON', 'NFW_ELLIPSE_GAUSS_DEC',
+                             #'GNFW_ELLIPSE_GAUSS_DEC',
                              'CTNFW_GAUSS_DEC', 'INTERPOL', 'INTERPOL_SCALED', 'NIE', 'NIE_SIMPLE']:
                 lensmodel_class = self._import_class(lens_type, custom_class, z_lens=lens_redshift_list[i],
                                                      z_source=z_source_convention)
@@ -119,6 +120,10 @@ class ProfileListBase(object):
         elif lens_type == 'NFW_ELLIPSE_GAUSS_DEC':
             from lenstronomy.LensModel.Profiles.gauss_decomposition import NFWEllipseGaussDec
             return NFWEllipseGaussDec()
+        elif lens_type == 'GNFW_ELLIPSE_GAUSS_DEC':
+            from lenstronomy.LensModel.Profiles.gauss_decomposition import \
+                GNFWEllipseGaussDec
+            return GNFWEllipseGaussDec()
         elif lens_type == 'TNFW':
             from lenstronomy.LensModel.Profiles.tnfw import TNFW
             return TNFW()
@@ -147,6 +152,10 @@ class ProfileListBase(object):
             from lenstronomy.LensModel.Profiles.gauss_decomposition \
                 import SersicEllipseGaussDec
             return SersicEllipseGaussDec()
+        elif lens_type == 'SERSIC_ELLIPSE_MLG_GAUSS_DEC':
+            from lenstronomy.LensModel.Profiles.gauss_decomposition \
+                import SersicEllipseMLGGaussDec
+            return SersicEllipseMLGGaussDec()
         elif lens_type == 'PJAFFE':
             from lenstronomy.LensModel.Profiles.p_jaffe import PJaffe
             return PJaffe()

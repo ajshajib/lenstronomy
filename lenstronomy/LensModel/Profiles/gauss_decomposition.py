@@ -204,8 +204,8 @@ class GaussDecompositionAbstract(with_metaclass(abc.ABCMeta)):
     This abstract class sets up a template for computing lensing properties of
     an elliptical convergence through Shajib (2019)'s Gauss decomposition.
     """
-    def __init__(self, n_sigma=15, sigma_start_mult=0.02, sigma_end_mult=15.,
-                 precision=10, use_scipy_wofz=True, min_ellipticity=1e-5):
+    def __init__(self, n_sigma=20, sigma_start_mult=0.01, sigma_end_mult=15.,
+                 precision=10, use_scipy_wofz=False, min_ellipticity=1e-5):
         """
         Set up settings for the Gaussian decomposition. For more details about
         the decomposition parameters, see Shajib (2019).
@@ -490,6 +490,69 @@ class SersicEllipseGaussDec(GaussDecompositionAbstract):
         return kwargs['R_sersic']
 
 
+class SersicEllipseMLGGaussDec(GaussDecompositionAbstract):
+    """
+    This class computes the lensing properties of an elliptical Sersic
+    profile using the Shajib (2019)'s Gauss decomposition method.
+    """
+    param_names = ['k_eff', 'R_sersic', 'n_sersic', 'e1', 'e2', 'center_x',
+                   'center_y', 'mlg_gamma']
+    lower_limit_default = {'k_eff': 0., 'R_sersic': 0., 'n_sersic': 0.5,
+                           'e1': -0.5, 'e2': -0.5, 'center_x': -100.,
+                           'center_y': -100., 'mlg_gamma': 0.}
+    upper_limit_default = {'k_eff': 100., 'R_sersic': 100., 'n_sersic': 8.,
+                           'e1': 0.5, 'e2': 0.5, 'center_x': 100.,
+                           'center_y': 100., 'mlg_gamma': 3.}
+
+    def get_kappa_1d(self, y, **kwargs):
+        r"""
+        Compute the spherical Sersic profile at y.
+
+        :param y: y coordinate
+        :type y: ``float``
+        :param \**kwargs: Keyword arguments
+
+        :Keyword Arguments:
+            * **n_sersic** (``float``) --
+              Sersic index
+            * **R_sersic** (``float``) --
+              Sersic scale radius
+            * **k_eff** (``float``) --
+              Sersic convergence at R_sersic
+
+        :return: Sersic function at y
+        :rtype: ``type(y)``
+        """
+        n_sersic = kwargs['n_sersic']
+        R_sersic = kwargs['R_sersic']
+        k_eff = kwargs['k_eff']
+        gamma = kwargs['mlg_gamma']
+
+        bn = SersicUtil.b_n(n_sersic)
+
+        return k_eff * np.exp(-bn * (y / R_sersic) ** (1. / n_sersic) + bn) *\
+               (1. + y / R_sersic)**(-gamma)
+
+    def get_scale(self, **kwargs):
+        """
+        Identify the scale size from the keyword arguments.
+
+        :param \**kwargs: Keyword arguments
+
+        :Keyword Arguments:
+            * **n_sersic** (``float``) --
+              Sersic index
+            * **R_sersic** (``float``) --
+              Sersic scale radius
+            * **k_eff** (``float``) --
+              Sersic convergence at R_sersic
+
+        :return: Sersic radius
+        :rtype: ``float``
+        """
+        return kwargs['R_sersic']
+
+
 class NFWEllipseGaussDec(GaussDecompositionAbstract):
     """
     This class computes the lensing properties of an elliptical, projected NFW
@@ -547,7 +610,7 @@ class NFWEllipseGaussDec(GaussDecompositionAbstract):
         R_s = kwargs['Rs']
         alpha_Rs = kwargs['alpha_Rs']
 
-        kappa_s = alpha_Rs / (4 * R_s * (1 -  0.30102999566))
+        kappa_s = alpha_Rs / (4 * R_s * (1 - 0.30102999566))
         # log2 = 0.30102999566
 
         x = y/R_s
@@ -571,6 +634,108 @@ class NFWEllipseGaussDec(GaussDecompositionAbstract):
             f[range3] = 1. / 3.
 
         return 2 * kappa_s * f
+
+    def get_scale(self, **kwargs):
+        """
+        Identify the scale size from the keyword arguments.
+
+        :param \**kwargs: Keyword arguments
+
+        :Keyword Arguments:
+            * **alpha_Rs** (``float``) --
+              Deflection angle at ``Rs``
+            * **R_s** (``float``) --
+              NFW scale radius
+
+        :return: NFW scale radius
+        :rtype: ``float``
+        """
+        return kwargs['Rs']
+
+
+class GNFWEllipseGaussDec(GaussDecompositionAbstract):
+    """
+    This class computes the lensing properties of an elliptical, projected NFW
+    profile using Shajib (2019)'s Gauss decomposition method.
+    """
+    param_names = ['Rs', 'alpha_Rs', 'e1', 'e2', 'center_x', 'center_y',
+                   'nfw_gamma']
+    lower_limit_default = {'Rs': 0, 'alpha_Rs': 0, 'e1': -0.5, 'e2': -0.5,
+                           'center_x': -100, 'center_y': -100, 'nfw_gamma': 0.}
+    upper_limit_default = {'Rs': 100, 'alpha_Rs': 10, 'e1': 0.5, 'e2': 0.5,
+                           'center_x': 100, 'center_y': 100, 'nfw_gamma': 2.5}
+
+    def __init__(self, n_sigma=20, sigma_start_mult=0.001, sigma_end_mult=50.,
+                 precision=10, use_scipy_wofz=False, min_ellipticity=1e-5):
+        """
+        Set up settings for the Gaussian decomposition. For more details about
+        the decomposition parameters, see Shajib (2019).
+
+        :param n_sigma: Number of Gaussian components
+        :type n_sigma: ``int``
+        :param sigma_start_mult: Lower range of logarithmically spaced sigmas
+        :type sigma_start_mult: ``float``
+        :param sigma_end_mult: Upper range of logarithmically spaced sigmas
+        :type sigma_end_mult: ``float``
+        :param precision: Numerical precision of Gaussian decomposition
+        :type precision: ``int``
+        :param use_scipy_wofz: To be passed to ``class GaussianEllipseKappa``. If ``True``, Gaussian lensing will use ``scipy.special.wofz`` function. Set ``False`` for lower precision, but faster speed.
+        :type use_scipy_wofz: ``bool``
+        :param min_ellipticity: To be passed to ``class GaussianEllipseKappa``. Minimum ellipticity for Gaussian elliptical lensing calculation. For lower ellipticity than min_ellipticity the equations for the spherical case will be used.
+        :type min_ellipticity: ``float``
+        """
+        super(GNFWEllipseGaussDec, self).__init__(n_sigma=n_sigma,
+                                                 sigma_start_mult=sigma_start_mult,
+                                                 sigma_end_mult=sigma_end_mult,
+                                                 precision=precision,
+                                                 use_scipy_wofz=use_scipy_wofz,
+                                                 min_ellipticity=min_ellipticity)
+
+    def get_kappa_1d(self, y, **kwargs):
+        r"""
+        Compute the spherical projected gNFW profile at y. From p11 of Keeton 2001.
+
+        :param y: y coordinate
+        :type y: ``float``
+        :param \**kwargs: Keyword arguments
+
+        :Keyword Arguments:
+            * **alpha_Rs** (``float``) --
+              Deflection angle at ``Rs``
+            * **R_s** (``float``) --
+              gNFW scale radius
+
+        :return: projected NFW profile at y
+        :rtype: ``type(y)``
+        """
+        R_s = kwargs['Rs']
+        alpha_Rs = kwargs['alpha_Rs']
+        gamma = kwargs['nfw_gamma']
+
+        kappa_s = alpha_Rs / (4 * R_s * (1 - 0.30102999566))
+        # log2 = 0.30102999566
+
+        x = y/R_s
+
+        ys = np.linspace(0., 1., 1001)
+        dy = ys[1] - ys[0]
+        ys = (ys + dy/2.)[:-1]
+
+        if np.isscalar(x):
+            integral = np.sum(
+                np.sum.outer(ys, x) ** (gamma - 4.) * (1. - np.sqrt(1 -
+                                                            ys * ys))) * dy
+        else:
+            # if x is a ndarray, then using broadcasting to compute the integral
+            # for each entry in x
+            integral = np.sum(np.multiply(
+                (x[:, :, np.newaxis] + ys[np.newaxis, :]) ** (gamma - 4.),
+                (1. - np.sqrt(1 - ys * ys))), axis=2) * dy
+
+        kappa = 2 * kappa_s * x**(1.-gamma) * ((1.+x)**(gamma-3.) +
+                                               (3.-gamma)*integral)
+
+        return kappa
 
     def get_scale(self, **kwargs):
         """
