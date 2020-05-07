@@ -1,5 +1,7 @@
 import numpy as np
 from scipy.interpolate import interp1d
+from scipy.optimize import brentq, fsolve
+import warnings
 
 import lenstronomy.Util.constants as const
 from lenstronomy.GalKin.light_profile import LightProfile
@@ -243,3 +245,166 @@ class NumericKinematics(Anisotropy):
             #                 / self.cosmo.dds * const.Mpc * const.c ** 2 / (4 * np.pi * const.G)
             self._log_mass_3d = interp1d(np.log(r_array), np.log(mass_3d_array/r_array), fill_value="extrapolate")
         return np.exp(self._log_mass_3d(np.log(r))) * r
+
+
+class NumericKinematicsContracted(NumericKinematics):
+
+    def __init__(self, kwargs_model, kwargs_cosmo, interpol_grid_num=100,
+                 log_integration=False, max_integrate=100,
+                 min_integrate=0.001):
+        """
+
+        """
+
+        self.halo_response = kwargs_model.get('halo_response')
+        self.m_gal = kwargs_model.get('m_gal')
+        self.dark_bool = kwargs_model.get('dark_bool')
+        self.baryon_bool = [not i for i in self.dark_bool]
+
+        super(NumericKinematicsContracted, self).__init__(kwargs_model,
+                            kwargs_cosmo, interpol_grid_num,
+                            log_integration, max_integrate, min_integrate)
+
+    def get_contracted_radius(self, r, kwargs, M_star):
+        """
+
+        """
+        nu = self.halo_response
+
+        if nu == 0.:
+            return r
+
+        # if nu < 0.15:
+        #     warnings.warn('Numerically unstable for halo response < 0.15! No contraction applied!')
+        #     return r
+
+        # M_dark_i = self._mass_profile.mass_3d(
+        #     r,
+        #     kwargs,
+        #     bool_list=self.dark_bool)
+
+        # import matplotlib.pyplot as plt
+        #
+        # for g in np.logspace(-1, 1, 100):
+        #     M_dark_f = self._mass_profile.mass_3d(
+        #         r * g**(-nu),
+        #         kwargs,
+        #         bool_list=self.dark_bool)
+        #
+        #     #plt.plot(r, M_star)
+        #     plt.plot(r, (g**(-nu) * (1+self.m_gal) - 1) * M_dark_f, 'b',
+        #              alpha=0.1)
+        #
+        #
+        # plt.plot(r, M_dark_i, 'r')
+        # plt.plot(r, M_star, 'g')
+        # plt.xscale('log')
+        #
+        # plt.show()
+        #
+        # M_dark = self._mass_profile.mass_3d(
+        #     r * 1. ** (-nu),
+        #     kwargs,
+        #     bool_list=self.dark_bool)
+        #
+        # plt.plot(r, M_star)
+        # plt.plot(r, M_dark)
+        # plt.show()
+
+        #print(M_star, M_dark)
+        def func(gamma): #, m_d, m_s):
+            M_dark = self._mass_profile.mass_3d(
+                r / gamma,
+                kwargs,
+                bool_list=self.dark_bool)
+
+            return np.log10((1./gamma * (1.+self.m_gal) - 1.) * M_dark) - \
+                   np.log10(M_star)
+
+        # def func_brentq(gamma, m_d, m_s):
+        #     return (gamma**(-nu) * (1.+self.m_gal) - 1.) * m_d - m_s
+        #
+        # gamma = [brentq(func_brentq, 0.001*np.ones_like(r), 10.**np.ones_like(r),
+        #                 args=(M_dark[i], M_star[i]) for i in range()
+        #                 )
+        #          for i in range]
+
+        gamma = fsolve(func, 1e-10*np.ones_like(r))
+
+        # M_dark = self._mass_profile.mass_3d(
+        #         r / gamma,
+        #         kwargs,
+        #         bool_list=self.dark_bool)
+        #
+        # import matplotlib.pyplot as plt
+        # plt.plot(r, (1/gamma * (1. + self.m_gal) - 1.) * M_dark /
+        #          M_star - 1.)
+        # plt.xlabel('r')
+        # plt.ylabel('solved func')
+        # #plt.ylim(-1e-3, 1e-3)
+        # plt.xscale('log')
+        # plt.show()
+        #
+        # plt.plot(r, gamma)
+        # plt.xlabel('r')
+        # plt.ylabel(r'$\Gamma$')
+        # plt.xscale('log')
+        # plt.yscale('log')
+        # plt.show()
+        #
+        # plt.plot(r,
+        #          self._mass_profile.mass_3d(
+        #              r * gamma ** (-nu),
+        #              kwargs,
+        #              bool_list=self.dark_bool), c='r', label='f')
+        # plt.plot(r, self._mass_profile.mass_3d(
+        #             r,
+        #             kwargs,
+        #             bool_list=self.dark_bool), c='b', label='i'
+        #          )
+        #
+        # plt.xlabel('r')
+        # plt.ylabel('M(r)')
+        # plt.legend()
+        # plt.xscale('log')
+        # plt.yscale('log')
+        # plt.show()
+        #
+        # plt.plot(r,
+        #          self._mass_profile.density(
+        #              r,
+        #              kwargs,
+        #              bool_list=self.baryon_bool), c='r', label='star')
+        # plt.plot(r, self._mass_profile.density(
+        #     r,
+        #     kwargs,
+        #     bool_list=self.dark_bool), c='b', label='DM'
+        #          )
+        #
+        # plt.xlabel('r')
+        # plt.ylabel(r'$\rho(r)$')
+        # plt.legend()
+        # plt.xscale('log')
+        # plt.yscale('log')
+        # plt.show()
+
+        return r * gamma**(-nu)
+
+    def mass_3d(self, r, kwargs):
+        """
+        mass enclosed a 3d radius
+
+        :param r: in arc seconds
+        :param kwargs: lens model parameters in arc seconds
+        :return: mass enclosed physical radius in kg
+        """
+        mass_dimless = self._mass_profile.mass_3d(r, kwargs,
+                                                  bool_list=self.baryon_bool)
+        mass_dimless += self._mass_profile.mass_3d(
+                             self.get_contracted_radius(r, kwargs, mass_dimless),
+                             kwargs,
+                             bool_list=self.dark_bool)
+
+        mass_dim = mass_dimless * const.arcsec ** 2 * self.cosmo.dd * self.cosmo.ds / self.cosmo.dds * const.Mpc * \
+                   const.c ** 2 / (4 * np.pi * const.G)
+        return mass_dim

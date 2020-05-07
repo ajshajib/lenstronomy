@@ -1,5 +1,6 @@
 from lenstronomy.GalKin.numeric_kinematics import NumericKinematics
 from lenstronomy.GalKin.analytic_kinematics import AnalyticKinematics
+from lenstronomy.GalKin.numeric_kinematics import NumericKinematicsContracted
 
 
 class GalkinModel(object):
@@ -39,13 +40,15 @@ class GalkinModel(object):
     conservative to impact too much the computational cost. Reasonable values might depend on the specific problem.
 
     """
-    def __init__(self, kwargs_model, kwargs_cosmo, kwargs_numerics=None, analytic_kinematics=False):
+    def __init__(self, kwargs_model, kwargs_cosmo, kwargs_numerics=None,
+                 analytic_kinematics=False, contraction=False):
         """
 
         :param kwargs_model: keyword arguments describing the model components
         :param kwargs_cosmo: keyword arguments that define the cosmology in terms of the angular diameter distances involved
         :param kwargs_numerics: numerics keyword arguments
         :param analytic_kinematics: bool, if True uses the analytic kinematic model
+        :param contraction: bool, if True dark matter is contracted
         """
         if kwargs_numerics is None:
             kwargs_numerics = {'interpol_grid_num': 200,  # numerical interpolation, should converge -> infinity
@@ -53,7 +56,13 @@ class GalkinModel(object):
                                # log or linear interpolation of surface brightness and mass models
                                'max_integrate': 100,
                                'min_integrate': 0.001}  # lower/upper bound of numerical integrals
-        if analytic_kinematics is True:
+
+        if contraction is True:
+            self.numerics = NumericKinematicsContracted(
+                                            kwargs_model=kwargs_model,
+                                            kwargs_cosmo=kwargs_cosmo,
+                                            **kwargs_numerics)
+        elif analytic_kinematics is True:
             anisotropy_model = kwargs_model.get('anisotropy_model')
             if not anisotropy_model == 'OM':
                 raise ValueError('analytic kinematics only available for OsipkovMerritt ("OM") anisotropy model.')

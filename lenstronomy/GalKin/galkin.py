@@ -1,5 +1,6 @@
 from lenstronomy.GalKin.observation import GalkinObservation
 from lenstronomy.GalKin.galkin_model import GalkinModel
+from lenstronomy.GalKin.numeric_kinematics import NumericKinematicsContracted
 
 import numpy as np
 
@@ -44,7 +45,7 @@ class Galkin(GalkinModel, GalkinObservation):
 
     """
     def __init__(self, kwargs_model, kwargs_aperture, kwargs_psf, kwargs_cosmo, kwargs_numerics=None,
-                 analytic_kinematics=False):
+                 analytic_kinematics=False, contraction=False):
         """
 
         :param kwargs_model: keyword arguments describing the model components
@@ -55,7 +56,8 @@ class Galkin(GalkinModel, GalkinObservation):
         :param analytic_kinematics: bool, if True uses the analytic kinematic model
         """
         GalkinModel.__init__(self, kwargs_model, kwargs_cosmo, kwargs_numerics=kwargs_numerics,
-                             analytic_kinematics=analytic_kinematics)
+                             analytic_kinematics=analytic_kinematics,
+                             contraction=contraction)
         GalkinObservation.__init__(self, kwargs_aperture=kwargs_aperture, kwargs_psf=kwargs_psf)
 
     def dispersion(self, kwargs_mass, kwargs_light, kwargs_anisotropy, sampling_number=1000):
