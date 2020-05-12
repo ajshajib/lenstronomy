@@ -336,7 +336,7 @@ class NumericKinematicsContracted(NumericKinematics):
         #         kwargs,
         #         bool_list=self.dark_bool)
         #
-        # import matplotlib.pyplot as plt
+        import matplotlib.pyplot as plt
         # plt.plot(r, (1/gamma * (1. + self.m_gal) - 1.) * M_dark /
         #          M_star - 1.)
         # plt.xlabel('r')
@@ -352,41 +352,48 @@ class NumericKinematicsContracted(NumericKinematics):
         # plt.yscale('log')
         # plt.show()
         #
-        # plt.plot(r,
-        #          self._mass_profile.mass_3d(
-        #              r * gamma ** (-nu),
-        #              kwargs,
-        #              bool_list=self.dark_bool), c='r', label='f')
-        # plt.plot(r, self._mass_profile.mass_3d(
-        #             r,
-        #             kwargs,
-        #             bool_list=self.dark_bool), c='b', label='i'
-        #          )
-        #
-        # plt.xlabel('r')
-        # plt.ylabel('M(r)')
-        # plt.legend()
-        # plt.xscale('log')
-        # plt.yscale('log')
-        # plt.show()
-        #
-        # plt.plot(r,
-        #          self._mass_profile.density(
-        #              r,
-        #              kwargs,
-        #              bool_list=self.baryon_bool), c='r', label='star')
-        # plt.plot(r, self._mass_profile.density(
-        #     r,
-        #     kwargs,
-        #     bool_list=self.dark_bool), c='b', label='DM'
-        #          )
-        #
-        # plt.xlabel('r')
-        # plt.ylabel(r'$\rho(r)$')
-        # plt.legend()
-        # plt.xscale('log')
-        # plt.yscale('log')
-        # plt.show()
+        import paperfig as pf
+        pf.set_fontscale(2.)
+
+        plt.plot(r,
+                 self._mass_profile.mass_3d(
+                     r,
+                     kwargs,
+                     bool_list=self.dark_bool), c=pf.cb2_orange, label='f')
+        plt.plot(r, self._mass_profile.mass_3d(
+                    r,
+                    kwargs,
+                    bool_list=self.baryon_bool), c=pf.cb_purple, label='i'
+                 )
+
+        plt.xlabel('log (r)')
+        plt.ylabel('log (density)')
+        #plt.legend()
+        plt.xscale('log')
+        plt.yscale('log')
+        plt.show()
+
+        fig = plt.figure(figsize=(10, 10))
+        ax = fig.add_subplot(111)
+        ax.plot(r,
+                 self._mass_profile.density(
+                     r,
+                     kwargs,
+                     bool_list=self.baryon_bool), lw=5, c=pf.cb2_orange,
+                label='star')
+        ax.plot(r, self._mass_profile.density(
+            r,
+            kwargs,
+            bool_list=self.dark_bool),lw=5, c=pf.cb_purple, label='DM'
+                 )
+
+        ax.set_xlabel('r')
+        ax.set_ylabel(r'$\rho(r)$')
+        #plt.legend()
+        ax.set_xscale('log')
+        ax.set_yscale('log')
+        fig.savefig('/Users/ajshajib/Downloads/profile.png')
+        plt.show()
 
         return r * gamma**(-nu)
 
