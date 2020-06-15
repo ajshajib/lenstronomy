@@ -265,9 +265,10 @@ class NumericKinematicsContracted(NumericKinematics):
                             kwargs_cosmo, interpol_grid_num,
                             log_integration, max_integrate, min_integrate)
 
-    def get_contracted_radius(self, r, kwargs, M_star):
+    def get_initial_radius(self, r, kwargs, M_star):
         """
-
+        Get the initial radius before contraction.
+        :param r: final radius
         """
         nu = self.halo_response
 
@@ -336,7 +337,7 @@ class NumericKinematicsContracted(NumericKinematics):
         #         kwargs,
         #         bool_list=self.dark_bool)
         #
-        import matplotlib.pyplot as plt
+        #import matplotlib.pyplot as plt
         # plt.plot(r, (1/gamma * (1. + self.m_gal) - 1.) * M_dark /
         #          M_star - 1.)
         # plt.xlabel('r')
@@ -352,48 +353,48 @@ class NumericKinematicsContracted(NumericKinematics):
         # plt.yscale('log')
         # plt.show()
         #
-        import paperfig as pf
-        pf.set_fontscale(2.)
-
-        plt.plot(r,
-                 self._mass_profile.mass_3d(
-                     r,
-                     kwargs,
-                     bool_list=self.dark_bool), c=pf.cb2_orange, label='f')
-        plt.plot(r, self._mass_profile.mass_3d(
-                    r,
-                    kwargs,
-                    bool_list=self.baryon_bool), c=pf.cb_purple, label='i'
-                 )
-
-        plt.xlabel('log (r)')
-        plt.ylabel('log (density)')
-        #plt.legend()
-        plt.xscale('log')
-        plt.yscale('log')
-        plt.show()
-
-        fig = plt.figure(figsize=(10, 10))
-        ax = fig.add_subplot(111)
-        ax.plot(r,
-                 self._mass_profile.density(
-                     r,
-                     kwargs,
-                     bool_list=self.baryon_bool), lw=5, c=pf.cb2_orange,
-                label='star')
-        ax.plot(r, self._mass_profile.density(
-            r,
-            kwargs,
-            bool_list=self.dark_bool),lw=5, c=pf.cb_purple, label='DM'
-                 )
-
-        ax.set_xlabel('r')
-        ax.set_ylabel(r'$\rho(r)$')
-        #plt.legend()
-        ax.set_xscale('log')
-        ax.set_yscale('log')
-        fig.savefig('/Users/ajshajib/Downloads/profile.png')
-        plt.show()
+        # import paperfig as pf
+        # pf.set_fontscale(2.)
+        #
+        # plt.plot(r,
+        #          self._mass_profile.mass_3d(
+        #              r,
+        #              kwargs,
+        #              bool_list=self.dark_bool), c=pf.cb2_orange, label='f')
+        # plt.plot(r, self._mass_profile.mass_3d(
+        #             r,
+        #             kwargs,
+        #             bool_list=self.baryon_bool), c=pf.cb_purple, label='i'
+        #          )
+        #
+        # plt.xlabel('log (r)')
+        # plt.ylabel('log (density)')
+        # #plt.legend()
+        # plt.xscale('log')
+        # plt.yscale('log')
+        # plt.show()
+        #
+        # fig = plt.figure(figsize=(10, 10))
+        # ax = fig.add_subplot(111)
+        # ax.plot(r,
+        #          self._mass_profile.density(
+        #              r,
+        #              kwargs,
+        #              bool_list=self.baryon_bool), lw=5, c=pf.cb2_orange,
+        #         label='star')
+        # ax.plot(r, self._mass_profile.density(
+        #     r,
+        #     kwargs,
+        #     bool_list=self.dark_bool),lw=5, c=pf.cb_purple, label='DM'
+        #          )
+        #
+        # ax.set_xlabel('r')
+        # ax.set_ylabel(r'$\rho(r)$')
+        # #plt.legend()
+        # ax.set_xscale('log')
+        # ax.set_yscale('log')
+        # fig.savefig('/Users/ajshajib/Downloads/profile.png')
+        # plt.show()
 
         return r * gamma**(-nu)
 
@@ -408,7 +409,7 @@ class NumericKinematicsContracted(NumericKinematics):
         mass_dimless = self._mass_profile.mass_3d(r, kwargs,
                                                   bool_list=self.baryon_bool)
         mass_dimless += self._mass_profile.mass_3d(
-                             self.get_contracted_radius(r, kwargs, mass_dimless),
+                             self.get_initial_radius(r, kwargs, mass_dimless),
                              kwargs,
                              bool_list=self.dark_bool)
 
