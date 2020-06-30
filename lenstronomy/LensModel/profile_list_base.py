@@ -159,6 +159,9 @@ class ProfileListBase(object):
         elif lens_type == 'HERNQUIST_ELLIPSE':
             from lenstronomy.LensModel.Profiles.hernquist_ellipse import Hernquist_Ellipse
             return Hernquist_Ellipse()
+        elif lens_type == 'JAFFE':
+            from lenstronomy.LensModel.Profiles.jaffe import Jaffe
+            return Jaffe()
         elif lens_type == 'GAUSSIAN':
             from lenstronomy.LensModel.Profiles.gaussian_potential import Gaussian
             return Gaussian()
