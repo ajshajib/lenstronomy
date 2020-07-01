@@ -65,7 +65,21 @@ class Jaffe(LensProfileBase):
         else:
             X[X == 1] = 1.000001
         #sigma = sigma0 / (X**2-1)**2 * (-3 + (2+X**2)*self._F(X))
-        sigma = sigma0 * (np.pi/X + 2* (1 - (2 - X*X)*self._F(x)) / (1 - X*X))
+
+        if isinstance(r, int) or isinstance(r, float):
+        #f = (1 - self._F(X)) / (X ** 2 - 1)  # this expression is 1/3 for X=1
+            if X == 1:
+                f = 1./3
+            else:
+                f = (1 - self._F(X)) / (X ** 2 - 1)
+        else:
+            f = np.empty_like(X)
+            f[X == 1] = 1./3
+            X_ = X[X != 1]
+            f[X != 1] = (1 - self._F(X_)) / (X_ ** 2 - 1)
+
+        F = 1 - f*(X*X - 1)
+        sigma = sigma0 * (np.pi/X + 2.* (1. - (2. - X*X)*F) / (1. - X*X))
         return sigma
 
     def mass_3d(self, r, rho0, Rs):
@@ -166,18 +180,18 @@ class Jaffe(LensProfileBase):
         r = np.sqrt(x_**2 + y_**2)
         r = np.maximum(r, self._s)
         X = r/Rs
-        # if isinstance(r, int) or isinstance(r, float):
-        # #f = (1 - self._F(X)) / (X ** 2 - 1)  # this expression is 1/3 for X=1
-        #     if X == 1:
-        #         f = 1./3
-        #     else:
-        #         f = (1 - self._F(X)) / (X ** 2 - 1)
-        # else:
-        #     f = np.empty_like(X)
-        #     f[X == 1] = 1./3
-        #     X_ = X[X != 1]
-        #     f[X != 1] = (1 - self._F(X_)) / (X_ ** 2 - 1)
-        alpha_r = 2*sigma0 * Rs * (np.pi - 2*X*self._F(X))
+        if isinstance(r, int) or isinstance(r, float):
+        #f = (1 - self._F(X)) / (X ** 2 - 1)  # this expression is 1/3 for X=1
+            if X == 1:
+                f = 1./3
+            else:
+                f = (1 - self._F(X)) / (X ** 2 - 1)
+        else:
+            f = np.empty_like(X)
+            f[X == 1] = 1./3
+            X_ = X[X != 1]
+            f[X != 1] = (1 - self._F(X_)) / (X_ ** 2 - 1)
+        alpha_r = 2*sigma0 * Rs * (np.pi - 2*X*(1-f*(X*X-1)))
         f_x = alpha_r * x_/r
         f_y = alpha_r * y_/r
         return f_x, f_y
@@ -230,31 +244,52 @@ class Jaffe(LensProfileBase):
         :param X: r/rs
         :return: F(X)
         """
-        c = self._s
-        if isinstance(X, int) or isinstance(X, float):
-            X = max(X, c)
-            if X < 1 and X > 0:
-                a = 1. / np.sqrt(1 - X ** 2) * np.arctanh(np.sqrt(1 - X**2))
-            elif X == 1:
-                a = 1.
-            elif X > 1:
-                a = 1. / np.sqrt(X ** 2 - 1) * np.arctan(np.sqrt(X**2 - 1))
-            else:  # X == 0:
-                a = 1. / np.sqrt(1 - c ** 2) * np.arctanh(np.sqrt((1 - c ** 2)))
-
+        # c = self._s
+        # if isinstance(X, int) or isinstance(X, float):
+        #     X = max(X, c)
+        #     if X < 1 and X > 0:
+        #         a = 1. / np.sqrt(1 - X ** 2) * np.arctanh(np.sqrt(1 - X**2))
+        #     elif X == 1:
+        #         a = 1.
+        #     elif X > 1:
+        #         a = 1. / np.sqrt(X ** 2 - 1) * np.arctan(np.sqrt(X**2 - 1))
+        #     else:  # X == 0:
+        #         a = 1. / np.sqrt(1 - c ** 2) * np.arctanh(np.sqrt((1 - c ** 2)))
+        #
+        # else:
+        #     a = np.empty_like(X)
+        #     X[X < c] = c
+        #     x = X[X < 1]
+        #     a[X < 1] = 1 / np.sqrt(1 - x ** 2) * np.arctanh(np.sqrt((1 - x**2)))
+        #
+        #     x = X[X == 1]
+        #     a[X == 1] = 1.
+        #
+        #     x = X[X > 1]
+        #     a[X > 1] = 1 / np.sqrt(x ** 2 - 1) * np.arctan(np.sqrt(x**2 - 1))
+        #     # a[X>y] = 0
+        # return a
+        x = X
+        if np.isscalar(x):
+            if np.abs(x - 1) < 1e-6:
+                return 1.
+            elif x > 1.:
+                return np.arccos(1. / x) / np.sqrt(x * x - 1.)
+            elif x < 1.:
+                return np.arccosh(1. / x) / np.sqrt(1. - x * x)
         else:
-            a = np.empty_like(X)
-            X[X < c] = c
-            x = X[X < 1]
-            a[X < 1] = 1 / np.sqrt(1 - x ** 2) * np.arctanh(np.sqrt((1 - x**2)))
+            reg1 = np.abs(x - 1) < 1e-6
+            reg2 = x > 1.
+            reg3 = x < 1.
 
-            x = X[X == 1]
-            a[X == 1] = 1.
+            f = np.ones_like(x)
 
-            x = X[X > 1]
-            a[X > 1] = 1 / np.sqrt(x ** 2 - 1) * np.arctan(np.sqrt(x**2 - 1))
-            # a[X>y] = 0
-        return a
+            f[reg1] = 1.
+            f[reg2] = np.arccos(1. / x[reg2]) / np.sqrt(x[reg2] * x[reg2] - 1.)
+            f[reg3] = np.arccosh(1. / x[reg3]) / np.sqrt(
+                1. - x[reg3] * x[reg3])
+
+            return f
 
     def grav_pot(self, x, y, rho0, Rs, center_x=0, center_y=0):
         """

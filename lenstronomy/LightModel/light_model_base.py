@@ -55,6 +55,9 @@ class LightModelBase(object):
             elif profile_type == 'HERNQUIST':
                 from lenstronomy.LightModel.Profiles.hernquist import Hernquist
                 self.func_list.append(Hernquist())
+            elif profile_type == 'JAFFE':
+                from lenstronomy.LightModel.Profiles.jaffe_circ import Jaffe
+                self.func_list.append(Jaffe())
             elif profile_type == 'HERNQUIST_ELLIPSE':
                 from lenstronomy.LightModel.Profiles.hernquist import HernquistEllipse
                 self.func_list.append(HernquistEllipse())
@@ -118,7 +121,8 @@ class LightModelBase(object):
         for i, func in enumerate(self.func_list):
             if bool_list[i] is True:
                 kwargs = {k: v for k, v in kwargs_list_standard[i].items() if not k in ['center_x', 'center_y']}
-                if self.profile_type_list[i] in ['HERNQUIST', 'HERNQUIST_ELLIPSE', 'PJAFFE', 'PJAFFE_ELLIPSE',
+                if self.profile_type_list[i] in ['HERNQUIST', 'JAFFE',
+                                                 'HERNQUIST_ELLIPSE', 'PJAFFE', 'PJAFFE_ELLIPSE',
                                                      'GAUSSIAN', 'GAUSSIAN_ELLIPSE', 'MULTI_GAUSSIAN',
                                                      'MULTI_GAUSSIAN_ELLIPSE', 'POWER_LAW']:
                     flux += func.light_3d(r, **kwargs)
