@@ -124,3 +124,47 @@ class CoreSersic(SersicUtil):
         bn = self.b_n(n_sersic)
         result = amp * (1 + (Rb / R) ** alpha) ** (gamma / alpha) * np.exp(-bn * (((R ** alpha + Rb ** alpha) / R_sersic ** alpha) ** (1. / (alpha * n_sersic)) - 1.))
         return np.nan_to_num(result)
+
+
+@export
+class DoubleSersicElliptic(SersicUtil):
+    """
+    this class contains functions to evaluate an elliptical Sersic function
+    """
+    param_names = ['amp', 'amp_ratio', 'R_sersic1', 'n_sersic1', 'e1', 'e2',
+                   'R_sersic2', 'n_sersic2', 'center_x', 'center_y']
+    lower_limit_default = {'amp': 0, 'amp_ratio': 1e-4, 'R_sersic1': 0,
+                           'n_sersic1': 0.5, 'e1': -0.5, 'e2': -0.5,
+                           'R_sersic2': 0, 'n_sersic2': 0.5,
+                           'center_x': -100, 'center_y': -100}
+    upper_limit_default = {'amp': 100, 'amp_ratio': 1e4, 'R_sersic1': 100,
+                           'n_sersic1': 8, 'e1': 0.5, 'e2': 0.5,
+                           'R_sersic2': 100, 'n_sersic2': 8,
+                           'center_x': 100, 'center_y': 100}
+
+    def function(self, x, y, amp, amp_ratio, R_sersic1, n_sersic1, R_sersic2,
+                 n_sersic2, e1, e2, center_x=0,
+                 center_y=0, max_R_frac=100.0):
+        """
+
+        :param x:
+        :param y:
+        :param amp: surface brightness/amplitude value at the half light radius
+        :param R_sersic: half light radius (either semi-major axis or product average of semi-major and semi-minor axis)
+        :param n_sersic: Sersic index
+        :param e1: eccentricity parameter
+        :param e2: eccentricity parameter
+        :param center_x: center in x-coordinate
+        :param center_y: center in y-coordinate
+        :param max_R_frac: maximum window outside of which the mass is zeroed, in units of R_sersic (float)
+        :return: Sersic profile value at (x, y)
+        """
+
+        R_sersic1 = np.maximum(0, R_sersic1)
+        R_sersic2 = np.maximum(0, R_sersic2)
+
+        R = self.get_distance_from_center(x, y, e1, e2, center_x, center_y)
+        componenent1 = self._r_sersic(R, R_sersic1, n_sersic1, max_R_frac)
+        componenent2 = self._r_sersic(R, R_sersic2, n_sersic2, max_R_frac)
+
+        return amp * (componenent1 + amp_ratio * componenent2)

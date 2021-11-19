@@ -12,7 +12,8 @@ __all__ = ['LightModelBase']
 
 
 _MODELS_SUPPORTED = ['GAUSSIAN', 'GAUSSIAN_ELLIPSE', 'ELLIPSOID', 'MULTI_GAUSSIAN', 'MULTI_GAUSSIAN_ELLIPSE',
-                     'SERSIC', 'SERSIC_ELLIPSE', 'CORE_SERSIC', 'SHAPELETS', 'SHAPELETS_POLAR', 'SHAPELETS_POLAR_EXP',
+                     'SERSIC', 'SERSIC_ELLIPSE', 'DOUBLE_SERSIC_ELLIPSE',
+                     'CORE_SERSIC', 'SHAPELETS', 'SHAPELETS_POLAR', 'SHAPELETS_POLAR_EXP',
                      'HERNQUIST', 'HERNQUIST_ELLIPSE', 'PJAFFE', 'PJAFFE_ELLIPSE', 'UNIFORM', 'POWER_LAW', 'NIE',
                      'CHAMELEON', 'DOUBLE_CHAMELEON', 'TRIPLE_CHAMELEON', 'INTERPOL', 'SLIT_STARLETS',
                      'SLIT_STARLETS_GEN2']
@@ -57,6 +58,9 @@ class LightModelBase(object):
             elif profile_type == 'SERSIC_ELLIPSE':
                 from lenstronomy.LightModel.Profiles.sersic import SersicElliptic
                 self.func_list.append(SersicElliptic(smoothing=smoothing, sersic_major_axis=sersic_major_axis))
+            elif profile_type == 'DOUBLE_SERSIC_ELLIPSE':
+                from lenstronomy.LightModel.Profiles.sersic import DoubleSersicElliptic
+                self.func_list.append(DoubleSersicElliptic(smoothing=smoothing, sersic_major_axis=sersic_major_axis))
             elif profile_type == 'CORE_SERSIC':
                 from lenstronomy.LightModel.Profiles.sersic import CoreSersic
                 self.func_list.append(CoreSersic(smoothing=smoothing, sersic_major_axis=sersic_major_axis))

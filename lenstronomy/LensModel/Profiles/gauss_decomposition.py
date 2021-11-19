@@ -553,6 +553,82 @@ class SersicEllipseMLGradientGaussDec(GaussDecompositionAbstract):
         return kwargs['R_sersic']
 
 
+class DoubleSersicEllipseMLGradientGaussDec(GaussDecompositionAbstract):
+    """
+    This class computes the lensing properties of an elliptical Sersic
+    profile multiplied with a M/L gradient using the Shajib (2019)'s Gauss
+    decomposition method.
+    """
+    param_names = ['k_eff', 'amp_ratio', 'R_sersic1', 'n_sersic1',
+                   'R_sersic2', 'n_sersic2', 'e1', 'e2', 'center_x',
+                   'center_y', 'ml_gradient_exponent']
+
+    lower_limit_default = {'k_eff': 0., 'R_sersic1': 0., 'n_sersic1': 0.5,
+                           'amp_ratio': 1e-4, 'R_sersic2': 0.,
+                           'n_sersic2': 0.5,
+                           'e1': -0.5, 'e2': -0.5, 'center_x': -100.,
+                           'center_y': -100., 'ml_gradient_exponent': 0.}
+    upper_limit_default = {'k_eff': 100., 'amp_ratio': 1e4,
+                           'R_sersic1': 100., 'n_sersic1': 8.,
+                           'R_sersic2': 100., 'n_sersic2': 8.,
+                           'e1': 0.5, 'e2': 0.5, 'center_x': 100.,
+                           'center_y': 100., 'ml_gradient_exponent': 1.}
+
+    def get_kappa_1d(self, y, **kwargs):
+        r"""
+        Compute the spherical Sersic profile at y.
+
+        :param y: y coordinate
+        :type y: ``float``
+        :param \**kwargs: Keyword arguments
+
+        :Keyword Arguments:
+            * **n_sersic** (``float``) --
+              Sersic index
+            * **R_sersic** (``float``) --
+              Sersic scale radius
+            * **k_eff** (``float``) --
+              Sersic convergence at R_sersic
+
+        :return: Sersic function at y
+        :rtype: ``type(y)``
+        """
+        n_sersic1 = kwargs['n_sersic1']
+        R_sersic1 = kwargs['R_sersic1']
+        n_sersic2 = kwargs['n_sersic2']
+        R_sersic2 = kwargs['R_sersic2']
+        k_eff = kwargs['k_eff']
+        amp_ratio = kwargs['amp_ratio']
+        eta = kwargs['ml_gradient_exponent']
+
+        bn1 = SersicUtil.b_n(n_sersic1)
+        bn2 = SersicUtil.b_n(n_sersic1)
+
+        component1 = np.exp(-bn1 * (y / R_sersic1) ** (1. / n_sersic1) + bn1)
+        component2 = np.exp(-bn2 * (y / R_sersic2) ** (1. / n_sersic2) + bn2)
+
+        return k_eff * (component1 + amp_ratio * component2) * (y)**(-eta)
+
+    def get_scale(self, **kwargs):
+        """
+        Identify the scale size from the keyword arguments.
+
+        :param \**kwargs: Keyword arguments
+
+        :Keyword Arguments:
+            * **n_sersic** (``float``) --
+              Sersic index
+            * **R_sersic** (``float``) --
+              Sersic scale radius
+            * **k_eff** (``float``) --
+              Sersic convergence at R_sersic
+
+        :return: Sersic radius
+        :rtype: ``float``
+        """
+        return kwargs['R_sersic']
+
+
 class NFWEllipseGaussDec(GaussDecompositionAbstract):
     """
     This class computes the lensing properties of an elliptical, projected NFW
@@ -653,7 +729,7 @@ class NFWEllipseGaussDec(GaussDecompositionAbstract):
         return kwargs['Rs']
 
 
-class GNFWEllipseGaussDec(GaussDecompositionAbstract):
+class GeneralizedNFWEllipseGaussDec(GaussDecompositionAbstract):
     """
     This class computes the lensing properties of an elliptical, projected NFW
     profile using Shajib (2019)'s Gauss decomposition method.

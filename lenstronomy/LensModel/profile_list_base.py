@@ -8,7 +8,8 @@ _SUPPORTED_MODELS = ['SHIFT', 'NIE_POTENTIAL', 'CONST_MAG', 'SHEAR', 'SHEAR_GAMM
                      'DOUBLE_CHAMELEON', 'TRIPLE_CHAMELEON', 'SPEP', 'PEMD', 'SPEMD', 'EPL', 'EPL_NUMBA', 'SPL_CORE',
                      'NFW', 'NFW_ELLIPSE', 'NFW_ELLIPSE_GAUSS_DEC', 'TNFW', 'TNFW_ELLIPSE',
                      'CNFW', 'CNFW_ELLIPSE', 'CTNFW_GAUSS_DEC', 'NFW_MC', 'SERSIC',
-                     'SERSIC_ELLIPSE_POTENTIAL', 'SERSIC_ELLIPSE_KAPPA', 'SERSIC_ELLIPSE_GAUSS_DEC', 'PJAFFE',
+                     'SERSIC_ELLIPSE_POTENTIAL', 'SERSIC_ELLIPSE_KAPPA', 'SERSIC_ELLIPSE_GAUSS_DEC',
+                     'DOUBLE_SERSIC_ELLIPSE_GAUSS_DEC', 'PJAFFE',
                      'PJAFFE_ELLIPSE', 'HERNQUIST', 'HERNQUIST_ELLIPSE', 'GAUSSIAN', 'GAUSSIAN_KAPPA',
                      'GAUSSIAN_ELLIPSE_KAPPA', 'GAUSSIAN_ELLIPSE_POTENTIAL', 'MULTI_GAUSSIAN_KAPPA',
                      'MULTI_GAUSSIAN_KAPPA_ELLIPSE', 'INTERPOL', 'INTERPOL_SCALED', 'SHAPELETS_POLAR', 'SHAPELETS_CART',
@@ -53,7 +54,7 @@ class ProfileListBase(object):
         for i, lens_type in enumerate(lens_model_list):
             # those models require a new instance per profile as certain pre-computations are relevant per individual profile
             if lens_type in ['NFW_MC', 'CHAMELEON', 'DOUBLE_CHAMELEON', 'TRIPLE_CHAMELEON', 'NFW_ELLIPSE_GAUSS_DEC',
-                             #'GNFW_ELLIPSE_GAUSS_DEC',
+                             'GNFW_ELLIPSE_GAUSS_DEC',
                              'CTNFW_GAUSS_DEC', 'INTERPOL', 'INTERPOL_SCALED', 'NIE', 'NIE_SIMPLE']:
                 lensmodel_class = self._import_class(lens_type, custom_class, z_lens=lens_redshift_list[i],
                                                      z_source=z_source_convention, kwargs_interp=kwargs_interp)
@@ -200,10 +201,14 @@ class ProfileListBase(object):
         elif lens_type == 'SERSIC_ELLIPSE_GAUSS_DEC':
             from lenstronomy.LensModel.Profiles.gauss_decomposition import SersicEllipseGaussDec
             return SersicEllipseGaussDec()
-        elif lens_type == 'SERSIC_ELLIPSE_MLG_GAUSS_DEC':
+        elif lens_type == 'DOUBLE_SERSIC_ELLIPSE_MLGRADIENT_GAUSS_DEC':
             from lenstronomy.LensModel.Profiles.gauss_decomposition \
-                import SersicEllipseMLGGaussDec
-            return SersicEllipseMLGGaussDec()
+                import DoubleSersicEllipseMLGradientGaussDec
+            return DoubleSersicEllipseMLGradientGaussDec()
+        elif lens_type == 'SERSIC_ELLIPSE_MLGRADIENT_GAUSS_DEC':
+            from lenstronomy.LensModel.Profiles.gauss_decomposition \
+                import SersicEllipseMLGradientGaussDec
+            return SersicEllipseMLGradientGaussDec()
         elif lens_type == 'PJAFFE':
             from lenstronomy.LensModel.Profiles.p_jaffe import PJaffe
             return PJaffe()
