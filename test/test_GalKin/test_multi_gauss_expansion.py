@@ -22,7 +22,7 @@ class TestGalkin(object):
         :return:
         """
         # anisotropy profile
-        anisotropy_type = 'OsipkovMerritt'
+        anisotropy_type = 'OM'
         r_ani = 2.
         kwargs_anisotropy = {'r_ani': r_ani}  # anisotropy radius [arcsec]
 
@@ -58,16 +58,18 @@ class TestGalkin(object):
         kwargs_model = {'mass_profile_list': mass_profile_list,
                         'light_profile_list': light_profile_list,
                         'anisotropy_model': anisotropy_type}
+        kwargs_numerics = {'interpol_grid_num': 100, 'log_integration': True,
+                           'max_integrate': 100, 'min_integrate': 0.01}
         galkin = Galkin(kwargs_model=kwargs_model, kwargs_psf=kwargs_psf, kwargs_cosmo=kwargs_cosmo,
-                        kwargs_aperture=kwargs_aperture, kwargs_numerics={})
-        sigma_v = galkin.vel_disp(kwargs_profile, kwargs_light, kwargs_anisotropy)
+                        kwargs_aperture=kwargs_aperture, kwargs_numerics=kwargs_numerics)
+        sigma_v = galkin.dispersion(kwargs_profile, kwargs_light, kwargs_anisotropy)
 
         kwargs_model_mge = {'mass_profile_list': mass_profile_list,
                         'light_profile_list': light_profile_list_mge,
                         'anisotropy_model': anisotropy_type}
         galkin = Galkin(kwargs_model=kwargs_model_mge, kwargs_psf=kwargs_psf, kwargs_cosmo=kwargs_cosmo,
-                        kwargs_aperture=kwargs_aperture, kwargs_numerics={})
-        sigma_v2 = galkin.vel_disp(kwargs_profile, kwargs_light_mge, kwargs_anisotropy)
+                        kwargs_aperture=kwargs_aperture, kwargs_numerics=kwargs_numerics)
+        sigma_v2 = galkin.dispersion(kwargs_profile, kwargs_light_mge, kwargs_anisotropy)
 
         print(sigma_v, sigma_v2, 'sigma_v Galkin, sigma_v MGEn')
         print((sigma_v/sigma_v2)**2)
@@ -80,7 +82,7 @@ class TestGalkin(object):
         :return:
         """
         # anisotropy profile
-        anisotropy_type = 'OsipkovMerritt'
+        anisotropy_type = 'OM'
         r_ani = 2.
         kwargs_anisotropy = {'r_ani': r_ani}  # anisotropy radius [arcsec]
 
@@ -106,7 +108,7 @@ class TestGalkin(object):
 
         # mge of lens profile
         lensModel = LensModel(mass_profile_list)
-        r_array = np.logspace(-2, 1, 100)*theta_E
+        r_array = np.logspace(-2, 2, 100)*theta_E
         kappa_r = lensModel.kappa(r_array, 0, kwargs_profile)
         amps, sigmas, norm = mge.mge_1d(r_array, kappa_r, N=20)
         mass_profile_list_mge = ['MULTI_GAUSSIAN_KAPPA']
@@ -115,17 +117,19 @@ class TestGalkin(object):
         kwargs_model = {'mass_profile_list': mass_profile_list,
                         'light_profile_list': light_profile_list,
                         'anisotropy_model': anisotropy_type}
+        kwargs_numerics = {'interpol_grid_num': 100, 'log_integration': True,
+                           'max_integrate': 100, 'min_integrate': 0.01}
 
         galkin = Galkin(kwargs_model=kwargs_model, kwargs_psf=kwargs_psf, kwargs_cosmo=kwargs_cosmo,
-                        kwargs_aperture=kwargs_aperture, kwargs_numerics={})
-        sigma_v = galkin.vel_disp(kwargs_profile, kwargs_light, kwargs_anisotropy)
+                        kwargs_aperture=kwargs_aperture, kwargs_numerics=kwargs_numerics)
+        sigma_v = galkin.dispersion(kwargs_profile, kwargs_light, kwargs_anisotropy)
 
         kwargs_model = {'mass_profile_list': mass_profile_list_mge,
                         'light_profile_list': light_profile_list,
                         'anisotropy_model': anisotropy_type}
         galkin = Galkin(kwargs_model=kwargs_model, kwargs_psf=kwargs_psf, kwargs_cosmo=kwargs_cosmo,
-                        kwargs_aperture=kwargs_aperture, kwargs_numerics={})
-        sigma_v2 = galkin.vel_disp(kwargs_profile_mge, kwargs_light, kwargs_anisotropy)
+                        kwargs_aperture=kwargs_aperture, kwargs_numerics=kwargs_numerics)
+        sigma_v2 = galkin.dispersion(kwargs_profile_mge, kwargs_light, kwargs_anisotropy)
 
         print(sigma_v, sigma_v2, 'sigma_v Galkin, sigma_v MGEn')
         print((sigma_v/sigma_v2)**2)
@@ -134,7 +138,7 @@ class TestGalkin(object):
 
     def test_mge_light_and_mass(self):
         # anisotropy profile
-        anisotropy_model = 'OsipkovMerritt'
+        anisotropy_model = 'OM'
         r_ani = 2.
         kwargs_anisotropy = {'r_ani': r_ani}  # anisotropy radius [arcsec]
 
@@ -177,18 +181,19 @@ class TestGalkin(object):
         kwargs_model = {'mass_profile_list': mass_profile_list,
                         'light_profile_list': light_profile_list,
                         'anisotropy_model': anisotropy_model}
-
+        kwargs_numerics = {'interpol_grid_num': 100, 'log_integration': True,
+                           'max_integrate': 100, 'min_integrate': 0.01}
         galkin = Galkin(kwargs_model=kwargs_model, kwargs_psf=kwargs_psf, kwargs_cosmo=kwargs_cosmo,
-                        kwargs_aperture=kwargs_aperture, kwargs_numerics={})
-        sigma_v = galkin.vel_disp(kwargs_profile, kwargs_light, kwargs_anisotropy)
+                        kwargs_aperture=kwargs_aperture, kwargs_numerics=kwargs_numerics)
+        sigma_v = galkin.dispersion(kwargs_profile, kwargs_light, kwargs_anisotropy)
 
         kwargs_model_mge = {'mass_profile_list': mass_profile_list_mge,
                         'light_profile_list': light_profile_list_mge,
                         'anisotropy_model': anisotropy_model}
 
         galkin = Galkin(kwargs_model=kwargs_model_mge, kwargs_psf=kwargs_psf, kwargs_cosmo=kwargs_cosmo,
-                        kwargs_aperture=kwargs_aperture, kwargs_numerics={})
-        sigma_v2 = galkin.vel_disp(kwargs_profile_mge, kwargs_light_mge, kwargs_anisotropy)
+                        kwargs_aperture=kwargs_aperture, kwargs_numerics=kwargs_numerics)
+        sigma_v2 = galkin.dispersion(kwargs_profile_mge, kwargs_light_mge, kwargs_anisotropy)
 
         print(sigma_v, sigma_v2, 'sigma_v Galkin, sigma_v MGEn')
         print((sigma_v/sigma_v2)**2)
@@ -202,7 +207,7 @@ class TestGalkin(object):
         :return:
         """
         # anisotropy profile
-        anisotropy_type = 'OsipkovMerritt'
+        anisotropy_type = 'OM'
         r_ani = 2.
         kwargs_anisotropy = {'r_ani': r_ani}  # anisotropy radius [arcsec]
 
@@ -251,14 +256,14 @@ class TestGalkin(object):
 
         galkin = Galkin(kwargs_model=kwargs_model, kwargs_psf=kwargs_psf, kwargs_cosmo=kwargs_cosmo,
                         kwargs_aperture=kwargs_aperture, kwargs_numerics={})
-        sigma_v = galkin.vel_disp(kwargs_profile, kwargs_light_hernquist, kwargs_anisotropy)
+        sigma_v = galkin.dispersion(kwargs_profile, kwargs_light_hernquist, kwargs_anisotropy)
 
         kwargs_model = {'mass_profile_list': mass_profile_list,
                         'light_profile_list': light_profile_list_mge,
                         'anisotropy_model': anisotropy_type}
         galkin = Galkin(kwargs_model=kwargs_model, kwargs_psf=kwargs_psf, kwargs_cosmo=kwargs_cosmo,
                         kwargs_aperture=kwargs_aperture, kwargs_numerics={})
-        sigma_v2 = galkin.vel_disp(kwargs_profile, kwargs_light_mge, kwargs_anisotropy)
+        sigma_v2 = galkin.dispersion(kwargs_profile, kwargs_light_mge, kwargs_anisotropy)
 
         print(sigma_v, sigma_v2, 'sigma_v Galkin, sigma_v MGEn')
         print((sigma_v/sigma_v2)**2)

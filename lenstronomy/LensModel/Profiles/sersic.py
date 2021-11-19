@@ -6,6 +6,8 @@ import lenstronomy.Util.util as util
 from lenstronomy.LensModel.Profiles.sersic_utils import SersicUtil
 from lenstronomy.LensModel.Profiles.base_profile import LensProfileBase
 
+__all__ = ['Sersic']
+
 
 class Sersic(SersicUtil, LensProfileBase):
     """
@@ -55,7 +57,7 @@ class Sersic(SersicUtil, LensProfileBase):
 
     def hessian(self, x, y, n_sersic, R_sersic, k_eff, center_x=0, center_y=0):
         """
-        returns Hessian matrix of function d^2f/dx^2, d^f/dy^2, d^2/dxdy
+        returns Hessian matrix of function d^2f/dx^2, d^2/dxdy, d^2/dydx, d^f/dy^2
         """
         x_ = x - center_x
         y_ = y - center_y
@@ -75,4 +77,4 @@ class Sersic(SersicUtil, LensProfileBase):
         f_yy = -(d_alpha_dr/r + alpha/r**2) * y_**2/r + alpha/r
         f_xy = -(d_alpha_dr/r + alpha/r**2) * x_*y_/r
 
-        return f_xx, f_yy, f_xy
+        return f_xx, f_xy, f_xy, f_yy

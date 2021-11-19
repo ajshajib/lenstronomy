@@ -3,6 +3,8 @@ __author__ = 'sibirrer'
 import numpy as np
 from lenstronomy.LensModel.profile_list_base import ProfileListBase
 
+__all__ = ['SinglePlane']
+
 
 class SinglePlane(ProfileListBase):
     """
@@ -97,28 +99,32 @@ class SinglePlane(ProfileListBase):
         :type y: numpy array
         :param kwargs: list of keyword arguments of lens model parameters matching the lens model classes
         :param k: only evaluate the k-th lens model
-        :return: f_xx, f_xy, f_yy components
+        :return: f_xx, f_xy, f_yx, f_yy components
         """
         x = np.array(x, dtype=float)
         y = np.array(y, dtype=float)
         if isinstance(k, int):
-            f_xx, f_yy, f_xy = self.func_list[k].hessian(x, y, **kwargs[k])
-            return f_xx, f_xy, f_xy, f_yy
+            f_xx, f_xy, f_yx, f_yy = self.func_list[k].hessian(x, y, **kwargs[k])
+            return f_xx, f_xy, f_yx, f_yy
 
         bool_list = self._bool_list(k)
-        f_xx, f_yy, f_xy = np.zeros_like(x), np.zeros_like(x), np.zeros_like(x)
+        f_xx, f_xy, f_yx, f_yy = np.zeros_like(x), np.zeros_like(x), np.zeros_like(x), np.zeros_like(x)
         for i, func in enumerate(self.func_list):
             if bool_list[i] is True:
-                f_xx_i, f_yy_i, f_xy_i = func.hessian(x, y, **kwargs[i])
+                f_xx_i, f_xy_i, f_yx_i, f_yy_i = func.hessian(x, y, **kwargs[i])
                 f_xx += f_xx_i
-                f_yy += f_yy_i
                 f_xy += f_xy_i
-        f_yx = f_xy
+                f_yx += f_yx_i
+                f_yy += f_yy_i
         return f_xx, f_xy, f_yx, f_yy
 
     def mass_3d(self, r, kwargs, bool_list=None):
         """
         computes the mass within a 3d sphere of radius r
+
+        if you want to have physical units of kg, you need to multiply by this factor:
+        const.arcsec ** 2 * self._cosmo.dd * self._cosmo.ds / self._cosmo.dds * const.Mpc * const.c ** 2 / (4 * np.pi * const.G)
+        grav_pot = -const.G * mass_dim / (r * const.arcsec * self._cosmo.dd * const.Mpc)
 
         :param r: radius (in angular units)
         :param kwargs: list of keyword arguments of lens model parameters matching the lens model classes

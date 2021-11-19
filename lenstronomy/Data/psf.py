@@ -3,10 +3,14 @@ import lenstronomy.Util.kernel_util as kernel_util
 import lenstronomy.Util.util as util
 import warnings
 
+__all__ = ['PSF']
+
 
 class PSF(object):
     """
-    Point Spread Function convolution
+    Point Spread Function class.
+    This class describes and manages products used to perform the PSF modeling (convolution for extended surface
+    brightness and painting of PSF's for point sources).
     """
 
     def __init__(self, psf_type='NONE', fwhm=None, truncation=5, pixel_size=None, kernel_point_source=None,
@@ -18,7 +22,9 @@ class PSF(object):
         :param truncation: float, Gaussian truncation (in units of sigma), only required for 'GAUSSIAN' model
         :param pixel_size: width of pixel (required for Gaussian model, not required when using in combination with ImageModel modules)
         :param kernel_point_source: 2d numpy array, odd length, centered PSF of a point source
-        :param psf_error_map: uncertainty in the PSF model. Same shape as point source kernel.
+         (if not normalized, will be normalized)
+        :param psf_error_map: uncertainty in the PSF model per pixel (size of data, not super-sampled). 2d numpy array.
+        Size can be larger or smaller than the pixel-sized PSF model and if so, will be matched.
         This error will be added to the pixel error around the position of point sources as follows:
         sigma^2_i += 'psf_error_map'_j * (point_source_flux_i)**2
         :param point_source_supersampling_factor: int, supersampling factor of kernel_point_source
@@ -51,10 +57,12 @@ class PSF(object):
         else:
             raise ValueError("psf_type %s not supported!" % self.psf_type)
         if psf_error_map is not None:
-            self._psf_error_map = psf_error_map
-            if self.psf_type == 'PIXEL':
-                if len(self._psf_error_map) != len(self._kernel_point_source):
-                    raise ValueError('psf_error_map must have same size as kernel_point_source!')
+            n_kernel = len(self.kernel_point_source)
+            self._psf_error_map = kernel_util.match_kernel_size(psf_error_map, n_kernel)
+            if self.psf_type == 'PIXEL' and point_source_supersampling_factor > 1:
+                if len(psf_error_map) == len(self._kernel_point_source_supersampled):
+                    Warning('psf_error_map has the same size as the super-sampled kernel. Make sure the units in the'
+                            'psf_error_map are on the down-sampled pixel scale.')
             self.psf_error_map_bool = True
         else:
             self.psf_error_map_bool = False
@@ -63,10 +71,10 @@ class PSF(object):
     def kernel_point_source(self):
         if not hasattr(self, '_kernel_point_source'):
             if self.psf_type == 'GAUSSIAN':
-                kernel_numPix = self._truncation * self._fwhm / self._pixel_size
-                if kernel_numPix % 2 == 0:
-                    kernel_numPix += 1
-                self._kernel_point_source = kernel_util.kernel_gaussian(kernel_numPix, self._pixel_size, self._fwhm)
+                kernel_num_pix = min(round(self._truncation * self._fwhm / self._pixel_size), 201)
+                if kernel_num_pix % 2 == 0:
+                    kernel_num_pix += 1
+                self._kernel_point_source = kernel_util.kernel_gaussian(kernel_num_pix, self._pixel_size, self._fwhm)
         return self._kernel_point_source
 
     @property
@@ -74,7 +82,7 @@ class PSF(object):
         """
         returns the convolution kernel for a uniform surface brightness on a pixel size
 
-        :return:
+        :return: 2d numpy array
         """
         if not hasattr(self, '_kernel_pixel'):
             self._kernel_pixel = kernel_util.pixel_kernel(self.kernel_point_source, subgrid_res=1)
@@ -82,8 +90,12 @@ class PSF(object):
 
     def kernel_point_source_supersampled(self, supersampling_factor, updata_cache=True):
         """
+        generates (if not already available) a supersampled PSF with ood numbers of pixels centered
 
-        :return:
+        :param supersampling_factor: int >=1, supersampling factor relative to pixel resolution
+        :param updata_cache: boolean, if True, updates the cached supersampling PSF if generated.
+         Attention, this will overwrite a previously used supersampled PSF if the resolution is changing.
+        :return: super-sampled PSF as 2d numpy array
         """
         if hasattr(self, '_kernel_point_source_supersampled') and self._point_source_supersampling_factor == supersampling_factor:
             kernel_point_source_supersampled = self._kernel_point_source_supersampled
@@ -122,8 +134,8 @@ class PSF(object):
         """
         update pixel size
 
-        :param deltaPix:
-        :return:
+        :param deltaPix: pixel size in angular units (arc seconds)
+        :return: None
         """
         self._pixel_size = deltaPix
         if self.psf_type == 'GAUSSIAN':

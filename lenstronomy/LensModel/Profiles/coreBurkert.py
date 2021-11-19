@@ -3,6 +3,8 @@ __author__ = 'dgilman'
 import numpy as np
 from lenstronomy.LensModel.Profiles.base_profile import LensProfileBase
 
+__all__ = ['CoreBurkert']
+
 
 class CoreBurkert(LensProfileBase):
     """
@@ -89,7 +91,7 @@ class CoreBurkert(LensProfileBase):
         f_xx = kappa + gamma1
         f_yy = kappa - gamma1
         f_xy = gamma2
-        return f_xx, f_yy, f_xy
+        return f_xx, f_xy, f_xy, f_yy
 
     def mass_2d(self, R, Rs, rho0, r_core):
 

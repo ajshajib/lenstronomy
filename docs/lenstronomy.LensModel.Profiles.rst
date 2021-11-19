@@ -4,14 +4,6 @@ lenstronomy.LensModel.Profiles package
 Submodules
 ----------
 
-lenstronomy.LensModel.Profiles.alpha\_shift module
---------------------------------------------------
-
-.. automodule:: lenstronomy.LensModel.Profiles.alpha_shift
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 lenstronomy.LensModel.Profiles.arc\_perturbations module
 --------------------------------------------------------
 
@@ -52,6 +44,22 @@ lenstronomy.LensModel.Profiles.cnfw\_ellipse module
     :undoc-members:
     :show-inheritance:
 
+lenstronomy.LensModel.Profiles.const\_mag module
+------------------------------------------------
+
+.. automodule:: lenstronomy.LensModel.Profiles.const_mag
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+lenstronomy.LensModel.Profiles.constant\_shift module
+-----------------------------------------------------
+
+.. automodule:: lenstronomy.LensModel.Profiles.constant_shift
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 lenstronomy.LensModel.Profiles.convergence module
 -------------------------------------------------
 
@@ -76,10 +84,66 @@ lenstronomy.LensModel.Profiles.cored\_density module
     :undoc-members:
     :show-inheritance:
 
-lenstronomy.LensModel.Profiles.curved\_arc module
--------------------------------------------------
+lenstronomy.LensModel.Profiles.cored\_density\_2 module
+-------------------------------------------------------
 
-.. automodule:: lenstronomy.LensModel.Profiles.curved_arc
+.. automodule:: lenstronomy.LensModel.Profiles.cored_density_2
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+lenstronomy.LensModel.Profiles.cored\_density\_exp module
+---------------------------------------------------------
+
+.. automodule:: lenstronomy.LensModel.Profiles.cored_density_exp
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+lenstronomy.LensModel.Profiles.cored\_density\_mst module
+---------------------------------------------------------
+
+.. automodule:: lenstronomy.LensModel.Profiles.cored_density_mst
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+lenstronomy.LensModel.Profiles.curved\_arc\_const module
+--------------------------------------------------------
+
+.. automodule:: lenstronomy.LensModel.Profiles.curved_arc_const
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+lenstronomy.LensModel.Profiles.curved\_arc\_sis\_mst module
+-----------------------------------------------------------
+
+.. automodule:: lenstronomy.LensModel.Profiles.curved_arc_sis_mst
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+lenstronomy.LensModel.Profiles.curved\_arc\_spp module
+------------------------------------------------------
+
+.. automodule:: lenstronomy.LensModel.Profiles.curved_arc_spp
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+lenstronomy.LensModel.Profiles.curved\_arc\_spt module
+------------------------------------------------------
+
+.. automodule:: lenstronomy.LensModel.Profiles.curved_arc_spt
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+lenstronomy.LensModel.Profiles.curved\_arc\_tan\_diff module
+------------------------------------------------------------
+
+.. automodule:: lenstronomy.LensModel.Profiles.curved_arc_tan_diff
     :members:
     :undoc-members:
     :show-inheritance:
@@ -88,6 +152,30 @@ lenstronomy.LensModel.Profiles.dipole module
 --------------------------------------------
 
 .. automodule:: lenstronomy.LensModel.Profiles.dipole
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+lenstronomy.LensModel.Profiles.elliptical\_density\_slice module
+----------------------------------------------------------------
+
+.. automodule:: lenstronomy.LensModel.Profiles.elliptical_density_slice
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+lenstronomy.LensModel.Profiles.epl module
+-----------------------------------------
+
+.. automodule:: lenstronomy.LensModel.Profiles.epl
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+lenstronomy.LensModel.Profiles.epl\_numba module
+------------------------------------------------
+
+.. automodule:: lenstronomy.LensModel.Profiles.epl_numba
     :members:
     :undoc-members:
     :show-inheritance:
@@ -164,6 +252,14 @@ lenstronomy.LensModel.Profiles.hernquist\_ellipse module
     :undoc-members:
     :show-inheritance:
 
+lenstronomy.LensModel.Profiles.hessian module
+---------------------------------------------
+
+.. automodule:: lenstronomy.LensModel.Profiles.hessian
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 lenstronomy.LensModel.Profiles.interpol module
 ----------------------------------------------
 
@@ -180,6 +276,14 @@ lenstronomy.LensModel.Profiles.multi\_gaussian\_kappa module
     :undoc-members:
     :show-inheritance:
 
+lenstronomy.LensModel.Profiles.multipole module
+-----------------------------------------------
+
+.. automodule:: lenstronomy.LensModel.Profiles.multipole
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 lenstronomy.LensModel.Profiles.nfw module
 -----------------------------------------
 
@@ -192,14 +296,6 @@ lenstronomy.LensModel.Profiles.nfw\_ellipse module
 --------------------------------------------------
 
 .. automodule:: lenstronomy.LensModel.Profiles.nfw_ellipse
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-lenstronomy.LensModel.Profiles.nfw\_lookup module
--------------------------------------------------
-
-.. automodule:: lenstronomy.LensModel.Profiles.nfw_lookup
     :members:
     :undoc-members:
     :show-inheritance:
@@ -228,6 +324,14 @@ lenstronomy.LensModel.Profiles.nie module
     :undoc-members:
     :show-inheritance:
 
+lenstronomy.LensModel.Profiles.nie\_potential module
+----------------------------------------------------
+
+.. automodule:: lenstronomy.LensModel.Profiles.nie_potential
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 lenstronomy.LensModel.Profiles.numerical\_deflections module
 ------------------------------------------------------------
 
@@ -248,6 +352,14 @@ lenstronomy.LensModel.Profiles.p\_jaffe\_ellipse module
 -------------------------------------------------------
 
 .. automodule:: lenstronomy.LensModel.Profiles.p_jaffe_ellipse
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+lenstronomy.LensModel.Profiles.pemd module
+------------------------------------------
+
+.. automodule:: lenstronomy.LensModel.Profiles.pemd
     :members:
     :undoc-members:
     :show-inheritance:
@@ -348,18 +460,18 @@ lenstronomy.LensModel.Profiles.spemd module
     :undoc-members:
     :show-inheritance:
 
-lenstronomy.LensModel.Profiles.spemd\_smooth module
----------------------------------------------------
-
-.. automodule:: lenstronomy.LensModel.Profiles.spemd_smooth
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 lenstronomy.LensModel.Profiles.spep module
 ------------------------------------------
 
 .. automodule:: lenstronomy.LensModel.Profiles.spep
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+lenstronomy.LensModel.Profiles.splcore module
+---------------------------------------------
+
+.. automodule:: lenstronomy.LensModel.Profiles.splcore
     :members:
     :undoc-members:
     :show-inheritance:
@@ -376,6 +488,14 @@ lenstronomy.LensModel.Profiles.tnfw module
 ------------------------------------------
 
 .. automodule:: lenstronomy.LensModel.Profiles.tnfw
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+lenstronomy.LensModel.Profiles.uldm module
+------------------------------------------
+
+.. automodule:: lenstronomy.LensModel.Profiles.uldm
     :members:
     :undoc-members:
     :show-inheritance:

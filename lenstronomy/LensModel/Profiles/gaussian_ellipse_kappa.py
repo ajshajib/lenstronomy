@@ -15,6 +15,8 @@ from lenstronomy.LensModel.Profiles.gaussian_kappa import GaussianKappa
 import lenstronomy.Util.param_util as param_util
 from lenstronomy.LensModel.Profiles.base_profile import LensProfileBase
 
+__all__ = ['GaussianEllipseKappa']
+
 
 class GaussianEllipseKappa(LensProfileBase):
     """
@@ -81,8 +83,8 @@ class GaussianEllipseKappa(LensProfileBase):
         # formulae given in Shajib (2019).
         amp_ = amp / (2 * np.pi * sigma**2)
 
-        # converting ellipticity definition from x^2 + y^2/q^2 to q^2*x^2 + y^2
-        sigma_ = sigma * q
+        # converting ellipticity definition from q*x^2 + y^2/q to q^2*x^2 + y^2
+        sigma_ = sigma * np.sqrt(q)  # * q
 
         x_shift = x - center_x
         y_shift = y - center_y
@@ -166,8 +168,8 @@ class GaussianEllipseKappa(LensProfileBase):
         # formulae given in Shajib (2019).
         amp_ = amp / (2 * np.pi * sigma**2)
 
-        # converting ellipticity definition from x^2 + y^2/q^2 to q^2*x^2 + y^2
-        sigma_ = sigma * q
+        # converting ellipticity definition from q*x^2 + y^2/q to q^2*x^2 + y^2
+        sigma_ = sigma * np.sqrt(q)  # * q
 
         x_shift = x - center_x
         y_shift = y - center_y
@@ -227,8 +229,8 @@ class GaussianEllipseKappa(LensProfileBase):
         # formulae given in Shajib (2019).
         amp_ = amp / (2 * np.pi * sigma**2)
 
-        # converting ellipticity definition from x^2 + y^2/q^2 to q^2*x^2 + y^2
-        sigma_ = sigma * q
+        # converting ellipticity definition from q*x^2 + y^2/q to q^2*x^2 + y^2
+        sigma_ = sigma * np.sqrt(q)  # * q
 
         x_shift = x - center_x
         y_shift = y - center_y
@@ -261,7 +263,7 @@ class GaussianEllipseKappa(LensProfileBase):
         f_xy = sin_phi * cos_phi * (f_xx_ - f_yy_) \
                + (cos_phi**2 - sin_phi**2) * f_xy_
 
-        return f_xx, f_yy, f_xy
+        return f_xx, f_xy, f_xy, f_yy
 
     def density_2d(self, x, y, amp, sigma, e1, e2, center_x=0, center_y=0):
         """
@@ -287,8 +289,7 @@ class GaussianEllipseKappa(LensProfileBase):
         :return: Density :math:`\kappa` for elliptical Gaussian convergence.
         :rtype: ``float``, or ``numpy.array`` with shape = ``x.shape``.
         """
-        f_xx, f_yy, f_xy = self.hessian(x, y, amp, sigma, e1, e2, center_x,
-                                        center_y)
+        f_xx, f_xy, f_yx, f_yy = self.hessian(x, y, amp, sigma, e1, e2, center_x, center_y)
         return (f_xx + f_yy) / 2
 
     @staticmethod

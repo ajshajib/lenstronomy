@@ -3,6 +3,9 @@ from lenstronomy.Util import util
 from lenstronomy.Util import mask_util as mask_util
 import lenstronomy.Util.multi_gauss_expansion as mge
 from lenstronomy.Util import analysis_util
+from lenstronomy.LensModel.lens_model_extensions import LensModelExtensions
+
+__all__ = ['LensProfileAnalysis']
 
 
 class LensProfileAnalysis(object):
@@ -22,8 +25,15 @@ class LensProfileAnalysis(object):
         computes the radius with mean convergence=1
 
         :param kwargs_lens: list of lens model keyword arguments
-        :param spacing: number of annular bins to compute the convergence (resolution of the Einstein radius estimate)
+        :param center_x: position of the center (if not set, is attempting to find it from the parameters kwargs_lens)
+        :param center_y: position of the center (if not set, is attempting to find it from the parameters kwargs_lens)
+        :param model_bool_list: list of booleans indicating the addition (=True) of a model component in computing the
+         Einstein radius
+        :param grid_num: integer, number of grid points to numerically evaluate the convergence and estimate the
+         Einstein radius
+        :param grid_spacing: spacing in angular units of the grid
         :param get_precision: If `True`, return the precision of estimated Einstein radius
+        :param verbose: boolean, if True prints warning if indication of insufficient result
         :return: estimate of the Einstein radius
         """
         center_x, center_y = analysis_util.profile_center(kwargs_lens, center_x, center_y)
@@ -60,18 +70,18 @@ class LensProfileAnalysis(object):
         :param ra_pos: RA position where to compute the external effect
         :param dec_pos: DEC position where to compute the external effect
         :param model_list_bool: boolean list indicating which models effect to be added to the estimate
-        :return: alpha_x, alpha_y, kappa_ext, shear1, shear2
+        :return: alpha_x, alpha_y, kappa, shear1, shear2
         """
         f_x, f_y = self._lens_model.alpha(ra_pos, dec_pos, kwargs_lens, k=model_list_bool)
         f_xx, f_xy, f_yx, f_yy = self._lens_model.hessian(ra_pos, dec_pos, kwargs_lens, k=model_list_bool)
-        kappa_ext = (f_xx + f_yy)/2.
+        kappa = (f_xx + f_yy)/2.
         shear1 = 1./2 * (f_xx - f_yy)
         shear2 = f_xy
-        return f_x, f_y, kappa_ext, shear1, shear2
+        return f_x, f_y, kappa, shear1, shear2
 
     def profile_slope(self, kwargs_lens, radius, center_x=None, center_y=None, model_list_bool=None, num_points=10):
         """
-        computes the logarithmic power-law slope of a profile
+        computes the logarithmic power-law slope of a profile. ATTENTION: this is not an observable!
 
         :param kwargs_lens: lens model keyword argument list
         :param radius: radius from the center where to compute the logarithmic slope (angular units
@@ -92,6 +102,33 @@ class LensProfileAnalysis(object):
         gamma = -slope + 2
         return gamma
 
+    def mst_invariant_differential(self, kwargs_lens, radius, center_x=None, center_y=None, model_list_bool=None,
+                                   num_points=10):
+        """
+        Average of the radial stretch differential in radial direction, divided by the radial stretch factor.
+
+        .. math::
+            \\xi = \\frac{\\partial \\lambda_{\\rm rad}}{\\partial r} \\frac{1}{\\lambda_{\\rm rad}}
+
+        This quantity is invariant under the MST.
+        The specific definition is provided by Birrer 2021. Equivalent (proportional) definitions are provided by e.g.
+        Kochanek 2020, Sonnenfeld 2018.
+
+        :param kwargs_lens: lens model keyword argument list
+        :param radius: radius from the center where to compute the MST invariant differential
+        :param center_x: center position
+        :param center_y: center position
+        :param model_list_bool: indicate which part of the model to consider
+        :param num_points: number of estimates around the radius
+        :return: xi
+        """
+        center_x, center_y = analysis_util.profile_center(kwargs_lens, center_x, center_y)
+        x, y = util.points_on_circle(radius, num_points)
+        ext = LensModelExtensions(lensModel=self._lens_model)
+        lambda_rad, lambda_tan, orientation_angle, dlambda_tan_dtan, dlambda_tan_drad, dlambda_rad_drad, dlambda_rad_dtan, dphi_tan_dtan, dphi_tan_drad, dphi_rad_drad, dphi_rad_dtan = ext.radial_tangential_differentials(x, y, kwargs_lens, center_x=center_x, center_y=center_y)
+        xi = np.mean(dlambda_rad_drad/lambda_rad)
+        return xi
+
     def radial_lens_profile(self, r_list, kwargs_lens, center_x=None, center_y=None, model_bool_list=None):
         """
 
@@ -100,7 +137,7 @@ class LensProfileAnalysis(object):
         :param center_y: center of the profile
         :param kwargs_lens: lens parameter keyword argument list
         :param model_bool_list: bool list or None, indicating which profiles to sum over
-        :return: flux amplitudes at r_list radii spherically averaged
+        :return: flux amplitudes at r_list radii azimuthally averaged
         """
         center_x, center_y = analysis_util.profile_center(kwargs_lens, center_x, center_y)
         kappa_list = []
@@ -139,7 +176,7 @@ class LensProfileAnalysis(object):
         x_grid, y_grid = util.make_grid(numPix=numPix, deltapix=2.*theta_E / numPix)
         x_grid += center_x
         y_grid += center_y
-        mask = mask_util.mask_sphere(x_grid, y_grid, center_x, center_y, theta_E)
+        mask = mask_util.mask_azimuthal(x_grid, y_grid, center_x, center_y, theta_E)
         kappa_list = []
         for i in range(len(kwargs_lens)):
             kappa = self._lens_model.kappa(x_grid, y_grid, kwargs_lens, k=i)

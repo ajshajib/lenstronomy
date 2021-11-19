@@ -3,6 +3,8 @@ import lenstronomy.ImSim.de_lens as de_lens
 
 import numpy as np
 
+__all__ = ['JointLinear']
+
 
 class JointLinear(MultiLinear):
     """
@@ -26,7 +28,9 @@ class JointLinear(MultiLinear):
                            kwargs_extinction=None, kwargs_special=None, inv_bool=False):
         """
         computes the image (lens and source surface brightness with a given lens model).
-        The linear parameters are computed with a weighted linear least square optimization (i.e. flux normalization of the brightness profiles)
+        The linear parameters are computed with a weighted linear least square optimization
+        (i.e. flux normalization of the brightness profiles)
+
         :param kwargs_lens: list of keyword arguments corresponding to the superposition of different lens profiles
         :param kwargs_source: list of keyword arguments corresponding to the superposition of different source light profiles
         :param kwargs_lens_light: list of keyword arguments corresponding to different lens light surface brightness profiles
@@ -44,7 +48,7 @@ class JointLinear(MultiLinear):
     def linear_response_matrix(self, kwargs_lens=None, kwargs_source=None, kwargs_lens_light=None, kwargs_ps=None,
                                kwargs_extinction=None, kwargs_special=None):
         """
-        computes the linear response matrix (m x n), with n beeing the data size and m being the coefficients
+        computes the linear response matrix (m x n), with n being the data size and m being the coefficients
 
         :param kwargs_lens:
         :param kwargs_source:
@@ -116,14 +120,18 @@ class JointLinear(MultiLinear):
         return C_D_response, model_error
 
     def likelihood_data_given_model(self, kwargs_lens=None, kwargs_source=None, kwargs_lens_light=None, kwargs_ps=None,
-                                    kwargs_extinction=None, kwargs_special=None, source_marg=False, linear_prior=None):
+                                    kwargs_extinction=None, kwargs_special=None, source_marg=False, linear_prior=None,
+                                    check_positive_flux=False):
         """
         computes the likelihood of the data given a model
         This is specified with the non-linear parameters and a linear inversion and prior marginalisation.
+
         :param kwargs_lens:
         :param kwargs_source:
         :param kwargs_lens_light:
         :param kwargs_ps:
+        :param check_positive_flux: bool, if True, checks whether the linear inversion resulted in non-negative flux
+         components and applies a punishment in the likelihood if so.
         :return: log likelihood (natural logarithm) (sum of the log likelihoods of the individual images)
         """
         # generate image
@@ -141,4 +149,8 @@ class JointLinear(MultiLinear):
         if cov_matrix is not None and source_marg:
             marg_const = de_lens.marginalization_new(cov_matrix, d_prior=linear_prior)
             logL += marg_const
+        if check_positive_flux is True and self._num_bands > 0:
+            bool = self._imageModel_list[0].check_positive_flux(kwargs_source, kwargs_lens_light, kwargs_ps)
+            if bool is False:
+                logL -= 10 ** 5
         return logL

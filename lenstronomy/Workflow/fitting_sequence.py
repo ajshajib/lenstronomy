@@ -1,5 +1,4 @@
 from lenstronomy.Workflow.psf_fitting import PsfFitting
-from lenstronomy.Sampling.reinitialize import ReusePositionGenerator
 from lenstronomy.Workflow.alignment_matching import AlignmentFitting
 from lenstronomy.ImSim.MultiBand.single_band_multi_model import SingleBandMultiModel
 from lenstronomy.Workflow.multi_band_manager import MultiBandUpdateManager
@@ -10,6 +9,8 @@ from lenstronomy.Sampling.Samplers.polychord_sampler import DyPolyChordSampler
 from lenstronomy.Sampling.Samplers.dynesty_sampler import DynestySampler
 import numpy as np
 import lenstronomy.Util.analysis_util as analysis_util
+
+__all__ = ['FittingSequence']
 
 
 class FittingSequence(object):
@@ -22,16 +23,28 @@ class FittingSequence(object):
                  verbose=True):
         """
 
-        :param kwargs_data_joint:
-        :param kwargs_model:
-        :param kwargs_constraints:
-        :param kwargs_likelihood:
-        :param kwargs_params:
-        :param mpi:
-        :param verbose: bool, if True
+        :param kwargs_data_joint: keyword argument specifying the data according to LikelihoodModule
+        :param kwargs_model: keyword arguments to describe all model components used in
+         class_creator.create_class_instances()
+        :param kwargs_constraints: keyword arguments of the Param() class to handle parameter constraints during the
+         sampling (except upper and lower limits and sampling input mean and width)
+        :param kwargs_likelihood: keyword arguments of the Likelihood() class to handle parameters and settings of the
+         likelihood
+        :param kwargs_params: setting of the sampling bounds and initial guess mean and spread.
+         The argument is organized as:
+         'lens_model': [kwargs_init, kwargs_sigma, kwargs_fixed, kwargs_lower, kwargs_upper]
+         'source_model': [kwargs_init, kwargs_sigma, kwargs_fixed, kwargs_lower, kwargs_upper]
+         'lens_light_model': [kwargs_init, kwargs_sigma, kwargs_fixed, kwargs_lower, kwargs_upper]
+         'point_source_model': [kwargs_init, kwargs_sigma, kwargs_fixed, kwargs_lower, kwargs_upper]
+         'extinction_model': [kwargs_init, kwargs_sigma, kwargs_fixed, kwargs_lower, kwargs_upper]
+         'special': [kwargs_init, kwargs_sigma, kwargs_fixed, kwargs_lower, kwargs_upper]
+        :param mpi: MPI option (bool), if True, will launch an MPI Pool job for the steps in the fitting sequence where
+        possible
+        :param verbose: bool, if True prints temporary results and indicators of the fitting process
         """
         self.kwargs_data_joint = kwargs_data_joint
         self.multi_band_list = kwargs_data_joint.get('multi_band_list', [])
+        self.multi_band_type = kwargs_data_joint.get('multi_band_type', 'single-band')
         self._verbose = verbose
         self._mpi = mpi
         self._updateManager = MultiBandUpdateManager(kwargs_model, kwargs_constraints, kwargs_likelihood, kwargs_params,
@@ -49,7 +62,8 @@ class FittingSequence(object):
     def fit_sequence(self, fitting_list):
         """
 
-        :param fitting_list: list of [['string', {kwargs}], ..] with 'string being the specific fitting option and kwargs being the arguments passed to this option
+        :param fitting_list: list of [['string', {kwargs}], ..] with 'string being the specific fitting option and
+         kwargs being the arguments passed to this option
         :return: fitting results
         """
         chain_list = []
@@ -62,6 +76,9 @@ class FittingSequence(object):
 
             elif fitting_type == 'update_settings':
                 self.update_settings(**kwargs)
+
+            elif fitting_type == 'set_param_value':
+                self.set_param_value(**kwargs)
 
             elif fitting_type == 'fix_not_computed':
                 self.fix_not_computed(**kwargs)
@@ -76,6 +93,11 @@ class FittingSequence(object):
                 kwargs_result, chain, param = self.pso(**kwargs)
                 self._updateManager.update_param_state(**kwargs_result)
                 chain_list.append([fitting_type, chain, param])
+
+            elif fitting_type == 'SIMPLEX':
+                kwargs_result = self.simplex(**kwargs)
+                self._updateManager.update_param_state(**kwargs_result)
+                chain_list.append([fitting_type, kwargs_result])
 
             elif fitting_type == 'MCMC':
                 if not 'init_samples' in kwargs:
@@ -92,8 +114,8 @@ class FittingSequence(object):
                 chain_list.append(ns_output)
 
             else:
-                raise ValueError("fitting_sequence %s is not supported. Please use: 'PSO', 'MCMC', 'psf_iteration', "
-                                 "'restart', 'update_settings' or ""'align_images'" % fitting_type)
+                raise ValueError("fitting_sequence %s is not supported. Please use: 'PSO', 'SIMPLEX', 'MCMC', "
+                                 "'psf_iteration', 'restart', 'update_settings' or ""'align_images'" % fitting_type)
         return chain_list
 
     def best_fit(self, bijective=False):
@@ -144,7 +166,7 @@ class FittingSequence(object):
     def param_class(self):
         """
 
-        :return: Param() class instance reflecting the current state of Fittingsequence
+        :return: Param() class instance reflecting the current state of FittingSequence
         """
         return self._updateManager.param_class
 
@@ -152,26 +174,45 @@ class FittingSequence(object):
     def likelihoodModule(self):
         """
 
-        :return: Likelihood() class instance reflecting the current state of Fittingsequence
+        :return: Likelihood() class instance reflecting the current state of FittingSequence
         """
         kwargs_model = self._updateManager.kwargs_model
         kwargs_likelihood = self._updateManager.kwargs_likelihood
         likelihoodModule = LikelihoodModule(self.kwargs_data_joint, kwargs_model, self.param_class, **kwargs_likelihood)
         return likelihoodModule
 
-    def mcmc(self, n_burn, n_run, walkerRatio, sigma_scale=1, threadCount=1, init_samples=None, re_use_samples=True,
-             sampler_type='EMCEE', progress=True):
+    def simplex(self, n_iterations, method='Nelder-Mead'):
+        """
+        Downhill simplex optimization using the Nelder-Mead algorithm.
+
+        :param n_iterations: maximum number of iterations to perform
+        :param method: the optimization method used, see documentation in scipy.optimize.minimize
+        :return: result of the best fit
+        """
+
+        param_class = self.param_class
+        kwargs_temp = self._updateManager.parameter_state
+        init_pos = param_class.kwargs2args(**kwargs_temp)
+        sampler = Sampler(likelihoodModule=self.likelihoodModule)
+        result = sampler.simplex(init_pos, n_iterations, method)
+
+        kwargs_result = param_class.args2kwargs(result, bijective=True)
+        return kwargs_result
+
+    def mcmc(self, n_burn, n_run, walkerRatio, n_walkers=None, sigma_scale=1, threadCount=1, init_samples=None,
+             re_use_samples=True, sampler_type='EMCEE', progress=True, backup_filename=None, start_from_backup=False):
         """
         MCMC routine
 
         :param n_burn: number of burn in iterations (will not be saved)
         :param n_run: number of MCMC iterations that are saved
         :param walkerRatio: ratio of walkers/number of free parameters
+        :param n_walkers: integer, number of walkers of emcee (optional, if set, overwrites the walkerRatio input
         :param sigma_scale: scaling of the initial parameter spread relative to the width in the initial settings
         :param threadCount: number of CPU threads. If MPI option is set, threadCount=1
         :param init_samples: initial sample from where to start the MCMC process
         :param re_use_samples: bool, if True, re-uses the samples described in init_samples.nOtherwise starts from scratch.
-        :param sampler_type: string, which MCMC sampler to be used. Options are: 'COSMOHAMMER, and 'EMCEE'
+        :param sampler_type: string, which MCMC sampler to be used. Options are: 'EMCEE'
         :param progress: boolean, if True shows progress bar in EMCEE
         :return: list of output arguments, e.g. MCMC samples, parameter names, logL distances of all samples specified by the specific sampler used
         """
@@ -184,23 +225,24 @@ class FittingSequence(object):
         kwargs_sigma = self._updateManager.sigma_kwargs
         sigma_start = np.array(param_class.kwargs2args(**kwargs_sigma)) * sigma_scale
         num_param, param_list = param_class.num_param()
+        if n_walkers is None:
+            n_walkers = num_param * walkerRatio
         # run MCMC
         if not init_samples is None and re_use_samples is True:
             num_samples, num_param_prev = np.shape(init_samples)
-            print(num_samples, num_param_prev, num_param, 'shape of init_sample')
             if num_param_prev == num_param:
                 print("re-using previous samples to initialize the next MCMC run.")
-                initpos = ReusePositionGenerator(init_samples)
+                idxs = np.random.choice(len(init_samples), n_walkers)
+                initpos = init_samples[idxs]
             else:
-                print("Can not re-use previous MCMC samples due to change in option")
-                initpos = None
+                raise ValueError("Can not re-use previous MCMC samples as number of parameters have changed!")
         else:
             initpos = None
 
-        if sampler_type is 'EMCEE':
-            n_walkers = num_param * walkerRatio
+        if sampler_type == 'EMCEE':
             samples, dist = mcmc_class.mcmc_emcee(n_walkers, n_run, n_burn, mean_start, sigma_start, mpi=self._mpi,
-                                                  threadCount=threadCount, progress=progress)
+                                                  threadCount=threadCount, progress=progress, initpos=initpos,
+                                                  backup_filename=backup_filename, start_from_backup=start_from_backup)
             output = [sampler_type, samples, param_list, dist]
         else:
             raise ValueError('sampler_type %s not supported!' % sampler_type)
@@ -315,26 +357,18 @@ class FittingSequence(object):
                   logZ, logZ_err, results_object]
         return output
 
-    def psf_iteration(self, num_iter=10, no_break=True, stacking_method='median', block_center_neighbour=0,
-                      keep_psf_error_map=True, psf_symmetry=1, psf_iter_factor=1, verbose=True, compute_bands=None):
+    def psf_iteration(self, compute_bands=None, **kwargs_psf_iter):
         """
         iterative PSF reconstruction
 
-        :param num_iter: number of iterations in the process
-        :param no_break: bool, if False will break the process as soon as one step lead to a wors reconstruction then the previous step
-        :param stacking_method: string, 'median' and 'mean' supported
-        :param block_center_neighbour: radius of neighbouring point source to be blocked in the reconstruction
-        :param keep_psf_error_map: bool, whether or not to keep the previous psf_error_map
-        :param psf_symmetry: int, number of invariant rotations in the reconstructed PSF
-        :param psf_iter_factor: factor of new estimated PSF relative to the old one PSF_updated = (1-psf_iter_factor) * PSF_old + psf_iter_factor*PSF_new
-        :param verbose: bool, print statements
         :param compute_bands: bool list, if multiple bands, this process can be limited to a subset of bands
-        :return: 0, updated PSF is stored in self.mult_iband_list
+        :param kwargs_psf_iter: keyword arguments as used or available in PSFIteration.update_iterative() definition
+        :return: 0, updated PSF is stored in self.multi_band_list
         """
         kwargs_model = self._updateManager.kwargs_model
         kwargs_likelihood = self._updateManager.kwargs_likelihood
         likelihood_mask_list = kwargs_likelihood.get('image_likelihood_mask_list', None)
-        #param_class = self.param_class
+        kwargs_pixelbased = kwargs_likelihood.get('kwargs_pixelbased', None)
         kwargs_temp = self.best_fit(bijective=False)
         if compute_bands is None:
             compute_bands = [True] * len(self.multi_band_list)
@@ -343,13 +377,10 @@ class FittingSequence(object):
             if compute_bands[band_index] is True:
                 kwargs_psf = self.multi_band_list[band_index][1]
                 image_model = SingleBandMultiModel(self.multi_band_list, kwargs_model,
-                                                   likelihood_mask_list=likelihood_mask_list, band_index=band_index)
+                                                   likelihood_mask_list=likelihood_mask_list, band_index=band_index,
+                                                   kwargs_pixelbased=kwargs_pixelbased)
                 psf_iter = PsfFitting(image_model_class=image_model)
-                kwargs_psf = psf_iter.update_iterative(kwargs_psf, kwargs_params=kwargs_temp, num_iter=num_iter,
-                                                       no_break=no_break, stacking_method=stacking_method,
-                                                       block_center_neighbour=block_center_neighbour,
-                                                       keep_psf_error_map=keep_psf_error_map,
-                 psf_symmetry=psf_symmetry, psf_iter_factor=psf_iter_factor, verbose=verbose)
+                kwargs_psf = psf_iter.update_iterative(kwargs_psf, kwargs_params=kwargs_temp, **kwargs_psf_iter)
                 self.multi_band_list[band_index][1] = kwargs_psf
         return 0
 
@@ -363,17 +394,12 @@ class FittingSequence(object):
         :param n_iterations: number of iterations in the optimization process
         :param lowerLimit: lower limit of relative shift
         :param upperLimit: upper limit of relative shift
-        :param verbose: bool, print statements
         :param compute_bands: bool list, if multiple bands, this process can be limited to a subset of bands
-        :return:
+        :return: 0, updated coordinate system for the band(s)
         """
         kwargs_model = self._updateManager.kwargs_model
         kwargs_likelihood = self._updateManager.kwargs_likelihood
         likelihood_mask_list = kwargs_likelihood.get('image_likelihood_mask_list', None)
-        #param_class = self.param_class
-        #lens_temp, source_temp, lens_light_temp, ps_temp, cosmo_temp = self._updateManager.parameter_state
-        #lens_updated = param_class.update_lens_scaling(cosmo_temp, lens_temp)
-        #source_updated = param_class.image2source_plane(source_temp, lens_updated)
         kwargs_temp = self.best_fit(bijective=False)
         if compute_bands is None:
             compute_bands = [True] * len(self.multi_band_list)
@@ -394,9 +420,11 @@ class FittingSequence(object):
         return 0
 
     def update_settings(self, kwargs_model={}, kwargs_constraints={}, kwargs_likelihood={}, lens_add_fixed=[],
-                     source_add_fixed=[], lens_light_add_fixed=[], ps_add_fixed=[], cosmo_add_fixed=[], lens_remove_fixed=[],
-                     source_remove_fixed=[], lens_light_remove_fixed=[], ps_remove_fixed=[], cosmo_remove_fixed=[],
-                        change_source_lower_limit=None, change_source_upper_limit=None):
+                        source_add_fixed=[], lens_light_add_fixed=[], ps_add_fixed=[], cosmo_add_fixed=[],
+                        lens_remove_fixed=[],
+                        source_remove_fixed=[], lens_light_remove_fixed=[], ps_remove_fixed=[], cosmo_remove_fixed=[],
+                        change_source_lower_limit=None, change_source_upper_limit=None,
+                        change_lens_lower_limit=None, change_lens_upper_limit=None):
         """
         updates lenstronomy settings "on the fly"
 
@@ -413,14 +441,32 @@ class FittingSequence(object):
         :param lens_light_remove_fixed: [[i_model, ['param1', 'param2',...], [...]]
         :param ps_remove_fixed: [[i_model, ['param1', 'param2',...], [...]]
         :param cosmo_remove_fixed: ['param1', 'param2',...]
+        :param change_lens_lower_limit: [[i_model, ['param_name', ...], [value1, value2, ...]]]
         :return: 0, the settings are overwritten for the next fitting step to come
         """
         self._updateManager.update_options(kwargs_model, kwargs_constraints, kwargs_likelihood)
         self._updateManager.update_fixed(lens_add_fixed, source_add_fixed, lens_light_add_fixed,
                                          ps_add_fixed, cosmo_add_fixed, lens_remove_fixed, source_remove_fixed,
                                          lens_light_remove_fixed, ps_remove_fixed, cosmo_remove_fixed)
-        self._updateManager.update_limits(change_source_lower_limit, change_source_upper_limit)
+        self._updateManager.update_limits(change_source_lower_limit, change_source_upper_limit, change_lens_lower_limit,
+                                          change_lens_upper_limit)
         return 0
+
+    def set_param_value(self, **kwargs):
+        """
+        Set a parameter to a specific value. `kwargs` are below.
+        :param lens: [[i_model, ['param1', 'param2',...], [...]]
+        :type lens:
+        :param source: [[i_model, ['param1', 'param2',...], [...]]
+        :type source:
+        :param lens_light: [[i_model, ['param1', 'param2',...], [...]]
+        :type lens_light:
+        :param ps: [[i_model, ['param1', 'param2',...], [...]]
+        :type ps:
+        :return: 0, the value of the param is overwritten
+        :rtype:
+        """
+        self._updateManager.update_param_value(**kwargs)
 
     def fix_not_computed(self, free_bands):
         """

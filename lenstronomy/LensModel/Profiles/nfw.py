@@ -1,9 +1,11 @@
 __author__ = 'sibirrer'
 
-#this file contains a class to compute the Navaro-Frank-White function
+# this file contains a class to compute the Navaro-Frenk-White profile
 import numpy as np
 import scipy.interpolate as interp
 from lenstronomy.LensModel.Profiles.base_profile import LensProfileBase
+
+__all__ = ['NFW']
 
 
 class NFW(LensProfileBase):
@@ -15,26 +17,42 @@ class NFW(LensProfileBase):
     angle at 'Rs' - 'alpha_Rs'. To convert a physical mass and concentration definition into those lensing quantities
     for a specific redshift configuration and cosmological model, you can find routines in lenstronomy.Cosmo.lens_cosmo.py
 
+    Examples for converting angular to physical mass units
+    ------------------------------------------------------
+    >>> from lenstronomy.Cosmo.lens_cosmo import LensCosmo
+    >>> from astropy.cosmology import FlatLambdaCDM
+    >>> cosmo = FlatLambdaCDM(H0=70, Om0=0.3, Ob0=0.05)
+    >>> lens_cosmo = LensCosmo(z_lens=0.5, z_source=1.5, cosmo=cosmo)
+
+    Here we compute the angular scale of Rs on the sky (in arc seconds) and the deflection angle at Rs (in arc seconds):
+
+    >>> Rs_angle, alpha_Rs = lens_cosmo.nfw_physical2angle(M=10**13, c=6)
+
+    And here we perform the inverse calculation given Rs_angle and alpha_Rs to return the physical halo properties.
+
+    >>> rho0, Rs, c, r200, M200 = lens_cosmo.nfw_angle2physical(Rs_angle=Rs_angle, alpha_Rs=alpha_Rs)
+
+    The lens model calculation uses angular units as arguments! So to execute a deflection angle calculation one uses
+
+    >>> from lenstronomy.LensModel.Profiles.nfw import NFW
+    >>> nfw = NFW()
+    >>> alpha_x, alpha_y = nfw.derivatives(x=1, y=1, Rs=Rs_angle, alpha_Rs=alpha_Rs, center_x=0, center_y=0)
 
     """
+    profile_name = 'NFW'
     param_names = ['Rs', 'alpha_Rs', 'center_x', 'center_y']
     lower_limit_default = {'Rs': 0, 'alpha_Rs': 0, 'center_x': -100, 'center_y': -100}
     upper_limit_default = {'Rs': 100, 'alpha_Rs': 10, 'center_x': 100, 'center_y': 100}
 
-    def __init__(self, interpol=False, num_interp_X=1000, max_interp_X=10, lookup=False):
+    def __init__(self, interpol=False, num_interp_X=1000, max_interp_X=10):
         """
 
         :param interpol: bool, if True, interpolates the functions F(), g() and h()
+        :param num_interp_X: int (only considered if interpol=True), number of interpolation elements in units of r/r_s
+        :param max_interp_X: float (only considered if interpol=True), maximum r/r_s value to be interpolated
+         (returning zeros outside)
         """
         self._interpol = interpol
-        self._lookup = lookup
-        if lookup and interpol:
-            from lenstronomy.LensModel.Profiles.nfw_lookup import nfw_f, nfw_g, nfw_h, nfw_x
-            self._f_lookup = nfw_f
-            self._h_lookup = nfw_h
-            self._g_lookup = nfw_g
-            self._x_lookup = nfw_x
-
         self._max_interp_X = max_interp_X
         self._num_interp_X = num_interp_X
         super(NFW, self).__init__()
@@ -50,7 +68,7 @@ class NFW(LensProfileBase):
         :param center_y: center of halo (in angular units)
         :return: lensing potential
         """
-        rho0_input = self._alpha2rho0(alpha_Rs=alpha_Rs, Rs=Rs)
+        rho0_input = self.alpha2rho0(alpha_Rs=alpha_Rs, Rs=Rs)
         if Rs < 0.0000001:
             Rs = 0.0000001
         x_ = x - center_x
@@ -71,7 +89,7 @@ class NFW(LensProfileBase):
         :param center_y: center of halo (in angular units)
         :return: deflection angle in x, deflection angle in y
         """
-        rho0_input = self._alpha2rho0(alpha_Rs=alpha_Rs, Rs=Rs)
+        rho0_input = self.alpha2rho0(alpha_Rs=alpha_Rs, Rs=Rs)
         if Rs < 0.0000001:
             Rs = 0.0000001
         x_ = x - center_x
@@ -89,9 +107,9 @@ class NFW(LensProfileBase):
         :param alpha_Rs: deflection (angular units) at projected Rs
         :param center_x: center of halo (in angular units)
         :param center_y: center of halo (in angular units)
-        :return: Hessian matrix of function d^2f/dx^2, d^f/dy^2, d^2/dxdy
+        :return: Hessian matrix of function d^2f/dx^2, d^2/dxdy, d^2/dydx, d^f/dy^2
         """
-        rho0_input = self._alpha2rho0(alpha_Rs=alpha_Rs, Rs=Rs)
+        rho0_input = self.alpha2rho0(alpha_Rs=alpha_Rs, Rs=Rs)
         if Rs < 0.0000001:
             Rs = 0.0000001
         x_ = x - center_x
@@ -102,7 +120,7 @@ class NFW(LensProfileBase):
         f_xx = kappa + gamma1
         f_yy = kappa - gamma1
         f_xy = gamma2
-        return f_xx, f_yy, f_xy
+        return f_xx, f_xy, f_xy, f_yy
 
     def density(self, R, Rs, rho0):
         """
@@ -128,7 +146,7 @@ class NFW(LensProfileBase):
         :param alpha_Rs: deflection at Rs
         :return: density rho(r)
         """
-        rho0 = self._alpha2rho0(alpha_Rs, Rs)
+        rho0 = self.alpha2rho0(alpha_Rs, Rs)
         return self.density(r, Rs, rho0)
 
     def density_2d(self, x, y, Rs, rho0, center_x=0, center_y=0):
@@ -152,37 +170,40 @@ class NFW(LensProfileBase):
         Fx = self.F_(x)
         return 2*rho0*Rs*Fx
 
-    def mass_3d(self, R, Rs, rho0):
+    def mass_3d(self, r, Rs, rho0):
         """
         mass enclosed a 3d sphere or radius r
-        :param r:
-        :param Rs:
-        :param rho0:
-        :return:
+
+        :param r: 3d radius
+        :param Rs: scale radius
+        :param rho0: density normalization (characteristic density)
+        :return: M(<r)
         """
         Rs = float(Rs)
-        m_3d = 4. * np.pi * rho0 * Rs**3 * (np.log((Rs + R)/Rs) - R/(Rs + R))
+        m_3d = 4. * np.pi * rho0 * Rs**3 * (np.log((Rs + r) / Rs) - r / (Rs + r))
         return m_3d
 
     def mass_3d_lens(self, r, Rs, alpha_Rs):
         """
-        mass enclosed a 3d sphere or radius r
-        :param R:
-        :param Rs:
-        :param alpha_Rs:
-        :return:
+        mass enclosed a 3d sphere or radius r.
+        This function takes as input the lensing parameterization.
+
+        :param r: 3d radius
+        :param Rs: scale radius
+        :param alpha_Rs: deflection (angular units) at projected Rs
+        :return: M(<r)
         """
-        rho0 = self._alpha2rho0(alpha_Rs, Rs)
+        rho0 = self.alpha2rho0(alpha_Rs, Rs)
         m_3d = self.mass_3d(r, Rs, rho0)
         return m_3d
 
     def mass_2d(self, R, Rs, rho0):
         """
-        mass enclosed a 3d sphere or radius r
-        :param r:
-        :param Ra:
-        :param Rs:
-        :return:
+        mass enclosed a 2d cylinder or projected radius R
+        :param R: projected radius
+        :param Rs: scale radius
+        :param rho0: density normalization (characteristic density)
+        :return: mass in cylinder
         """
         x = R/Rs
         gx = self.g_(x)
@@ -225,10 +246,7 @@ class NFW(LensProfileBase):
         :type axis: same as R
         :return: Epsilon(R) projected density at radius R
         """
-        if isinstance(R, int) or isinstance(R, float):
-            R = max(R, 0.00000001)
-        else:
-            R[R <= 0.00000001] = 0.00000001
+        R = np.maximum(R, 0.00000001)
         x = R/Rs
         gx = self.g_(x)
         a = 4*rho0*Rs*R*gx/x**2/R
@@ -252,10 +270,7 @@ class NFW(LensProfileBase):
         :return: Epsilon(R) projected density at radius R
         """
         c = 0.000001
-        if isinstance(R, int) or isinstance(R, float):
-            R = max(R, c)
-        else:
-            R[R <= c] = c
+        R = np.maximum(R, c)
         x = R/Rs
         gx = self.g_(x)
         Fx = self.F_(x)
@@ -271,25 +286,21 @@ class NFW(LensProfileBase):
         """
         if self._interpol:
             if not hasattr(self, '_F_interp'):
-
-                if self._lookup:
-                    x = self._x_lookup
-                    F_x = self._f_lookup
-                else:
-                    x = np.linspace(0, self._max_interp_X, self._num_interp_X)
-                    F_x = self._F(x)
+                x = np.linspace(0, self._max_interp_X, self._num_interp_X)
+                F_x = self._F(x)
                 self._F_interp = interp.interp1d(x, F_x, kind='linear', axis=-1, copy=False, bounds_error=False,
                                                  fill_value=0, assume_sorted=True)
             return self._F_interp(X)
         else:
             return self._F(X)
 
-    def _F(self, X):
+    @staticmethod
+    def _F(X):
         """
         analytic solution of the projection integral
 
-        :param x: R/Rs
-        :type x: float >0
+        :param X: R/Rs
+        :type X: float >0
         """
         if isinstance(X, int) or isinstance(X, float):
             if X < 1 and X > 0:
@@ -321,31 +332,28 @@ class NFW(LensProfileBase):
         """
         computes h()
 
-        :param X:
+        :param X: R/Rs
+        :type X: float >0
         :return:
         """
         if self._interpol:
             if not hasattr(self, '_g_interp'):
-
-                if self._lookup:
-                    x = self._x_lookup
-                    g_x = self._g_lookup
-                else:
-                    x = np.linspace(0, self._max_interp_X, self._num_interp_X)
-                    g_x = self._g(x)
+                x = np.linspace(0, self._max_interp_X, self._num_interp_X)
+                g_x = self._g(x)
                 self._g_interp = interp.interp1d(x, g_x, kind='linear', axis=-1, copy=False, bounds_error=False,
                                                  fill_value=0, assume_sorted=True)
             return self._g_interp(X)
         else:
             return self._g(X)
 
-    def _g(self, X):
+    @staticmethod
+    def _g(X):
         """
 
         analytic solution of integral for NFW profile to compute deflection angel and gamma
 
-        :param x: R/Rs
-        :type x: float >0
+        :param X: R/Rs
+        :type X: float >0
         """
         c = 0.000001
         if isinstance(X, int) or isinstance(X, float):
@@ -365,38 +373,34 @@ class NFW(LensProfileBase):
             a[X == 1] = 1 + np.log(1./2.)
             x = X[X > 1]
             a[X > 1] = np.log(x/2) + 1/np.sqrt(x**2-1)*np.arccos(1./x)
-
         return a
 
     def h_(self, X):
         """
         computes h()
 
-        :param X:
-        :return:
+        :param X: R/Rs
+        :type X: float >0
+        :return: h(X)
         """
         if self._interpol:
             if not hasattr(self, '_h_interp'):
-
-                if self._lookup:
-                    x = self._x_lookup
-                    h_x = self._h_lookup
-                else:
-                    x = np.linspace(0, self._max_interp_X, self._num_interp_X)
-                    h_x = self._h(x)
+                x = np.linspace(0, self._max_interp_X, self._num_interp_X)
+                h_x = self._h(x)
                 self._h_interp = interp.interp1d(x, h_x, kind='linear', axis=-1, copy=False, bounds_error=False,
                                                  fill_value=0, assume_sorted=True)
             return self._h_interp(X)
         else:
             return self._h(X)
 
-    def _h(self, X):
+    @staticmethod
+    def _h(X):
         """
 
         analytic solution of integral for NFW profile to compute the potential
 
-        :param x: R/Rs
-        :type x: float >0
+        :param X: R/Rs
+        :type X: float >0
         """
         c = 0.000001
         if isinstance(X, int) or isinstance(X, float):
@@ -415,24 +419,28 @@ class NFW(LensProfileBase):
         return a
 
     @staticmethod
-    def _alpha2rho0(alpha_Rs, Rs):
+    def alpha2rho0(alpha_Rs, Rs):
 
         """
         convert angle at Rs into rho0
+
+        :param alpha_Rs: deflection angle at RS
+        :param Rs: scale radius
+        :return: density normalization (characteristic density)
         """
 
         rho0 = alpha_Rs / (4. * Rs ** 2 * (1. + np.log(1. / 2.)))
         return rho0
 
     @staticmethod
-    def _rho02alpha(rho0, Rs):
+    def rho02alpha(rho0, Rs):
 
         """
         convert rho0 to angle at Rs
 
-        :param rho0:
-        :param Rs:
-        :return:
+        :param rho0: density normalization (characteristic density)
+        :param Rs: scale radius
+        :return: deflection angle at RS
         """
 
         alpha_Rs = rho0 * (4 * Rs ** 2 * (1 + np.log(1. / 2.)))

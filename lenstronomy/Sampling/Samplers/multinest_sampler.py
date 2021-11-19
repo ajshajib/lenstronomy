@@ -8,6 +8,8 @@ import numpy as np
 from lenstronomy.Sampling.Samplers.base_nested_sampler import NestedSampler
 import lenstronomy.Util.sampling_util as utils
 
+__all__ = ['MultiNestSampler']
+
 
 class MultiNestSampler(NestedSampler):
     """
@@ -72,7 +74,6 @@ class MultiNestSampler(NestedSampler):
         self._rm_output = remove_output_dir
         self._has_warned = False
 
-
     def prior(self, cube, ndim, nparams):
         """
         compute the mapping between the unit cube and parameter cube (in-place)
@@ -89,7 +90,6 @@ class MultiNestSampler(NestedSampler):
             utils.cube2args_uniform(cube_py, self.lowers, self.uppers, self.n_dims)
         for i in range(self.n_dims):
             cube[i] = cube_py[i]
-
 
     def log_likelihood(self, args, ndim, nparams):
         """
@@ -156,7 +156,6 @@ class MultiNestSampler(NestedSampler):
             
         return samples, means, logZ, logZ_err, logL, stats
 
-
     def _multinest2python(self, multinest_list, num_dims):
         """convert ctypes list to standard python list"""
         python_list = []
@@ -164,17 +163,15 @@ class MultiNestSampler(NestedSampler):
             python_list.append(multinest_list[i])
         return python_list
 
-
     def _check_install(self):
         try:
             import pymultinest
             from pymultinest.analyse import Analyzer
         except:
             print("Warning : MultiNest/pymultinest not properly installed (results might be unexpected). \
-You can get it from : https://johannesbuchner.github.io/PyMultiNest/pymultinest.html")
+                    You can get it from : https://johannesbuchner.github.io/PyMultiNest/pymultinest.html")
             self._pymultinest_installed = False
         else:
             self._pymultinest_installed = True
             self._pymultinest = pymultinest
             self._Analyzer = Analyzer
-

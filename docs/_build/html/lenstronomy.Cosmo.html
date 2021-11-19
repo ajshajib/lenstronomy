@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>lenstronomy.Cosmo package &#8212; lenstronomy 1.3.0 documentation</title>
+    <title>lenstronomy.Cosmo package &#8212; lenstronomy 1.9.1 documentation</title>
     <link rel="stylesheet" href="_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     
@@ -18,8 +18,8 @@
     
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="lenstronomy.Cosmo.Sampling package" href="lenstronomy.Cosmo.Sampling.html" />
-    <link rel="prev" title="lenstronomy.Analysis package" href="lenstronomy.Analysis.html" /> 
+    <link rel="next" title="lenstronomy.Data package" href="lenstronomy.Data.html" />
+    <link rel="prev" title="lenstronomy.Conf package" href="lenstronomy.Conf.html" /> 
   </head><body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
@@ -31,12 +31,12 @@
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="lenstronomy.Cosmo.Sampling.html" title="lenstronomy.Cosmo.Sampling package"
+          <a href="lenstronomy.Data.html" title="lenstronomy.Data package"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="lenstronomy.Analysis.html" title="lenstronomy.Analysis package"
+          <a href="lenstronomy.Conf.html" title="lenstronomy.Conf package"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">lenstronomy 1.3.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="index.html">lenstronomy 1.9.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="lenstronomy.html" accesskey="U">lenstronomy package</a> &#187;</li> 
       </ul>
     </div>  
@@ -48,22 +48,6 @@
             
   <div class="section" id="lenstronomy-cosmo-package">
 <h1>lenstronomy.Cosmo package<a class="headerlink" href="#lenstronomy-cosmo-package" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="subpackages">
-<h2>Subpackages<a class="headerlink" href="#subpackages" title="Permalink to this headline">¶</a></h2>
-<div class="toctree-wrapper compound">
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="lenstronomy.Cosmo.Sampling.html">lenstronomy.Cosmo.Sampling package</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="lenstronomy.Cosmo.Sampling.html#submodules">Submodules</a></li>
-<li class="toctree-l2"><a class="reference internal" href="lenstronomy.Cosmo.Sampling.html#module-lenstronomy.Cosmo.Sampling.cosmo_likelihood">lenstronomy.Cosmo.Sampling.cosmo_likelihood module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="lenstronomy.Cosmo.Sampling.html#module-lenstronomy.Cosmo.Sampling.lens_likelihood">lenstronomy.Cosmo.Sampling.lens_likelihood module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="lenstronomy.Cosmo.Sampling.html#module-lenstronomy.Cosmo.Sampling.mcmc_sampling">lenstronomy.Cosmo.Sampling.mcmc_sampling module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="lenstronomy.Cosmo.Sampling.html#module-lenstronomy.Cosmo.Sampling.param_manager">lenstronomy.Cosmo.Sampling.param_manager module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="lenstronomy.Cosmo.Sampling.html#module-lenstronomy.Cosmo.Sampling">Module contents</a></li>
-</ul>
-</li>
-</ul>
-</div>
-</div>
 <div class="section" id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
 </div>
@@ -71,50 +55,9 @@
 <span id="lenstronomy-cosmo-background-module"></span><h2>lenstronomy.Cosmo.background module<a class="headerlink" href="#module-lenstronomy.Cosmo.background" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="lenstronomy.Cosmo.background.Background">
-<em class="property">class </em><code class="descclassname">lenstronomy.Cosmo.background.</code><code class="descname">Background</code><span class="sig-paren">(</span><em>cosmo=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lenstronomy/Cosmo/background.html#Background"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lenstronomy.Cosmo.background.Background" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">lenstronomy.Cosmo.background.</code><code class="descname">Background</code><span class="sig-paren">(</span><em>cosmo=None</em>, <em>interp=False</em>, <em>**kwargs_interp</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lenstronomy/Cosmo/background.html#Background"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lenstronomy.Cosmo.background.Background" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>class to compute cosmological distances</p>
-<dl class="method">
-<dt id="lenstronomy.Cosmo.background.Background.D_dt">
-<code class="descname">D_dt</code><span class="sig-paren">(</span><em>z_lens</em>, <em>z_source</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lenstronomy/Cosmo/background.html#Background.D_dt"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lenstronomy.Cosmo.background.Background.D_dt" title="Permalink to this definition">¶</a></dt>
-<dd><p>time-delay distance</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>z_lens</strong> – redshift of lens</li>
-<li><strong>z_source</strong> – redshift of source</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">time-delay distance in units of proper Mpc</p>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="lenstronomy.Cosmo.background.Background.D_xy">
-<code class="descname">D_xy</code><span class="sig-paren">(</span><em>z_observer</em>, <em>z_source</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lenstronomy/Cosmo/background.html#Background.D_xy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lenstronomy.Cosmo.background.Background.D_xy" title="Permalink to this definition">¶</a></dt>
-<dd><table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>z_observer</strong> – observer redshift</li>
-<li><strong>z_source</strong> – source redshift</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">angular diameter distance in units of Mpc</p>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
 <dl class="method">
 <dt id="lenstronomy.Cosmo.background.Background.T_xy">
 <code class="descname">T_xy</code><span class="sig-paren">(</span><em>z_observer</em>, <em>z_source</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lenstronomy/Cosmo/background.html#Background.T_xy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lenstronomy.Cosmo.background.Background.T_xy" title="Permalink to this definition">¶</a></dt>
@@ -143,6 +86,47 @@
 :return: scale factor</p>
 </dd></dl>
 
+<dl class="method">
+<dt id="lenstronomy.Cosmo.background.Background.d_xy">
+<code class="descname">d_xy</code><span class="sig-paren">(</span><em>z_observer</em>, <em>z_source</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lenstronomy/Cosmo/background.html#Background.d_xy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lenstronomy.Cosmo.background.Background.d_xy" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>z_observer</strong> – observer redshift</li>
+<li><strong>z_source</strong> – source redshift</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">angular diameter distance in units of Mpc</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="lenstronomy.Cosmo.background.Background.ddt">
+<code class="descname">ddt</code><span class="sig-paren">(</span><em>z_lens</em>, <em>z_source</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lenstronomy/Cosmo/background.html#Background.ddt"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lenstronomy.Cosmo.background.Background.ddt" title="Permalink to this definition">¶</a></dt>
+<dd><p>time-delay distance</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>z_lens</strong> – redshift of lens</li>
+<li><strong>z_source</strong> – redshift of source</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">time-delay distance in units of proper Mpc</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
 <dl class="attribute">
 <dt id="lenstronomy.Cosmo.background.Background.rho_crit">
 <code class="descname">rho_crit</code><a class="headerlink" href="#lenstronomy.Cosmo.background.Background.rho_crit" title="Permalink to this definition">¶</a></dt>
@@ -155,31 +139,60 @@
 </div>
 <div class="section" id="module-lenstronomy.Cosmo.cosmo_solver">
 <span id="lenstronomy-cosmo-cosmo-solver-module"></span><h2>lenstronomy.Cosmo.cosmo_solver module<a class="headerlink" href="#module-lenstronomy.Cosmo.cosmo_solver" title="Permalink to this headline">¶</a></h2>
-<dl class="class">
-<dt id="lenstronomy.Cosmo.cosmo_solver.InvertCosmo">
-<em class="property">class </em><code class="descclassname">lenstronomy.Cosmo.cosmo_solver.</code><code class="descname">InvertCosmo</code><span class="sig-paren">(</span><em>z_d</em>, <em>z_s</em>, <em>H0_range=array([ 10.</em>, <em>11.01123596</em>, <em>12.02247191</em>, <em>13.03370787</em>, <em>14.04494382</em>, <em>15.05617978</em>, <em>16.06741573</em>, <em>17.07865169</em>, <em>18.08988764</em>, <em>19.1011236</em>, <em>20.11235955</em>, <em>21.12359551</em>, <em>22.13483146</em>, <em>23.14606742</em>, <em>24.15730337</em>, <em>25.16853933</em>, <em>26.17977528</em>, <em>27.19101124</em>, <em>28.20224719</em>, <em>29.21348315</em>, <em>30.2247191</em>, <em>31.23595506</em>, <em>32.24719101</em>, <em>33.25842697</em>, <em>34.26966292</em>, <em>35.28089888</em>, <em>36.29213483</em>, <em>37.30337079</em>, <em>38.31460674</em>, <em>39.3258427</em>, <em>40.33707865</em>, <em>41.34831461</em>, <em>42.35955056</em>, <em>43.37078652</em>, <em>44.38202247</em>, <em>45.39325843</em>, <em>46.40449438</em>, <em>47.41573034</em>, <em>48.42696629</em>, <em>49.43820225</em>, <em>50.4494382</em>, <em>51.46067416</em>, <em>52.47191011</em>, <em>53.48314607</em>, <em>54.49438202</em>, <em>55.50561798</em>, <em>56.51685393</em>, <em>57.52808989</em>, <em>58.53932584</em>, <em>59.5505618</em>, <em>60.56179775</em>, <em>61.57303371</em>, <em>62.58426966</em>, <em>63.59550562</em>, <em>64.60674157</em>, <em>65.61797753</em>, <em>66.62921348</em>, <em>67.64044944</em>, <em>68.65168539</em>, <em>69.66292135</em>, <em>70.6741573</em>, <em>71.68539326</em>, <em>72.69662921</em>, <em>73.70786517</em>, <em>74.71910112</em>, <em>75.73033708</em>, <em>76.74157303</em>, <em>77.75280899</em>, <em>78.76404494</em>, <em>79.7752809</em>, <em>80.78651685</em>, <em>81.79775281</em>, <em>82.80898876</em>, <em>83.82022472</em>, <em>84.83146067</em>, <em>85.84269663</em>, <em>86.85393258</em>, <em>87.86516854</em>, <em>88.87640449</em>, <em>89.88764045</em>, <em>90.8988764</em>, <em>91.91011236</em>, <em>92.92134831</em>, <em>93.93258427</em>, <em>94.94382022</em>, <em>95.95505618</em>, <em>96.96629213</em>, <em>97.97752809</em>, <em>98.98876404</em>, <em>100.        ])</em>, <em>omega_m_range=array([0.05</em>, <em>0.06010638</em>, <em>0.07021277</em>, <em>0.08031915</em>, <em>0.09042553</em>, <em>0.10053191</em>, <em>0.1106383</em>, <em>0.12074468</em>, <em>0.13085106</em>, <em>0.14095745</em>, <em>0.15106383</em>, <em>0.16117021</em>, <em>0.1712766</em>, <em>0.18138298</em>, <em>0.19148936</em>, <em>0.20159574</em>, <em>0.21170213</em>, <em>0.22180851</em>, <em>0.23191489</em>, <em>0.24202128</em>, <em>0.25212766</em>, <em>0.26223404</em>, <em>0.27234043</em>, <em>0.28244681</em>, <em>0.29255319</em>, <em>0.30265957</em>, <em>0.31276596</em>, <em>0.32287234</em>, <em>0.33297872</em>, <em>0.34308511</em>, <em>0.35319149</em>, <em>0.36329787</em>, <em>0.37340426</em>, <em>0.38351064</em>, <em>0.39361702</em>, <em>0.4037234</em>, <em>0.41382979</em>, <em>0.42393617</em>, <em>0.43404255</em>, <em>0.44414894</em>, <em>0.45425532</em>, <em>0.4643617</em>, <em>0.47446809</em>, <em>0.48457447</em>, <em>0.49468085</em>, <em>0.50478723</em>, <em>0.51489362</em>, <em>0.525</em>, <em>0.53510638</em>, <em>0.54521277</em>, <em>0.55531915</em>, <em>0.56542553</em>, <em>0.57553191</em>, <em>0.5856383</em>, <em>0.59574468</em>, <em>0.60585106</em>, <em>0.61595745</em>, <em>0.62606383</em>, <em>0.63617021</em>, <em>0.6462766</em>, <em>0.65638298</em>, <em>0.66648936</em>, <em>0.67659574</em>, <em>0.68670213</em>, <em>0.69680851</em>, <em>0.70691489</em>, <em>0.71702128</em>, <em>0.72712766</em>, <em>0.73723404</em>, <em>0.74734043</em>, <em>0.75744681</em>, <em>0.76755319</em>, <em>0.77765957</em>, <em>0.78776596</em>, <em>0.79787234</em>, <em>0.80797872</em>, <em>0.81808511</em>, <em>0.82819149</em>, <em>0.83829787</em>, <em>0.84840426</em>, <em>0.85851064</em>, <em>0.86861702</em>, <em>0.8787234</em>, <em>0.88882979</em>, <em>0.89893617</em>, <em>0.90904255</em>, <em>0.91914894</em>, <em>0.92925532</em>, <em>0.9393617</em>, <em>0.94946809</em>, <em>0.95957447</em>, <em>0.96968085</em>, <em>0.97978723</em>, <em>0.98989362</em>, <em>1.        ])</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lenstronomy/Cosmo/cosmo_solver.html#InvertCosmo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lenstronomy.Cosmo.cosmo_solver.InvertCosmo" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#lenstronomy.Cosmo.cosmo_solver.SolverUtil" title="lenstronomy.Cosmo.cosmo_solver.SolverUtil"><code class="xref py py-class docutils literal notranslate"><span class="pre">lenstronomy.Cosmo.cosmo_solver.SolverUtil</span></code></a></p>
-<p>class to do an interpolation and call the inverse of this interpolation to get H_0 and omega_m</p>
-<dl class="method">
-<dt id="lenstronomy.Cosmo.cosmo_solver.InvertCosmo.get_cosmo">
-<code class="descname">get_cosmo</code><span class="sig-paren">(</span><em>Dd</em>, <em>Ds_Dds</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lenstronomy/Cosmo/cosmo_solver.html#InvertCosmo.get_cosmo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lenstronomy.Cosmo.cosmo_solver.InvertCosmo.get_cosmo" title="Permalink to this definition">¶</a></dt>
-<dd><p>return the values of H0 and omega_m computed with an interpolation
-:param Dd: flat
-:param Ds_Dds: float
-:return:</p>
+<dl class="function">
+<dt id="lenstronomy.Cosmo.cosmo_solver.cosmo2angular_diameter_distances">
+<code class="descclassname">lenstronomy.Cosmo.cosmo_solver.</code><code class="descname">cosmo2angular_diameter_distances</code><span class="sig-paren">(</span><em>H_0</em>, <em>omega_m</em>, <em>z_lens</em>, <em>z_source</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lenstronomy/Cosmo/cosmo_solver.html#cosmo2angular_diameter_distances"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lenstronomy.Cosmo.cosmo_solver.cosmo2angular_diameter_distances" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>H_0</strong> – Hubble constant [km/s/Mpc]</li>
+<li><strong>omega_m</strong> – dimensionless matter density at z=0</li>
+<li><strong>z_lens</strong> – deflector redshift</li>
+<li><strong>z_source</strong> – source redshift</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">angular diameter distances Dd and Ds/Dds</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
+<dl class="function">
+<dt id="lenstronomy.Cosmo.cosmo_solver.ddt2h0">
+<code class="descclassname">lenstronomy.Cosmo.cosmo_solver.</code><code class="descname">ddt2h0</code><span class="sig-paren">(</span><em>ddt</em>, <em>z_lens</em>, <em>z_source</em>, <em>cosmo</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lenstronomy/Cosmo/cosmo_solver.html#ddt2h0"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lenstronomy.Cosmo.cosmo_solver.ddt2h0" title="Permalink to this definition">¶</a></dt>
+<dd><p>converts time-delay distance to H0 for a given expansion history</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>ddt</strong> – time-delay distance in Mpc</li>
+<li><strong>z_lens</strong> – deflector redshift</li>
+<li><strong>z_source</strong> – source redshift</li>
+<li><strong>cosmo</strong> – astropy.cosmology class instance</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">h0 value which matches the cosmology class effectively replacing the h0 value used in the creation of this class</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="class">
-<dt id="lenstronomy.Cosmo.cosmo_solver.SolverFlatCosmo">
-<em class="property">class </em><code class="descclassname">lenstronomy.Cosmo.cosmo_solver.</code><code class="descname">SolverFlatCosmo</code><span class="sig-paren">(</span><em>z_d</em>, <em>z_s</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lenstronomy/Cosmo/cosmo_solver.html#SolverFlatCosmo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lenstronomy.Cosmo.cosmo_solver.SolverFlatCosmo" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#lenstronomy.Cosmo.cosmo_solver.SolverUtil" title="lenstronomy.Cosmo.cosmo_solver.SolverUtil"><code class="xref py py-class docutils literal notranslate"><span class="pre">lenstronomy.Cosmo.cosmo_solver.SolverUtil</span></code></a></p>
+<dt id="lenstronomy.Cosmo.cosmo_solver.SolverFlatLCDM">
+<em class="property">class </em><code class="descclassname">lenstronomy.Cosmo.cosmo_solver.</code><code class="descname">SolverFlatLCDM</code><span class="sig-paren">(</span><em>z_d</em>, <em>z_s</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lenstronomy/Cosmo/cosmo_solver.html#SolverFlatLCDM"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lenstronomy.Cosmo.cosmo_solver.SolverFlatLCDM" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>class to solve multidimensional non-linear equations to determine the cosmological parameters H0 and omega_m given
 the angular diameter distance relations</p>
 <dl class="method">
-<dt id="lenstronomy.Cosmo.cosmo_solver.SolverFlatCosmo.F">
-<code class="descname">F</code><span class="sig-paren">(</span><em>x</em>, <em>Dd</em>, <em>Ds_Dds</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lenstronomy/Cosmo/cosmo_solver.html#SolverFlatCosmo.F"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lenstronomy.Cosmo.cosmo_solver.SolverFlatCosmo.F" title="Permalink to this definition">¶</a></dt>
+<dt id="lenstronomy.Cosmo.cosmo_solver.SolverFlatLCDM.F">
+<code class="descname">F</code><span class="sig-paren">(</span><em>x</em>, <em>Dd</em>, <em>Ds_Dds</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lenstronomy/Cosmo/cosmo_solver.html#SolverFlatLCDM.F"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lenstronomy.Cosmo.cosmo_solver.SolverFlatLCDM.F" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -193,35 +206,24 @@ the angular diameter distance relations</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="lenstronomy.Cosmo.cosmo_solver.SolverFlatCosmo.solve">
-<code class="descname">solve</code><span class="sig-paren">(</span><em>init</em>, <em>Dd</em>, <em>Ds_Dds</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lenstronomy/Cosmo/cosmo_solver.html#SolverFlatCosmo.solve"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lenstronomy.Cosmo.cosmo_solver.SolverFlatCosmo.solve" title="Permalink to this definition">¶</a></dt>
+<dt id="lenstronomy.Cosmo.cosmo_solver.SolverFlatLCDM.solve">
+<code class="descname">solve</code><span class="sig-paren">(</span><em>init</em>, <em>dd</em>, <em>ds_dds</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lenstronomy/Cosmo/cosmo_solver.html#SolverFlatLCDM.solve"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lenstronomy.Cosmo.cosmo_solver.SolverFlatLCDM.solve" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="class">
-<dt id="lenstronomy.Cosmo.cosmo_solver.SolverUtil">
-<em class="property">class </em><code class="descclassname">lenstronomy.Cosmo.cosmo_solver.</code><code class="descname">SolverUtil</code><span class="sig-paren">(</span><em>z_d</em>, <em>z_s</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lenstronomy/Cosmo/cosmo_solver.html#SolverUtil"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lenstronomy.Cosmo.cosmo_solver.SolverUtil" title="Permalink to this definition">¶</a></dt>
+<dt id="lenstronomy.Cosmo.cosmo_solver.InvertCosmo">
+<em class="property">class </em><code class="descclassname">lenstronomy.Cosmo.cosmo_solver.</code><code class="descname">InvertCosmo</code><span class="sig-paren">(</span><em>z_d</em>, <em>z_s</em>, <em>H0_range=array([ 10.</em>, <em>11.01123596</em>, <em>12.02247191</em>, <em>13.03370787</em>, <em>14.04494382</em>, <em>15.05617978</em>, <em>16.06741573</em>, <em>17.07865169</em>, <em>18.08988764</em>, <em>19.1011236</em>, <em>20.11235955</em>, <em>21.12359551</em>, <em>22.13483146</em>, <em>23.14606742</em>, <em>24.15730337</em>, <em>25.16853933</em>, <em>26.17977528</em>, <em>27.19101124</em>, <em>28.20224719</em>, <em>29.21348315</em>, <em>30.2247191</em>, <em>31.23595506</em>, <em>32.24719101</em>, <em>33.25842697</em>, <em>34.26966292</em>, <em>35.28089888</em>, <em>36.29213483</em>, <em>37.30337079</em>, <em>38.31460674</em>, <em>39.3258427</em>, <em>40.33707865</em>, <em>41.34831461</em>, <em>42.35955056</em>, <em>43.37078652</em>, <em>44.38202247</em>, <em>45.39325843</em>, <em>46.40449438</em>, <em>47.41573034</em>, <em>48.42696629</em>, <em>49.43820225</em>, <em>50.4494382</em>, <em>51.46067416</em>, <em>52.47191011</em>, <em>53.48314607</em>, <em>54.49438202</em>, <em>55.50561798</em>, <em>56.51685393</em>, <em>57.52808989</em>, <em>58.53932584</em>, <em>59.5505618</em>, <em>60.56179775</em>, <em>61.57303371</em>, <em>62.58426966</em>, <em>63.59550562</em>, <em>64.60674157</em>, <em>65.61797753</em>, <em>66.62921348</em>, <em>67.64044944</em>, <em>68.65168539</em>, <em>69.66292135</em>, <em>70.6741573</em>, <em>71.68539326</em>, <em>72.69662921</em>, <em>73.70786517</em>, <em>74.71910112</em>, <em>75.73033708</em>, <em>76.74157303</em>, <em>77.75280899</em>, <em>78.76404494</em>, <em>79.7752809</em>, <em>80.78651685</em>, <em>81.79775281</em>, <em>82.80898876</em>, <em>83.82022472</em>, <em>84.83146067</em>, <em>85.84269663</em>, <em>86.85393258</em>, <em>87.86516854</em>, <em>88.87640449</em>, <em>89.88764045</em>, <em>90.8988764</em>, <em>91.91011236</em>, <em>92.92134831</em>, <em>93.93258427</em>, <em>94.94382022</em>, <em>95.95505618</em>, <em>96.96629213</em>, <em>97.97752809</em>, <em>98.98876404</em>, <em>100.        ])</em>, <em>omega_m_range=array([0.05</em>, <em>0.06010638</em>, <em>0.07021277</em>, <em>0.08031915</em>, <em>0.09042553</em>, <em>0.10053191</em>, <em>0.1106383</em>, <em>0.12074468</em>, <em>0.13085106</em>, <em>0.14095745</em>, <em>0.15106383</em>, <em>0.16117021</em>, <em>0.1712766</em>, <em>0.18138298</em>, <em>0.19148936</em>, <em>0.20159574</em>, <em>0.21170213</em>, <em>0.22180851</em>, <em>0.23191489</em>, <em>0.24202128</em>, <em>0.25212766</em>, <em>0.26223404</em>, <em>0.27234043</em>, <em>0.28244681</em>, <em>0.29255319</em>, <em>0.30265957</em>, <em>0.31276596</em>, <em>0.32287234</em>, <em>0.33297872</em>, <em>0.34308511</em>, <em>0.35319149</em>, <em>0.36329787</em>, <em>0.37340426</em>, <em>0.38351064</em>, <em>0.39361702</em>, <em>0.4037234</em>, <em>0.41382979</em>, <em>0.42393617</em>, <em>0.43404255</em>, <em>0.44414894</em>, <em>0.45425532</em>, <em>0.4643617</em>, <em>0.47446809</em>, <em>0.48457447</em>, <em>0.49468085</em>, <em>0.50478723</em>, <em>0.51489362</em>, <em>0.525</em>, <em>0.53510638</em>, <em>0.54521277</em>, <em>0.55531915</em>, <em>0.56542553</em>, <em>0.57553191</em>, <em>0.5856383</em>, <em>0.59574468</em>, <em>0.60585106</em>, <em>0.61595745</em>, <em>0.62606383</em>, <em>0.63617021</em>, <em>0.6462766</em>, <em>0.65638298</em>, <em>0.66648936</em>, <em>0.67659574</em>, <em>0.68670213</em>, <em>0.69680851</em>, <em>0.70691489</em>, <em>0.71702128</em>, <em>0.72712766</em>, <em>0.73723404</em>, <em>0.74734043</em>, <em>0.75744681</em>, <em>0.76755319</em>, <em>0.77765957</em>, <em>0.78776596</em>, <em>0.79787234</em>, <em>0.80797872</em>, <em>0.81808511</em>, <em>0.82819149</em>, <em>0.83829787</em>, <em>0.84840426</em>, <em>0.85851064</em>, <em>0.86861702</em>, <em>0.8787234</em>, <em>0.88882979</em>, <em>0.89893617</em>, <em>0.90904255</em>, <em>0.91914894</em>, <em>0.92925532</em>, <em>0.9393617</em>, <em>0.94946809</em>, <em>0.95957447</em>, <em>0.96968085</em>, <em>0.97978723</em>, <em>0.98989362</em>, <em>1.        ])</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lenstronomy/Cosmo/cosmo_solver.html#InvertCosmo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lenstronomy.Cosmo.cosmo_solver.InvertCosmo" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>util functions</p>
+<p>class to do an interpolation and call the inverse of this interpolation to get H_0 and omega_m</p>
 <dl class="method">
-<dt id="lenstronomy.Cosmo.cosmo_solver.SolverUtil.cosmo2Dd_Ds_Dds">
-<code class="descname">cosmo2Dd_Ds_Dds</code><span class="sig-paren">(</span><em>H_0</em>, <em>omega_m</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lenstronomy/Cosmo/cosmo_solver.html#SolverUtil.cosmo2Dd_Ds_Dds"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lenstronomy.Cosmo.cosmo_solver.SolverUtil.cosmo2Dd_Ds_Dds" title="Permalink to this definition">¶</a></dt>
-<dd><table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>H_0</strong> – Hubble constant</li>
-<li><strong>omega_m</strong> – matter density</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">angular diameter distances Dd and Ds/Dds</p>
-</td>
-</tr>
-</tbody>
-</table>
+<dt id="lenstronomy.Cosmo.cosmo_solver.InvertCosmo.get_cosmo">
+<code class="descname">get_cosmo</code><span class="sig-paren">(</span><em>Dd</em>, <em>Ds_Dds</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lenstronomy/Cosmo/cosmo_solver.html#InvertCosmo.get_cosmo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lenstronomy.Cosmo.cosmo_solver.InvertCosmo.get_cosmo" title="Permalink to this definition">¶</a></dt>
+<dd><p>return the values of H0 and omega_m computed with an interpolation
+:param Dd: flat
+:param Ds_Dds: float
+:return:</p>
 </dd></dl>
 
 </dd></dl>
@@ -313,58 +315,6 @@ diameter distances.</p>
 <em class="property">class </em><code class="descclassname">lenstronomy.Cosmo.lens_cosmo.</code><code class="descname">LensCosmo</code><span class="sig-paren">(</span><em>z_lens</em>, <em>z_source</em>, <em>cosmo=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lenstronomy/Cosmo/lens_cosmo.html#LensCosmo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lenstronomy.Cosmo.lens_cosmo.LensCosmo" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>class to manage the physical units and distances present in a single plane lens with fixed input cosmology</p>
-<dl class="attribute">
-<dt id="lenstronomy.Cosmo.lens_cosmo.LensCosmo.D_d">
-<code class="descname">D_d</code><a class="headerlink" href="#lenstronomy.Cosmo.lens_cosmo.LensCosmo.D_d" title="Permalink to this definition">¶</a></dt>
-<dd><table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">angular diameter distance to the deflector [Mpc]</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="lenstronomy.Cosmo.lens_cosmo.LensCosmo.D_ds">
-<code class="descname">D_ds</code><a class="headerlink" href="#lenstronomy.Cosmo.lens_cosmo.LensCosmo.D_ds" title="Permalink to this definition">¶</a></dt>
-<dd><table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">angular diameter distance from deflector to source [Mpc]</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="lenstronomy.Cosmo.lens_cosmo.LensCosmo.D_dt">
-<code class="descname">D_dt</code><a class="headerlink" href="#lenstronomy.Cosmo.lens_cosmo.LensCosmo.D_dt" title="Permalink to this definition">¶</a></dt>
-<dd><table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">time delay distance [Mpc]</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="lenstronomy.Cosmo.lens_cosmo.LensCosmo.D_s">
-<code class="descname">D_s</code><a class="headerlink" href="#lenstronomy.Cosmo.lens_cosmo.LensCosmo.D_s" title="Permalink to this definition">¶</a></dt>
-<dd><table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">angular diameter distance to the source [Mpc]</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
 <dl class="method">
 <dt id="lenstronomy.Cosmo.lens_cosmo.LensCosmo.a_z">
 <code class="descname">a_z</code><span class="sig-paren">(</span><em>z</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lenstronomy/Cosmo/lens_cosmo.html#LensCosmo.a_z"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lenstronomy.Cosmo.lens_cosmo.LensCosmo.a_z" title="Permalink to this definition">¶</a></dt>
@@ -390,17 +340,55 @@ diameter distances.</p>
 </dd></dl>
 
 <dl class="attribute">
-<dt id="lenstronomy.Cosmo.lens_cosmo.LensCosmo.epsilon_crit">
-<code class="descname">epsilon_crit</code><a class="headerlink" href="#lenstronomy.Cosmo.lens_cosmo.LensCosmo.epsilon_crit" title="Permalink to this definition">¶</a></dt>
-<dd><p>returns the critical projected mass density in units of M_sun/Mpc^2 (physical units)
-:return: critical projected mass density</p>
+<dt id="lenstronomy.Cosmo.lens_cosmo.LensCosmo.dd">
+<code class="descname">dd</code><a class="headerlink" href="#lenstronomy.Cosmo.lens_cosmo.LensCosmo.dd" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">angular diameter distance to the deflector [Mpc]</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="attribute">
-<dt id="lenstronomy.Cosmo.lens_cosmo.LensCosmo.epsilon_crit_angle">
-<code class="descname">epsilon_crit_angle</code><a class="headerlink" href="#lenstronomy.Cosmo.lens_cosmo.LensCosmo.epsilon_crit_angle" title="Permalink to this definition">¶</a></dt>
-<dd><p>returns the critical projected mass density in units of M_sun/arcsec^2 (in physical solar mass units)
-:return: critical projected mass density</p>
+<dt id="lenstronomy.Cosmo.lens_cosmo.LensCosmo.dds">
+<code class="descname">dds</code><a class="headerlink" href="#lenstronomy.Cosmo.lens_cosmo.LensCosmo.dds" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">angular diameter distance from deflector to source [Mpc]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="lenstronomy.Cosmo.lens_cosmo.LensCosmo.ddt">
+<code class="descname">ddt</code><a class="headerlink" href="#lenstronomy.Cosmo.lens_cosmo.LensCosmo.ddt" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">time delay distance [Mpc]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="lenstronomy.Cosmo.lens_cosmo.LensCosmo.ds">
+<code class="descname">ds</code><a class="headerlink" href="#lenstronomy.Cosmo.lens_cosmo.LensCosmo.ds" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">angular diameter distance to the source [Mpc]</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="attribute">
@@ -442,10 +430,22 @@ diameter distances.</p>
 <dl class="method">
 <dt id="lenstronomy.Cosmo.lens_cosmo.LensCosmo.nfwParam_physical">
 <code class="descname">nfwParam_physical</code><span class="sig-paren">(</span><em>M</em>, <em>c</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lenstronomy/Cosmo/lens_cosmo.html#LensCosmo.nfwParam_physical"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lenstronomy.Cosmo.lens_cosmo.LensCosmo.nfwParam_physical" title="Permalink to this definition">¶</a></dt>
-<dd><p>returns the NFW parameters in physical units
-:param M: physical mass in M_sun
-:param c: concentration
-:return:</p>
+<dd><p>returns the NFW parameters in physical units</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>M</strong> – physical mass in M_sun</li>
+<li><strong>c</strong> – concentration</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">rho0, Rs, r200</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
@@ -478,7 +478,7 @@ diameter distances.</p>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">M200, r200, Rs_physical, c</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">rho0, Rs, c, r200, M200</p>
 </td>
 </tr>
 </tbody>
@@ -494,12 +494,12 @@ diameter distances.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>M</strong> – mass enclosed 200 rho_crit in units of M_sun</li>
+<li><strong>M</strong> – mass enclosed 200 rho_crit in units of M_sun (physical units, meaning no little h)</li>
 <li><strong>c</strong> – NFW concentration parameter (r200/r_s)</li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">alpha_Rs (observed bending angle at the scale radius, Rs_angle (angle at scale radius) (in units of arcsec)</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Rs_angle (angle at scale radius) (in units of arcsec), alpha_Rs (observed bending angle at the scale radius</p>
 </td>
 </tr>
 </tbody>
@@ -512,6 +512,21 @@ diameter distances.</p>
 <dd><p>convert physical Mpc into arc seconds
 :param phys: physical distance [Mpc]
 :return: angular diameter [arcsec]</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="lenstronomy.Cosmo.lens_cosmo.LensCosmo.sigma_crit">
+<code class="descname">sigma_crit</code><a class="headerlink" href="#lenstronomy.Cosmo.lens_cosmo.LensCosmo.sigma_crit" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns the critical projected lensing mass density in units of M_sun/Mpc^2
+:return: critical projected lensing mass density</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="lenstronomy.Cosmo.lens_cosmo.LensCosmo.sigma_crit_angle">
+<code class="descname">sigma_crit_angle</code><a class="headerlink" href="#lenstronomy.Cosmo.lens_cosmo.LensCosmo.sigma_crit_angle" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns the critical surface density in units of M_sun/arcsec^2 (in physical solar mass units)
+when provided a physical mass per physical Mpc^2
+:return: critical projected mass density</p>
 </dd></dl>
 
 <dl class="method">
@@ -565,6 +580,27 @@ diameter distances.</p>
 </table>
 </dd></dl>
 
+<dl class="method">
+<dt id="lenstronomy.Cosmo.lens_cosmo.LensCosmo.uldm_angular2phys">
+<code class="descname">uldm_angular2phys</code><span class="sig-paren">(</span><em>kappa_0</em>, <em>theta_c</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lenstronomy/Cosmo/lens_cosmo.html#LensCosmo.uldm_angular2phys"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lenstronomy.Cosmo.lens_cosmo.LensCosmo.uldm_angular2phys" title="Permalink to this definition">¶</a></dt>
+<dd><p>converts the anguar parameters entering the LensModel Uldm() (Ultra Light
+Dark Matter) class in physical masses, i.e. the total soliton mass and the
+mass of the particle
+:param kappa_0: central convergence of profile
+:param theta_c: core radius (in arcseconds)
+:return: m_eV_log10, M_sol_log10, the log10 of the masses, m in eV and M in M_sun</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="lenstronomy.Cosmo.lens_cosmo.LensCosmo.uldm_mphys2angular">
+<code class="descname">uldm_mphys2angular</code><span class="sig-paren">(</span><em>m_log10</em>, <em>M_log10</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lenstronomy/Cosmo/lens_cosmo.html#LensCosmo.uldm_mphys2angular"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lenstronomy.Cosmo.lens_cosmo.LensCosmo.uldm_mphys2angular" title="Permalink to this definition">¶</a></dt>
+<dd><p>converts physical ULDM mass in the ones, in angular units, that enter
+the LensModel Uldm() class
+:param m_log10: exponent of ULDM mass in eV
+:param M_log10: exponent of soliton mass in M_sun
+:return: kappa_0, theta_c, the central convergence and core radius (in arcseconds)</p>
+</dd></dl>
+
 </dd></dl>
 
 </div>
@@ -572,20 +608,22 @@ diameter distances.</p>
 <span id="lenstronomy-cosmo-nfw-param-module"></span><h2>lenstronomy.Cosmo.nfw_param module<a class="headerlink" href="#module-lenstronomy.Cosmo.nfw_param" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="lenstronomy.Cosmo.nfw_param.NFWParam">
-<em class="property">class </em><code class="descclassname">lenstronomy.Cosmo.nfw_param.</code><code class="descname">NFWParam</code><a class="reference internal" href="_modules/lenstronomy/Cosmo/nfw_param.html#NFWParam"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lenstronomy.Cosmo.nfw_param.NFWParam" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">lenstronomy.Cosmo.nfw_param.</code><code class="descname">NFWParam</code><span class="sig-paren">(</span><em>cosmo=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lenstronomy/Cosmo/nfw_param.html#NFWParam"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lenstronomy.Cosmo.nfw_param.NFWParam" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>class which contains a halo model parameters dependent on cosmology for NFW profile
-all distances are given in comoving coordinates</p>
+All distances are given in physical units. Mass definitions are relative to 200 crit including redshift evolution.
+The redshift evolution is cosmology dependent (dark energy).
+The H0 dependence is propagated into the input and return units.</p>
 <dl class="method">
 <dt id="lenstronomy.Cosmo.nfw_param.NFWParam.M200">
-<code class="descname">M200</code><span class="sig-paren">(</span><em>Rs</em>, <em>rho0</em>, <em>c</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lenstronomy/Cosmo/nfw_param.html#NFWParam.M200"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lenstronomy.Cosmo.nfw_param.NFWParam.M200" title="Permalink to this definition">¶</a></dt>
+<code class="descname">M200</code><span class="sig-paren">(</span><em>rs</em>, <em>rho0</em>, <em>c</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lenstronomy/Cosmo/nfw_param.html#NFWParam.M200"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lenstronomy.Cosmo.nfw_param.NFWParam.M200" title="Permalink to this definition">¶</a></dt>
 <dd><p>M(R_200) calculation for NFW profile</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>Rs</strong> (<em>float</em>) – scale radius</li>
+<li><strong>rs</strong> (<em>float</em>) – scale radius</li>
 <li><strong>rho0</strong> (<em>float</em>) – density normalization (characteristic density)</li>
 <li><strong>c</strong> (<em>float</em><em> [</em><em>4</em><em>,</em><em>40</em><em>]</em>) – concentration</li>
 </ul>
@@ -600,14 +638,19 @@ all distances are given in comoving coordinates</p>
 
 <dl class="method">
 <dt id="lenstronomy.Cosmo.nfw_param.NFWParam.M_r200">
-<code class="descname">M_r200</code><span class="sig-paren">(</span><em>r200</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lenstronomy/Cosmo/nfw_param.html#NFWParam.M_r200"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lenstronomy.Cosmo.nfw_param.NFWParam.M_r200" title="Permalink to this definition">¶</a></dt>
+<code class="descname">M_r200</code><span class="sig-paren">(</span><em>r200</em>, <em>z</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lenstronomy/Cosmo/nfw_param.html#NFWParam.M_r200"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lenstronomy.Cosmo.nfw_param.NFWParam.M_r200" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>r200</strong> – r200 in comoving Mpc/h</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>r200</strong> – r200 in physical Mpc/h</li>
+<li><strong>z</strong> – redshift</li>
+</ul>
+</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">M200 in M_sol/h</td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">M200 in M_sun/h</p>
+</td>
 </tr>
 </tbody>
 </table>
@@ -616,7 +659,8 @@ all distances are given in comoving coordinates</p>
 <dl class="method">
 <dt id="lenstronomy.Cosmo.nfw_param.NFWParam.c_M_z">
 <code class="descname">c_M_z</code><span class="sig-paren">(</span><em>M</em>, <em>z</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lenstronomy/Cosmo/nfw_param.html#NFWParam.c_M_z"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lenstronomy.Cosmo.nfw_param.NFWParam.c_M_z" title="Permalink to this definition">¶</a></dt>
-<dd><p>fitting function of <a class="reference external" href="http://moriond.in2p3.fr/J08/proceedings/duffy.pdf">http://moriond.in2p3.fr/J08/proceedings/duffy.pdf</a> for the mass and redshift dependence of the concentration parameter</p>
+<dd><p>fitting function of <a class="reference external" href="http://moriond.in2p3.fr/J08/proceedings/duffy.pdf">http://moriond.in2p3.fr/J08/proceedings/duffy.pdf</a> for the mass and redshift dependence of
+the concentration parameter</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -636,33 +680,39 @@ all distances are given in comoving coordinates</p>
 
 <dl class="method">
 <dt id="lenstronomy.Cosmo.nfw_param.NFWParam.c_rho0">
-<code class="descname">c_rho0</code><span class="sig-paren">(</span><em>rho0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lenstronomy/Cosmo/nfw_param.html#NFWParam.c_rho0"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lenstronomy.Cosmo.nfw_param.NFWParam.c_rho0" title="Permalink to this definition">¶</a></dt>
-<dd><p>computes the concentration given a comoving overdensity rho0 (inverse of function rho0_c)
-:param rho0: density normalization in h^2/Mpc^3 (comoving)
+<code class="descname">c_rho0</code><span class="sig-paren">(</span><em>rho0</em>, <em>z</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lenstronomy/Cosmo/nfw_param.html#NFWParam.c_rho0"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lenstronomy.Cosmo.nfw_param.NFWParam.c_rho0" title="Permalink to this definition">¶</a></dt>
+<dd><p>computes the concentration given density normalization rho_0 in h^2/Mpc^3 (physical) (inverse of function rho0_c)
+:param rho0: density normalization in h^2/Mpc^3 (physical)
+:param z: redshift
 :return: concentration parameter c</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="lenstronomy.Cosmo.nfw_param.NFWParam.nfw_Mz">
 <code class="descname">nfw_Mz</code><span class="sig-paren">(</span><em>M</em>, <em>z</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lenstronomy/Cosmo/nfw_param.html#NFWParam.nfw_Mz"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lenstronomy.Cosmo.nfw_param.NFWParam.nfw_Mz" title="Permalink to this definition">¶</a></dt>
-<dd><p>returns all needed parameter (in comoving units modulo h) to draw the profile of the main halo
-r200 in co-moving Mpc/h
-rho_s in  h^2/Mpc^3 (co-moving)
-Rs in Mpc/h co-moving
+<dd><p>returns all needed parameter (in physical units modulo h) to draw the profile of the main halo
+r200 in physical Mpc/h
+rho_s in  h^2/Mpc^3 (physical)
+Rs in Mpc/h physical
 c unit less</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="lenstronomy.Cosmo.nfw_param.NFWParam.r200_M">
-<code class="descname">r200_M</code><span class="sig-paren">(</span><em>M</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lenstronomy/Cosmo/nfw_param.html#NFWParam.r200_M"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lenstronomy.Cosmo.nfw_param.NFWParam.r200_M" title="Permalink to this definition">¶</a></dt>
-<dd><p>computes the radius R_200 of a halo of mass M in comoving distances M/h</p>
+<code class="descname">r200_M</code><span class="sig-paren">(</span><em>M</em>, <em>z</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lenstronomy/Cosmo/nfw_param.html#NFWParam.r200_M"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lenstronomy.Cosmo.nfw_param.NFWParam.r200_M" title="Permalink to this definition">¶</a></dt>
+<dd><p>computes the radius R_200 crit of a halo of mass M in physical distances M/h</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>M</strong> (<em>float</em><em> or </em><em>numpy array</em>) – halo mass in M_sun/h</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>M</strong> (<em>float</em><em> or </em><em>numpy array</em>) – halo mass in M_sun/h</li>
+<li><strong>z</strong> (<em>float</em>) – redshift</li>
+</ul>
+</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">radius R_200 in comoving Mpc/h</td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">radius R_200 in physical Mpc/h</p>
+</td>
 </tr>
 </tbody>
 </table>
@@ -670,9 +720,23 @@ c unit less</p>
 
 <dl class="method">
 <dt id="lenstronomy.Cosmo.nfw_param.NFWParam.rho0_c">
-<code class="descname">rho0_c</code><span class="sig-paren">(</span><em>c</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lenstronomy/Cosmo/nfw_param.html#NFWParam.rho0_c"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lenstronomy.Cosmo.nfw_param.NFWParam.rho0_c" title="Permalink to this definition">¶</a></dt>
-<dd><p>computes density normalization as a function of concentration parameter
-:return: density normalization in h^2/Mpc^3 (comoving)</p>
+<code class="descname">rho0_c</code><span class="sig-paren">(</span><em>c</em>, <em>z</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lenstronomy/Cosmo/nfw_param.html#NFWParam.rho0_c"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lenstronomy.Cosmo.nfw_param.NFWParam.rho0_c" title="Permalink to this definition">¶</a></dt>
+<dd><p>computes density normalization as a function of concentration parameter</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>c</strong> – concentration</li>
+<li><strong>z</strong> – redshift</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">density normalization in h^2/Mpc^3 (physical)</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="attribute">
@@ -689,7 +753,7 @@ c unit less</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>z</strong> – redshift</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">scaled critical density as a function of redshift (attention, this is not rho_crit(z))</td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">critical density of the universe at redshift z in physical units [h^2 M_sun Mpc^-3]</td>
 </tr>
 </tbody>
 </table>
@@ -712,7 +776,6 @@ c unit less</p>
   <h3><a href="index.html">Table of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">lenstronomy.Cosmo package</a><ul>
-<li><a class="reference internal" href="#subpackages">Subpackages</a></li>
 <li><a class="reference internal" href="#submodules">Submodules</a></li>
 <li><a class="reference internal" href="#module-lenstronomy.Cosmo.background">lenstronomy.Cosmo.background module</a></li>
 <li><a class="reference internal" href="#module-lenstronomy.Cosmo.cosmo_solver">lenstronomy.Cosmo.cosmo_solver module</a></li>
@@ -726,11 +789,11 @@ c unit less</p>
 </ul>
 
   <h4>Previous topic</h4>
-  <p class="topless"><a href="lenstronomy.Analysis.html"
-                        title="previous chapter">lenstronomy.Analysis package</a></p>
+  <p class="topless"><a href="lenstronomy.Conf.html"
+                        title="previous chapter">lenstronomy.Conf package</a></p>
   <h4>Next topic</h4>
-  <p class="topless"><a href="lenstronomy.Cosmo.Sampling.html"
-                        title="next chapter">lenstronomy.Cosmo.Sampling package</a></p>
+  <p class="topless"><a href="lenstronomy.Data.html"
+                        title="next chapter">lenstronomy.Data package</a></p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
@@ -764,12 +827,12 @@ c unit less</p>
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="lenstronomy.Cosmo.Sampling.html" title="lenstronomy.Cosmo.Sampling package"
+          <a href="lenstronomy.Data.html" title="lenstronomy.Data package"
              >next</a> |</li>
         <li class="right" >
-          <a href="lenstronomy.Analysis.html" title="lenstronomy.Analysis package"
+          <a href="lenstronomy.Conf.html" title="lenstronomy.Conf package"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">lenstronomy 1.3.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="index.html">lenstronomy 1.9.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="lenstronomy.html" >lenstronomy package</a> &#187;</li> 
       </ul>
     </div>

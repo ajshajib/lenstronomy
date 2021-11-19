@@ -2,18 +2,19 @@ __author__ = 'sibirrer'
 
 import pytest
 import numpy as np
+import os
 import lenstronomy.Util.simulation_util as sim_util
 from lenstronomy.ImSim.image_model import ImageModel
 from lenstronomy.Sampling.likelihood import LikelihoodModule
 from lenstronomy.Sampling.parameters import Param
 from lenstronomy.LensModel.lens_model import LensModel
 from lenstronomy.LightModel.light_model import LightModel
-from lenstronomy.Sampling.sampler import Sampler
+from lenstronomy.Sampling.sampler import Sampler, choose_pool
 from lenstronomy.Data.imaging_data import ImageData
 from lenstronomy.Data.psf import PSF
 
 
-class TestFittingSequence(object):
+class TestSampler(object):
     """
     test the fitting sequences
     """
@@ -104,6 +105,20 @@ class TestFittingSequence(object):
         samples, dist = self.sampler.mcmc_emcee(n_walkers, n_run, n_burn, mean_start, sigma_start, mpi=False)
         assert len(samples) == n_walkers * n_run
         assert len(dist) == len(samples)
+
+        # test of backup file
+        # 1) run a chain specifiying a backup file name
+        backup_filename = 'test_mcmc_emcee.h5'
+        samples_1, dist_1 = self.sampler.mcmc_emcee(n_walkers, n_run, n_burn, mean_start, sigma_start, mpi=False,
+                                                    backup_filename=backup_filename)
+        assert len(samples_1) == n_walkers * n_run
+        # 2) run a chain starting from the backup of previous run
+        samples_2, dist_2 = self.sampler.mcmc_emcee(n_walkers, n_run, n_burn, mean_start, sigma_start, mpi=False,
+                                                    backup_filename=backup_filename, start_from_backup=True)
+        assert len(samples_2) == len(samples_1) + n_walkers * n_run
+        assert len(dist_2) == len(samples_2)
+        
+        os.remove(backup_filename)  # just remove the backup file created above
 
 
 if __name__ == '__main__':

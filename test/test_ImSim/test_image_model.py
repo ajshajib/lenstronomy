@@ -68,7 +68,7 @@ class TestImageModel(object):
         self.kwargs_ps = [{'ra_source': 0.01, 'dec_source': 0.0,
                        'source_amp': 1.}]  # quasar point source position in the source plane and intrinsic brightness
         point_source_class = PointSource(point_source_type_list=['SOURCE_POSITION'], fixed_magnification_list=[True])
-        kwargs_numerics = {'supersampling_factor': 2, 'supersampling_convolution': False, 'compute_mode': 'gaussian'}
+        kwargs_numerics = {'supersampling_factor': 2, 'supersampling_convolution': False}
         imageModel = ImageModel(data_class, psf_class, lens_model_class, source_model_class, lens_light_model_class, point_source_class, kwargs_numerics=kwargs_numerics)
         image_sim = sim_util.simulate_simple(imageModel, self.kwargs_lens, self.kwargs_source,
                                        self.kwargs_lens_light, self.kwargs_ps)
@@ -103,6 +103,13 @@ class TestImageModel(object):
         model, error_map, cov_param, param = self.imageModel.image_linear_solve(self.kwargs_lens, self.kwargs_source, self.kwargs_lens_light, self.kwargs_ps, inv_bool=False)
         chi2_reduced = self.imageModel.reduced_chi2(model, error_map)
         npt.assert_almost_equal(chi2_reduced, 1, decimal=1)
+
+    def test_linear_response_matrix(self):
+        A = self.imageModel.linear_response_matrix(self.kwargs_lens, self.kwargs_source, self.kwargs_lens_light,
+                                                   self.kwargs_ps)
+        n, m = np.shape(A)
+        assert n == 3
+        assert m == 100*100
 
     def test_image_with_params(self):
         model = self.imageModel.image(self.kwargs_lens, self.kwargs_source, self.kwargs_lens_light, self.kwargs_ps, unconvolved=False, source_add=True, lens_light_add=True, point_source_add=True)

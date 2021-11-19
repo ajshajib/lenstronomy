@@ -53,7 +53,7 @@ class TestImageLikelihood(object):
         time_delays_measured = t_days[1:] - t_days[0]
         time_delays_uncertainties = np.array([0.1, 0.1, 0.1])
         self.td_likelihood = TimeDelayLikelihood(time_delays_measured, time_delays_uncertainties, lens_model_class=lensModel, point_source_class=pointSource)
-        kwargs_cosmo = {'D_dt': lensCosmo.D_dt}
+        kwargs_cosmo = {'D_dt': lensCosmo.ddt}
         logL = self.td_likelihood.logL(kwargs_lens=kwargs_lens, kwargs_ps=kwargs_ps, kwargs_cosmo=kwargs_cosmo)
         npt.assert_almost_equal(logL, 0, decimal=8)
 
@@ -61,9 +61,28 @@ class TestImageLikelihood(object):
         time_delays_measured_new[0] += 0.1
         td_likelihood = TimeDelayLikelihood(time_delays_measured_new, time_delays_uncertainties,
                                                  lens_model_class=lensModel, point_source_class=pointSource)
-        kwargs_cosmo = {'D_dt': lensCosmo.D_dt}
+        kwargs_cosmo = {'D_dt': lensCosmo.ddt}
         logL = td_likelihood.logL(kwargs_lens=kwargs_lens, kwargs_ps=kwargs_ps, kwargs_cosmo=kwargs_cosmo)
         npt.assert_almost_equal(logL, -0.5, decimal=8)
+
+    
+        # Test a covariance matrix being used
+        time_delays_cov = np.diag([0.1, 0.1, 0.1])**2
+        td_likelihood = TimeDelayLikelihood(time_delays_measured_new, time_delays_cov,
+                                                 lens_model_class=lensModel, point_source_class=pointSource)
+        logL = td_likelihood.logL(kwargs_lens=kwargs_lens, kwargs_ps=kwargs_ps, kwargs_cosmo=kwargs_cosmo)
+        npt.assert_almost_equal(logL, -0.5, decimal=8)
+
+        # Test behaviour with a wrong number of images
+        time_delays_measured_new = time_delays_measured_new[:-1]
+        time_delays_uncertainties = time_delays_uncertainties[:-1] # remove last image
+        td_likelihood = TimeDelayLikelihood(time_delays_measured_new, time_delays_uncertainties,
+                                                 lens_model_class=lensModel, point_source_class=pointSource)
+        logL = td_likelihood.logL(kwargs_lens=kwargs_lens, kwargs_ps=kwargs_ps, kwargs_cosmo=kwargs_cosmo)
+        npt.assert_almost_equal(logL, -10**15, decimal=8)
+        
+
+
 
 
 if __name__ == '__main__':

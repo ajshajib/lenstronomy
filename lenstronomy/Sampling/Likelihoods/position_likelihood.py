@@ -1,6 +1,8 @@
 import numpy as np
 from numpy.linalg import inv
 
+__all__ = ['PositionLikelihood']
+
 
 class PositionLikelihood(object):
     """
@@ -107,7 +109,8 @@ class PositionLikelihood(object):
                     return True
         return False
 
-    def astrometric_likelihood(self, kwargs_ps, kwargs_special, sigma):
+    @staticmethod
+    def astrometric_likelihood(kwargs_ps, kwargs_special, sigma):
         """
         evaluates the astrometric uncertainty of the model plotted point sources (only available for 'LENSED_POSITION'
         point source model) and predicted image position by the lens model including an astrometric correction term.
@@ -126,7 +129,7 @@ class PositionLikelihood(object):
             dist = (delta_x ** 2 + delta_y ** 2) / sigma ** 2 / 2
             logL = -np.sum(dist)
             if np.isnan(logL) is True:
-                return -np.inf
+                return -10**15
             return logL
         else:
             return 0
@@ -149,7 +152,8 @@ class PositionLikelihood(object):
 
     def source_position_likelihood(self, kwargs_lens, kwargs_ps, sigma, hard_bound_rms=None, verbose=False):
         """
-        computes a likelihood/punishing factor of how well the source positions of multiple images match given the image position and a lens model.
+        computes a likelihood/punishing factor of how well the source positions of multiple images match given the image
+        position and a lens model.
         The likelihood level is computed in respect of a displacement in the image plane and transposed through the
         Hessian into the source plane.
 
@@ -165,7 +169,7 @@ class PositionLikelihood(object):
         logL = 0
         source_x, source_y = self._pointSource.source_position(kwargs_ps, kwargs_lens)
         for k in range(len(kwargs_ps)):
-            if 'ra_image' in kwargs_ps[k]:
+            if 'ra_image' in kwargs_ps[k] and self._pointSource.point_source_type_list[k] == 'LENSED_POSITION':
 
                 x_image = kwargs_ps[k]['ra_image']
                 y_image = kwargs_ps[k]['dec_image']
@@ -186,7 +190,7 @@ class PositionLikelihood(object):
                     try:
                         Sigma_inv = inv(Sigma_beta)
                     except:
-                        return -np.inf
+                        return -10**15
                     chi2 = delta.T.dot(Sigma_inv.dot(delta))
                     logL -= chi2 / 2
         return logL

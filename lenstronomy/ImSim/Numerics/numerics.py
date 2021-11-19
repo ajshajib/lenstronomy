@@ -5,6 +5,8 @@ from lenstronomy.Util import util
 from lenstronomy.Util import kernel_util
 import numpy as np
 
+__all__ = ['Numerics']
+
 
 class Numerics(PointSourceRendering):
     """
@@ -30,14 +32,17 @@ class Numerics(PointSourceRendering):
         ray-shooting). Pixels marked as False will be assigned a flux value of zero (or ignored in the adaptive
         convolution)
         :param supersampled_indexes: 2d boolean array (only used in mode='adaptive') of pixels to be supersampled (in
-        surface brightness and if supersampling_convolution=True also in convolution)
-        :param compute_indexes: 2d boolean array (only used in mode='adaptive'), marks pixel that the resonse after
+        surface brightness and if supersampling_convolution=True also in convolution). All other pixels not set to =True
+        will not be super-sampled.
+        :param compute_indexes: 2d boolean array (only used in compute_mode='adaptive'), marks pixel that the response after
         convolution is computed (all others =0). This can be set to likelihood_mask in the Likelihood module for
         consistency.
         :param point_source_supersampling_factor: super-sampling resolution of the point source placing
         :param convolution_kernel_size: int, odd number, size of convolution kernel. If None, takes size of point_source_kernel
         :param convolution_type: string, 'fft', 'grid', 'fft_static' mode of 2d convolution
         """
+        if compute_mode not in ['regular', 'adaptive']:
+            raise ValueError('compute_mode specified as %s not valid. Options are "adaptive", "regular"')
         # if no super sampling, turn the supersampling convolution off
         self._psf_type = psf.psf_type
         if not isinstance(supersampling_factor, int):
@@ -95,22 +100,35 @@ class Numerics(PointSourceRendering):
             raise ValueError('psf_type %s not valid! Chose either NONE, GAUSSIAN or PIXEL.' % self._psf_type)
         super(Numerics, self).__init__(pixel_grid=pixel_grid, supersampling_factor=point_source_supersampling_factor,
                                        psf=psf)
+        if supersampling_convolution is True:
+            self._high_res_return = True
+        else:
+            self._high_res_return = False
 
     def re_size_convolve(self, flux_array, unconvolved=False):
         """
 
         :param flux_array: 1d array, flux values corresponding to coordinates_evaluate
-        :param array_low_res_partial: regular sampled surface brightness, 1d array
+        :param unconvolved: boolean, if True, does not apply a convolution
         :return: convolved image on regular pixel grid, 2d array
         """
         # add supersampled region to lower resolution on
-        image_low_res, image_high_res_partial = self._grid.flux_array2image_low_high(flux_array)
+        image_low_res, image_high_res_partial = self._grid.flux_array2image_low_high(flux_array,
+                                                                                     high_res_return=self._high_res_return)
         if unconvolved is True or self._psf_type == 'NONE':
             image_conv = image_low_res
         else:
             # convolve low res grid and high res grid
             image_conv = self._conv.re_size_convolve(image_low_res, image_high_res_partial)
         return image_conv * self._pixel_width ** 2
+
+    @property
+    def grid_supersampling_factor(self):
+        """
+
+        :return: supersampling factor set for higher resolution sub-pixel sampling of surface brightness
+        """
+        return self._grid.supersampling_factor
 
     @property
     def coordinates_evaluate(self):
@@ -120,13 +138,14 @@ class Numerics(PointSourceRendering):
         """
         return self._grid.coordinates_evaluate
 
-    def _supersampling_cut_kernel(self, kernel_super, convolution_kernel_size, supersampling_factor):
+    @staticmethod
+    def _supersampling_cut_kernel(kernel_super, convolution_kernel_size, supersampling_factor):
         """
 
-        :param kernel_super: supersampled kernel
+        :param kernel_super: super-sampled kernel
         :param convolution_kernel_size: size of convolution kernel in units of regular pixels (odd)
         :param supersampling_factor: super-sampling factor of convolution kernel
-        :return: cut out kernel in supersampling size
+        :return: cut out kernel in super-sampling size
         """
         if convolution_kernel_size is not None:
             size = convolution_kernel_size * supersampling_factor
@@ -136,3 +155,19 @@ class Numerics(PointSourceRendering):
             return kernel_cut
         else:
             return kernel_super
+
+    @property
+    def convolution_class(self):
+        """
+
+        :return: convolution class (can be SubgridKernelConvolution, PixelKernelConvolution, MultiGaussianConvolution, ...)
+        """
+        return self._conv
+
+    @property
+    def grid_class(self):
+        """
+
+        :return: grid class (can be RegularGrid, AdaptiveGrid)
+        """
+        return self._grid

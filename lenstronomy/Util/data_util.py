@@ -1,6 +1,10 @@
 import numpy as np
 
+from lenstronomy.Util.package_util import exporter
+export, __all__ = exporter()
 
+
+@export
 def bkg_noise(readout_noise, exposure_time, sky_brightness, pixel_scale, num_exposures=1):
     """
     computes the expected Gaussian background noise of a pixel in units of counts/second
@@ -13,12 +17,14 @@ def bkg_noise(readout_noise, exposure_time, sky_brightness, pixel_scale, num_exp
     :return: estimated Gaussian noise sqrt(variance)
     """
     exposure_time_tot = num_exposures * exposure_time
-    readout_noise_tot = num_exposures * readout_noise ** 2
+    readout_noise_tot = num_exposures * readout_noise ** 2  # square of readout noise
     sky_per_pixel = sky_brightness * pixel_scale ** 2
-    sigma_bkg = np.sqrt(readout_noise_tot + exposure_time_tot * sky_per_pixel ** 2) / exposure_time_tot
+    sky_brightness_tot = exposure_time_tot * sky_per_pixel
+    sigma_bkg = np.sqrt(readout_noise_tot + sky_brightness_tot) / exposure_time_tot
     return sigma_bkg
 
 
+@export
 def flux_noise(cps_pixel, exposure_time):
     """
     computes the variance of the shot noise Gaussian approximation of Poisson noise term
@@ -30,6 +36,7 @@ def flux_noise(cps_pixel, exposure_time):
     return cps_pixel / np.sqrt(exposure_time)
 
 
+@export
 def magnitude2cps(magnitude, magnitude_zero_point):
     """
     converts an apparent magnitude to counts per second
@@ -39,15 +46,16 @@ def magnitude2cps(magnitude, magnitude_zero_point):
     length EXPTIME is therefore:
     m = -2.5 x log10(DN / EXPTIME) + ZEROPOINT
 
-    :param magnitude:
-    :param magnitude_zero_point:
-    :return: counts per second
+    :param magnitude: astronomical magnitude
+    :param magnitude_zero_point: magnitude zero point (astronomical magnitude with 1 count per second)
+    :return: counts per second of astronomical object
     """
     delta_M = magnitude - magnitude_zero_point
     counts = 10**(-delta_M/2.5)
     return counts
 
 
+@export
 def cps2magnitude(cps, magnitude_zero_point):
     """
 
@@ -60,18 +68,20 @@ def cps2magnitude(cps, magnitude_zero_point):
     return magnitude
 
 
+@export
 def absolute2apparent_magnitude(absolute_magnitude, d_parsec):
     """
     converts absolute to apparent magnitudes
 
     :param absolute_magnitude: absolute magnitude of object
-    :param d_parsec: distance to object in untis parsec
+    :param d_parsec: distance to object in units parsec
     :return: apparent magnitude
     """
     m_apparent = 5.8 * (np.log10(d_parsec) - 1) + absolute_magnitude
     return m_apparent
 
 
+@export
 def adu2electrons(adu, ccd_gain):
     """
     converts analog-to-digital units into electron counts
@@ -82,6 +92,7 @@ def adu2electrons(adu, ccd_gain):
     return adu * ccd_gain
 
 
+@export
 def electrons2adu(electrons, ccd_gain):
     """
     converts electron counts into analog-to-digital unit

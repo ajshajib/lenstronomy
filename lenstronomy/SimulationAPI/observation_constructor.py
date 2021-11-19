@@ -1,9 +1,10 @@
-from lenstronomy.SimulationAPI.observation_api import SingleBand
 import lenstronomy.Util.util as util
 
 
 instrument_name_list = ['LSST']
 observation_name_list = ['LSST_g_band', 'LSST_r_band', 'LSST_i_band']
+
+__all__ = ['observation_constructor']
 
 
 def observation_constructor(instrument_name, observation_name):
@@ -17,7 +18,7 @@ def observation_constructor(instrument_name, observation_name):
     if instrument_name == 'LSST':
         kwargs_instrument = LSST_camera
     else:
-        raise ValueError("instrument name %s not supported! Chose among  %s " % (instrument_name, instrument_name_list))
+        raise ValueError("instrument name %s not supported! Choose among  %s " % (instrument_name, instrument_name_list))
 
     if observation_name == 'LSST_g_band':
         kwargs_observation = LSST_g_band_obs
@@ -26,7 +27,7 @@ def observation_constructor(instrument_name, observation_name):
     elif observation_name == 'LSST_i_band':
         kwargs_observation = LSST_i_band_obs
     else:
-        raise ValueError('observation name %s not supported! Chose among %s' %
+        raise ValueError('observation name %s not supported! Choose among %s' %
                          (observation_name, observation_name_list))
     kwargs_data = util.merge_dicts(kwargs_instrument, kwargs_observation)
     return kwargs_data

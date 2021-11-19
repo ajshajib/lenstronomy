@@ -1,23 +1,40 @@
 __author__ = 'sibirrer'
 
-#this file contains a class which describes the surface brightness of the light models
+# this file contains a class which describes the surface brightness of the light models
 
 import numpy as np
 from lenstronomy.Util.util import convert_bool_list
+from lenstronomy.Conf import config_loader
+convention_conf = config_loader.conventions_conf()
+sersic_major_axis_conf = convention_conf.get('sersic_major_axis', False)
+
+__all__ = ['LightModelBase']
+
+
+_MODELS_SUPPORTED = ['GAUSSIAN', 'GAUSSIAN_ELLIPSE', 'ELLIPSOID', 'MULTI_GAUSSIAN', 'MULTI_GAUSSIAN_ELLIPSE',
+                     'SERSIC', 'SERSIC_ELLIPSE', 'CORE_SERSIC', 'SHAPELETS', 'SHAPELETS_POLAR', 'SHAPELETS_POLAR_EXP',
+                     'HERNQUIST', 'HERNQUIST_ELLIPSE', 'PJAFFE', 'PJAFFE_ELLIPSE', 'UNIFORM', 'POWER_LAW', 'NIE',
+                     'CHAMELEON', 'DOUBLE_CHAMELEON', 'TRIPLE_CHAMELEON', 'INTERPOL', 'SLIT_STARLETS',
+                     'SLIT_STARLETS_GEN2']
 
 
 class LightModelBase(object):
     """
     class to handle source and lens light models
     """
-    def __init__(self, light_model_list, smoothing=0.0000001):
+    def __init__(self, light_model_list, smoothing=0.001, sersic_major_axis=None):
         """
 
         :param light_model_list: list of light models
         :param smoothing: smoothing factor for certain models (deprecated)
+        :param sersic_major_axis: boolean or None, if True, uses the semi-major axis as the definition of the Sersic
+         half-light radius, if False, uses the product average of semi-major and semi-minor axis. If None, uses the
+         convention in the lenstronomy yaml setting (which by default is =False)
         """
         self.profile_type_list = light_model_list
         self.func_list = []
+        if sersic_major_axis is None:
+            sersic_major_axis = sersic_major_axis_conf
         for profile_type in light_model_list:
             if profile_type == 'GAUSSIAN':
                 from lenstronomy.LightModel.Profiles.gaussian import Gaussian
@@ -39,10 +56,10 @@ class LightModelBase(object):
                 self.func_list.append(Sersic(smoothing=smoothing))
             elif profile_type == 'SERSIC_ELLIPSE':
                 from lenstronomy.LightModel.Profiles.sersic import SersicElliptic
-                self.func_list.append(SersicElliptic(smoothing=smoothing))
+                self.func_list.append(SersicElliptic(smoothing=smoothing, sersic_major_axis=sersic_major_axis))
             elif profile_type == 'CORE_SERSIC':
                 from lenstronomy.LightModel.Profiles.sersic import CoreSersic
-                self.func_list.append(CoreSersic(smoothing=smoothing))
+                self.func_list.append(CoreSersic(smoothing=smoothing, sersic_major_axis=sersic_major_axis))
             elif profile_type == 'SHAPELETS':
                 from lenstronomy.LightModel.Profiles.shapelets import ShapeletSet
                 self.func_list.append(ShapeletSet())
@@ -85,8 +102,14 @@ class LightModelBase(object):
             elif profile_type == 'INTERPOL':
                 from lenstronomy.LightModel.Profiles.interpolation import Interpol
                 self.func_list.append(Interpol())
+            elif profile_type == 'SLIT_STARLETS':
+                from lenstronomy.LightModel.Profiles.starlets import SLIT_Starlets
+                self.func_list.append(SLIT_Starlets(fast_inverse=True, second_gen=False))
+            elif profile_type == 'SLIT_STARLETS_GEN2':
+                from lenstronomy.LightModel.Profiles.starlets import SLIT_Starlets
+                self.func_list.append(SLIT_Starlets(second_gen=True))
             else:
-                raise ValueError('Warning! No light model of type', profile_type, ' found!')
+                raise ValueError('No light model of type %s found! Supported are the following models: %s' % (profile_type, _MODELS_SUPPORTED))
         self._num_func = len(self.func_list)
 
     def surface_brightness(self, x, y, kwargs_list, k=None):
@@ -118,9 +141,10 @@ class LightModelBase(object):
         for i, func in enumerate(self.func_list):
             if bool_list[i] is True:
                 kwargs = {k: v for k, v in kwargs_list_standard[i].items() if not k in ['center_x', 'center_y']}
-                if self.profile_type_list[i] in ['HERNQUIST', 'HERNQUIST_ELLIPSE', 'PJAFFE', 'PJAFFE_ELLIPSE',
-                                                     'GAUSSIAN', 'GAUSSIAN_ELLIPSE', 'MULTI_GAUSSIAN',
-                                                     'MULTI_GAUSSIAN_ELLIPSE', 'POWER_LAW']:
+                if self.profile_type_list[i] in ['DOUBLE_CHAMELEON', 'CHAMELEON', 'HERNQUIST', 'HERNQUIST_ELLIPSE',
+                                                 'PJAFFE', 'PJAFFE_ELLIPSE', 'GAUSSIAN', 'GAUSSIAN_ELLIPSE',
+                                                 'MULTI_GAUSSIAN', 'MULTI_GAUSSIAN_ELLIPSE', 'NIE', 'POWER_LAW',
+                                                 'TRIPLE_CHAMELEON']:
                     flux += func.light_3d(r, **kwargs)
                 else:
                     raise ValueError('Light model %s does not support a 3d light distribution!'
@@ -130,7 +154,8 @@ class LightModelBase(object):
     def total_flux(self, kwargs_list, norm=False, k=None):
         """
         Computes the total flux of each individual light profile. This allows to estimate the total flux as
-        well as lenstronomy amp to magnitude conversions. Not all models are supported
+        well as lenstronomy amp to magnitude conversions. Not all models are supported.
+        The units are linked to the data to be modelled with associated noise properties (default is count/s).
 
         :param kwargs_list: list of keyword arguments corresponding to the light profiles. The 'amp' parameter can be missing.
         :param norm: bool, if True, computes the flux for amp=1
@@ -163,7 +188,7 @@ class LightModelBase(object):
     def delete_interpol_caches(self):
         """Call the delete_cache method of INTERPOL profiles"""
         for i, model in enumerate(self.profile_type_list):
-            if model == 'INTERPOL':
+            if model in ['INTERPOL', 'SLIT_STARLETS', 'SLIT_STARLETS_GEN2']:
                 self.func_list[i].delete_cache()
 
     def _transform_kwargs(self, kwargs_list):

@@ -1,6 +1,8 @@
 from lenstronomy.LightModel.light_model import LightModel
 import numpy as np
 
+__all__ = ['DifferentialExtinction']
+
 
 class DifferentialExtinction(object):
     """
@@ -21,6 +23,13 @@ class DifferentialExtinction(object):
             self._compute_bool = True
         self._tau0_index = tau0_index
 
+    @property
+    def compute_bool(self):
+        """
+        :return: True when a differential extinction is set, False otherwise 
+        """
+        return self._compute_bool
+
     def extinction(self, x, y, kwargs_extinction=None, kwargs_special=None):
         """
 
@@ -28,6 +37,7 @@ class DifferentialExtinction(object):
         :param y: coordinate in image plane of flux intensity
         :param tau_0: normalization factor of the extinction profile
         :param kwargs_extinction: keyword argument list matching the extinction profile
+        :param kwargs_special: keyword arguments hosting special parameters, here required 'tau0_list'
         :return: extinction corrected flux
         """
         if self._compute_bool is False or kwargs_extinction is None:

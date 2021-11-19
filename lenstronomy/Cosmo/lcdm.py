@@ -3,6 +3,8 @@ __author__ = 'sibirrer'
 from astropy.cosmology import FlatLambdaCDM, LambdaCDM
 from lenstronomy.Cosmo.lens_cosmo import LensCosmo
 
+__all__ = ['LCDM']
+
 
 class LCDM(object):
     """
@@ -43,7 +45,7 @@ class LCDM(object):
         :return: float [Mpc]
         """
         lensCosmo = self._get_cosom(H_0, Om0, Ode0)
-        return lensCosmo.D_d
+        return lensCosmo.dd
 
     def D_s(self, H_0, Om0, Ode0=None):
         """
@@ -53,7 +55,7 @@ class LCDM(object):
         :return: float [Mpc]
         """
         lensCosmo = self._get_cosom(H_0, Om0, Ode0)
-        return lensCosmo.D_s
+        return lensCosmo.ds
 
     def D_ds(self, H_0, Om0, Ode0=None):
         """
@@ -63,7 +65,7 @@ class LCDM(object):
         :return: float [Mpc]
         """
         lensCosmo = self._get_cosom(H_0, Om0, Ode0)
-        return lensCosmo.D_ds
+        return lensCosmo.dds
 
     def D_dt(self, H_0, Om0, Ode0=None):
         """
@@ -73,4 +75,4 @@ class LCDM(object):
         :return: float [Mpc]
         """
         lensCosmo = self._get_cosom(H_0, Om0, Ode0)
-        return lensCosmo.D_dt
+        return lensCosmo.ddt

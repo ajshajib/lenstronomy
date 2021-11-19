@@ -1,26 +1,15 @@
 __author__ = 'aymgal'
 
 import numpy as np
-from scipy import special
+from scipy import stats
+
+from lenstronomy.Util.package_util import exporter
+export, __all__ = exporter()
 
 
 # transform the unit hypercube to pysical parameters for (nested) sampling
 
-
-SQRT2 = np.sqrt(2)
-
-
-def unit2gaussian(x, mu, sigma):
-    """
-    mapping from uniform distribution on unit hypercube
-    to truncated gaussian distribution on parameter space, 
-    with mean 'mu' and std dev 'sigma'
-
-    from Handley+15, eq. (A9)
-    """
-    return mu + SQRT2 * sigma * special.erfinv(2*x - 1)
-
-
+@export
 def unit2uniform(x, vmin, vmax):
     """
     mapping from uniform distribution on parameter space 
@@ -29,6 +18,7 @@ def unit2uniform(x, vmin, vmax):
     return vmin + (vmax - vmin) * x
 
 
+@export
 def uniform2unit(theta, vmin, vmax):
     """
     mapping from uniform distribution on unit hypercube
@@ -37,6 +27,7 @@ def uniform2unit(theta, vmin, vmax):
     return (theta - vmin) / (vmax - vmin)
 
 
+@export
 def cube2args_uniform(cube, lowers, uppers, num_dims, copy=False):
     """
     mapping from uniform distribution on unit hypercube 'cube'
@@ -58,7 +49,7 @@ def cube2args_uniform(cube, lowers, uppers, num_dims, copy=False):
         cube[i] = unit2uniform(val, low, upp)
     return cube
 
-
+@export
 def cube2args_gaussian(cube, lowers, uppers, means, sigmas, num_dims, copy=False):
     """
     mapping from uniform distribution on unit hypercube 'cube'
@@ -77,16 +68,12 @@ def cube2args_gaussian(cube, lowers, uppers, means, sigmas, num_dims, copy=False
     if copy:
         cube_ = cube
         cube = np.zeros_like(cube_)
-    for i in range(num_dims):
-        val = cube_[i] if copy else cube[i]
-        val = unit2gaussian(val, means[i], sigmas[i])
-        low, upp = lowers[i], uppers[i]
-        if val <= low: cube[i] = low
-        elif val >= upp: cube[i] = upp
-        else: cube[i] = val
+    a, b = (np.array(lowers)-means)/sigmas, (np.array(uppers)-means)/sigmas
+    cube[:] = stats.truncnorm.ppf(cube_ if copy else cube, a=a, b=b, loc=means, scale=sigmas)
     return cube
 
 
+@export
 def scale_limits(lowers, uppers, scale):
     if not isinstance(lowers, np.ndarray):
         lowers = np.asarray(lowers)
@@ -98,16 +85,44 @@ def scale_limits(lowers, uppers, scale):
     return lowers_scaled, uppers_scaled
 
 
-def sample_ball(p0, std, size=1):
+@export
+def sample_ball(p0, std, size=1, dist='uniform'):
     """
     Produce a ball of walkers around an initial parameter value.
     this routine is from the emcee package as it became deprecated there
 
-    :param p0: The initial parameter value.
-    :param std: The axis-aligned standard deviation.
+    :param p0: The initial parameter values (array).
+    :param std: The axis-aligned standard deviation (array).
     :param size: The number of samples to produce.
+    :param dist: string, specifies the distribution being sampled, supports 'uniform' and 'normal'
 
     """
     assert(len(p0) == len(std))
-    return np.vstack([p0 + std * np.random.uniform(low=-1, high=1, size=len(p0))
-                      for i in range(size)])
+    if dist == 'uniform':
+        return np.vstack([p0 + std * np.random.uniform(low=-1, high=1, size=len(p0))
+                         for i in range(size)])
+    elif dist == 'normal':
+        return np.vstack([p0 + std * np.random.normal(loc=0, scale=1, size=len(p0))
+                          for i in range(size)])
+    else:
+        raise ValueError('distribution %s not supported. Chose among "uniform" or "normal".' % dist)
+
+
+@export
+def sample_ball_truncated(mean, sigma, lower_limit, upper_limit, size):
+    """
+    samples gaussian ball with truncation at lower and upper limit of the distribution
+
+    :param mean: numpy array, mean of the distribution to be sampled
+    :param sigma: numpy array, sigma of the distribution to be sampled
+    :param lower_limit: numpy array, lower bound of to be sampled distribution
+    :param upper_limit: numpy array, upper bound of to be sampled distribution
+    :param size: number of tuples to be sampled
+    :return: realization of truncated normal distribution with shape (size, dim(parameters))
+    """
+    a, b = (lower_limit- mean) / sigma, (upper_limit - mean) / sigma
+
+    r = stats.truncnorm.rvs(a, b, size=len(a))
+    print(r, 'test')
+    draws = np.vstack([mean + sigma * stats.truncnorm.rvs(a, b, size=len(a)) for i in range(size)])
+    return draws

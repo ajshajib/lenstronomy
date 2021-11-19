@@ -1,5 +1,7 @@
 from lenstronomy.LensModel.Profiles.base_profile import LensProfileBase
 
+__all__ = ['Flexion']
+
 
 class Flexion(LensProfileBase):
     """
@@ -28,4 +30,4 @@ class Flexion(LensProfileBase):
         f_xx = g1*x_ + g2*y_
         f_yy = g3*x_ + g4*y_
         f_xy = g2*x_ + g3*y_
-        return f_xx, f_yy, f_xy
+        return f_xx, f_xy, f_xy, f_yy

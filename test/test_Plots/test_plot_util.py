@@ -2,7 +2,7 @@ import numpy as np
 import numpy.testing as npt
 import pytest
 import matplotlib.pyplot as plt
-
+from lenstronomy.Data.coord_transforms import Coordinates
 
 import lenstronomy.Plots.plot_util as plot_util
 
@@ -42,6 +42,57 @@ class TestPlotUtil(object):
 
         f, ax = plt.subplots(1, 1, figsize=(4, 4))
         plot_util.source_position_plot(ax, coords_source, ra_source, dec_source)
+        plt.close()
+
+    def test_result_string(self):
+        x = np.random.normal(loc=1, scale=0.1, size=10000)
+        string =plot_util.result_string(x, weights=None, title_fmt=".2f", label='test')
+        print(string)
+        assert string == str('test = ${1.00}_{-0.10}^{+0.10}$')
+
+    def test_cmap_conf(self):
+        cmap = plot_util.cmap_conf(cmap_string='gist_heat')
+        cmap_update = plot_util.cmap_conf(cmap_string=cmap)
+        assert cmap is cmap_update
+
+    def test_plot_line_set(self):
+
+        coords = Coordinates(transform_pix2angle=[[1, 0], [0, 1]], ra_at_xy_0=0, dec_at_xy_0=0)
+        line_set_x = np.linspace(start=0, stop=1, num=10)
+        line_set_y = np.linspace(start=0, stop=1, num=10)
+        f, ax = plt.subplots(1, 1, figsize=(4, 4))
+        ax = plot_util.plot_line_set(ax, coords, line_set_x, line_set_y, origin=None, color='g', flipped_x=True)
+        plt.close()
+
+        f, ax = plt.subplots(1, 1, figsize=(4, 4))
+        ax = plot_util.plot_line_set(ax, coords, line_set_x, line_set_y, origin=[1, 1], color='g',
+                                     flipped_x=False)
+        plt.close()
+
+        # and here we input a list of arrays
+
+        line_set_list_x = [np.linspace(start=0, stop=1, num=10), np.linspace(start=0, stop=1, num=10)]
+        line_set_list_y = [np.linspace(start=0, stop=1, num=10), np.linspace(start=0, stop=1, num=10)]
+        f, ax = plt.subplots(1, 1, figsize=(4, 4))
+        ax = plot_util.plot_line_set(ax, coords, line_set_list_x, line_set_list_y, origin=None, color='g',
+                                     flipped_x=True)
+        plt.close()
+
+        f, ax = plt.subplots(1, 1, figsize=(4, 4))
+        ax = plot_util.plot_line_set(ax, coords, line_set_list_x, line_set_list_y, origin=[1, 1], color='g',
+                                          flipped_x=False)
+        plt.close()
+
+    def test_image_position_plot(self):
+        coords = Coordinates(transform_pix2angle=[[1, 0], [0, 1]], ra_at_xy_0=0, dec_at_xy_0=0)
+        f, ax = plt.subplots(1, 1, figsize=(4, 4))
+
+        ra_image, dec_image = np.array([1, 2]), np.array([1, 2])
+        ax = plot_util.image_position_plot(ax, coords, ra_image, dec_image, color='w', image_name_list=None,
+                                           origin=None, flipped_x=False)
+        plt.close()
+        ax = plot_util.image_position_plot(ax, coords, ra_image, dec_image, color='w', image_name_list=['A', 'B'],
+                                           origin=[1, 1], flipped_x=True)
         plt.close()
 
 

@@ -9,15 +9,18 @@ __author__ = 'ajshajib'
 import numpy as np
 import abc
 from scipy.special import comb
-from future.utils import with_metaclass
 
 from lenstronomy.LensModel.Profiles.gaussian_ellipse_kappa import GaussianEllipseKappa
 from lenstronomy.LensModel.Profiles.sersic_utils import SersicUtil
 from lenstronomy.LensModel.Profiles.base_profile import LensProfileBase
 
+from lenstronomy.Util.package_util import exporter
+export, __all__ = exporter()
+
 _SQRT_2PI = np.sqrt(2*np.pi)
 
 
+@export
 class GaussianEllipseKappaSet(LensProfileBase):
     """
     This class computes the lensing properties of a set of concentric
@@ -139,7 +142,7 @@ class GaussianEllipseKappaSet(LensProfileBase):
         :type center_x: ``float``
         :param center_y: y coordianate of centroid
         :type center_y: ``float``
-        :return: Hessian :math:`\partial^2f/\partial x^2`, :math:`\partial^2 f/\partial y^2`, :math:`\partial^2/\partial x\partial y` for elliptical Gaussian convergence.
+        :return: Hessian :math:`\partial^2f/\partial x^2`, :math:`\partial^2/\partial x\partial y`, :math:`\partial^2/\partial y\partial x`, :math:`\partial^2 f/\partial y^2` for elliptical Gaussian convergence.
         :rtype: tuple ``(float, float, float)`` , or ``(numpy.array, numpy.array, numpy.array)`` with each ``numpy`` array's shape equal to ``x.shape``
         """
         f_xx = np.zeros_like(x, dtype=float)
@@ -147,19 +150,13 @@ class GaussianEllipseKappaSet(LensProfileBase):
         f_xy = np.zeros_like(x, dtype=float)
 
         for i in range(len(amp)):
-            f_xx_i, f_yy_i, f_xy_i = self.gaussian_ellipse_kappa.hessian(
-                                                            x, y,
-                                                            amp=amp[i],
-                                                            sigma=sigma[i],
-                                                            e1=e1,
-                                                            e2=e2,
-                                                            center_x=center_x,
-                                                            center_y=center_y)
+            f_xx_i, f_xy_i, _, f_yy_i = self.gaussian_ellipse_kappa.hessian(x, y, amp=amp[i], sigma=sigma[i], e1=e1,
+                                                                            e2=e2, center_x=center_x, center_y=center_y)
             f_xx += f_xx_i
             f_yy += f_yy_i
             f_xy += f_xy_i
 
-        return f_xx, f_yy, f_xy
+        return f_xx, f_xy, f_xy, f_yy
 
     def density_2d(self, x, y, amp, sigma, e1, e2, center_x=0, center_y=0):
         """
@@ -199,7 +196,8 @@ class GaussianEllipseKappaSet(LensProfileBase):
         return density_2d
 
 
-class GaussDecompositionAbstract(with_metaclass(abc.ABCMeta)):
+@export
+class GaussDecompositionAbstract(metaclass=abc.ABCMeta):
     """
     This abstract class sets up a template for computing lensing properties of
     an elliptical convergence through Shajib (2019)'s Gauss decomposition.
@@ -429,6 +427,7 @@ class GaussDecompositionAbstract(with_metaclass(abc.ABCMeta)):
                                                    center_x, center_y)
 
 
+@export
 class SersicEllipseGaussDec(GaussDecompositionAbstract):
     """
     This class computes the lensing properties of an elliptical Sersic
@@ -490,19 +489,20 @@ class SersicEllipseGaussDec(GaussDecompositionAbstract):
         return kwargs['R_sersic']
 
 
-class SersicEllipseMLGGaussDec(GaussDecompositionAbstract):
+class SersicEllipseMLGradientGaussDec(GaussDecompositionAbstract):
     """
     This class computes the lensing properties of an elliptical Sersic
-    profile using the Shajib (2019)'s Gauss decomposition method.
+    profile multiplied with a M/L gradient using the Shajib (2019)'s Gauss
+    decomposition method.
     """
     param_names = ['k_eff', 'R_sersic', 'n_sersic', 'e1', 'e2', 'center_x',
-                   'center_y', 'mlg_gamma']
+                   'center_y', 'ml_gradient_exponent']
     lower_limit_default = {'k_eff': 0., 'R_sersic': 0., 'n_sersic': 0.5,
                            'e1': -0.5, 'e2': -0.5, 'center_x': -100.,
-                           'center_y': -100., 'mlg_gamma': 0.}
+                           'center_y': -100., 'ml_gradient_exponent': 0.}
     upper_limit_default = {'k_eff': 100., 'R_sersic': 100., 'n_sersic': 8.,
                            'e1': 0.5, 'e2': 0.5, 'center_x': 100.,
-                           'center_y': 100., 'mlg_gamma': 3.}
+                           'center_y': 100., 'ml_gradient_exponent': 3.}
 
     def get_kappa_1d(self, y, **kwargs):
         r"""
@@ -526,12 +526,12 @@ class SersicEllipseMLGGaussDec(GaussDecompositionAbstract):
         n_sersic = kwargs['n_sersic']
         R_sersic = kwargs['R_sersic']
         k_eff = kwargs['k_eff']
-        gamma = kwargs['mlg_gamma']
+        eta = kwargs['ml_gradient_exponent']
 
         bn = SersicUtil.b_n(n_sersic)
 
         return k_eff * np.exp(-bn * (y / R_sersic) ** (1. / n_sersic) + bn) *\
-               (1. + y / R_sersic)**(-gamma)
+               (y / R_sersic)**(-eta)
 
     def get_scale(self, **kwargs):
         """
@@ -780,6 +780,7 @@ class GaussDecompositionAbstract3D(GaussDecompositionAbstract):
         return f_sigmas * sigmas * _SQRT_2PI, sigmas
 
 
+@export
 class CTNFWGaussDec(GaussDecompositionAbstract3D):
     """
     This class computes the lensing properties of an projection from a

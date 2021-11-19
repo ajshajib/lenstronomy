@@ -7,6 +7,8 @@ import numpy as np
 from lenstronomy.GalKin.light_profile import LightProfile
 from lenstronomy.Analysis.light_profile import LightProfileAnalysis
 from lenstronomy.LightModel.light_model import LightModel
+from lenstronomy.GalKin import velocity_util
+import scipy.integrate as integrate
 
 
 class TestLightProfile(object):
@@ -20,7 +22,7 @@ class TestLightProfile(object):
         kwargs_profile = [{'amp': 1., 'Rs': 0.8}]
         r_list = lightProfile.draw_light_2d(kwargs_profile, n=500000)
         bins = np.linspace(0., 1, 20)
-        hist, bins_hist = np.histogram(r_list, bins=bins, normed=True)
+        hist, bins_hist = np.histogram(r_list, bins=bins, density=True)
         light2d = lightProfile.light_2d(R=(bins_hist[1:] + bins_hist[:-1])/2., kwargs_list=kwargs_profile)
         light2d *= (bins_hist[1:] + bins_hist[:-1]) / 2.
         light2d /= np.sum(light2d)
@@ -32,11 +34,11 @@ class TestLightProfile(object):
 
     def test_draw_light_2d_linear(self):
         np.random.seed(41)
-        lightProfile = LightProfile(profile_list=['HERNQUIST'])
+        lightProfile = LightProfile(profile_list=['HERNQUIST'], interpol_grid_num=1000, max_interpolate=10, min_interpolate=0.01)
         kwargs_profile = [{'amp': 1., 'Rs': 0.8}]
         r_list = lightProfile.draw_light_2d_linear(kwargs_profile, n=100000)
         bins = np.linspace(0., 1, 20)
-        hist, bins_hist = np.histogram(r_list, bins=bins, normed=True)
+        hist, bins_hist = np.histogram(r_list, bins=bins, density=True)
         light2d = lightProfile.light_2d(R=(bins_hist[1:] + bins_hist[:-1])/2., kwargs_list=kwargs_profile)
         light2d_upper = lightProfile.light_2d(R=bins_hist[1:], kwargs_list=kwargs_profile) * bins_hist[1:]
         light2d_lower = lightProfile.light_2d(R=bins_hist[:-1], kwargs_list=kwargs_profile) * bins_hist[:-1]
@@ -55,7 +57,7 @@ class TestLightProfile(object):
         kwargs_profile = [{'amp': 1., 'Rs': 0.5, 'Ra': 0.2}]
         r_list = lightProfile.draw_light_2d(kwargs_profile, n=100000)
         bins = np.linspace(0, 2, 10)
-        hist, bins_hist = np.histogram(r_list, bins=bins, normed=True)
+        hist, bins_hist = np.histogram(r_list, bins=bins, density=True)
         light2d = lightProfile.light_2d(R=(bins_hist[1:] + bins_hist[:-1])/2., kwargs_list=kwargs_profile)
         light2d *= (bins_hist[1:] + bins_hist[:-1]) / 2.
         light2d /= np.sum(light2d)
@@ -67,13 +69,112 @@ class TestLightProfile(object):
         kwargs_profile = [{'amp': 1., 'Rs': 0.04, 'Ra': 0.02}]
         r_list = lightProfile.draw_light_2d(kwargs_profile, n=100000)
         bins = np.linspace(0., 0.1, 10)
-        hist, bins_hist = np.histogram(r_list, bins=bins, normed=True)
+        hist, bins_hist = np.histogram(r_list, bins=bins, density=True)
         light2d = lightProfile.light_2d(R=(bins_hist[1:] + bins_hist[:-1])/2., kwargs_list=kwargs_profile)
         light2d *= (bins_hist[1:] + bins_hist[:-1]) / 2.
         light2d /= np.sum(light2d)
         hist /= np.sum(hist)
         print(light2d / hist)
         npt.assert_almost_equal(light2d[5] / hist[5], 1, decimal=1)
+        assert hasattr(lightProfile, '_kwargs_light_circularized')
+        lightProfile.delete_cache()
+        if hasattr(lightProfile, '_kwargs_light_circularized'):
+            assert False
+
+    def test_draw_light_3d_hernquist(self):
+        lightProfile = LightProfile(profile_list=['HERNQUIST'], min_interpolate=0.0001, max_interpolate=1000.)
+        kwargs_profile = [{'amp': 1., 'Rs': 0.5}]
+        r_list = lightProfile.draw_light_3d(kwargs_profile, n=1000000, new_compute=False)
+        print(r_list, 'r_list')
+        # project it
+
+        # test with draw light 2d profile routine
+        # compare with 3d analytical solution vs histogram binned
+        bins = np.linspace(0.0, 10, 20)
+        hist, bins_hist = np.histogram(r_list, bins=bins, density=True)
+        bins_plot = (bins_hist[1:] + bins_hist[:-1]) / 2.
+        light3d = lightProfile.light_3d(r=bins_plot, kwargs_list=kwargs_profile)
+        light3d *= bins_plot ** 2
+        light3d /= np.sum(light3d)
+        hist /= np.sum(hist)
+        #import matplotlib.pyplot as plt
+        #plt.plot(bins_plot , light3d/light3d[5], label='3d reference Hernquist')
+        #plt.plot(bins_plot, hist / hist[5], label='hist')
+        #plt.legend()
+        #plt.show()
+        print(light3d / hist)
+        #npt.assert_almost_equal(light3d / hist, 1, decimal=1)
+
+        # compare with 2d analytical solution vs histogram binned
+        #bins = np.linspace(0.1, 1, 10)
+        R, x, y = velocity_util.project2d_random(np.array(r_list))
+        hist_2d, bins_hist = np.histogram(R, bins=bins, density=True)
+        hist_2d /= np.sum(hist_2d)
+        bins_plot = (bins_hist[1:] + bins_hist[:-1]) / 2.
+        light2d = lightProfile.light_2d(R=bins_plot, kwargs_list=kwargs_profile)
+        light2d *= bins_plot ** 1
+        light2d /= np.sum(light2d)
+
+        light2d_finite = lightProfile.light_2d_finite(R=bins_plot, kwargs_list=kwargs_profile)
+        light2d_finite *= bins_plot ** 1
+        light2d_finite /= np.sum(light2d_finite)
+        hist /= np.sum(hist)
+        #import matplotlib.pyplot as plt
+        #plt.plot(bins_plot, light2d/light2d[5], '--', label='2d reference Hernquist')
+        #plt.plot(bins_plot, light2d_finite / light2d_finite[5], '-.', label='2d reference Hernquist finite')
+        #plt.plot(bins_plot, hist_2d / hist_2d[5], label='hist')
+        #plt.legend()
+        #plt.show()
+        print(light2d / hist_2d)
+
+        #plt.plot(R, r_list, '.', label='test')
+        #plt.legend()
+        #plt.xlim([0, 0.2])
+        #plt.ylim([0, 0.2])
+        #plt.show()
+
+        npt.assert_almost_equal(light2d / hist_2d, 1, decimal=1)
+
+    def test_draw_light_3d_power_law(self):
+        lightProfile = LightProfile(profile_list=['POWER_LAW'], min_interpolate=0.0001, max_interpolate=1000.)
+        kwargs_profile = [{'amp': 1., 'gamma': 2, 'e1': 0, 'e2': 0}]
+        r_list = lightProfile.draw_light_3d(kwargs_profile, n=1000000, new_compute=False)
+        print(r_list, 'r_list')
+        # project it
+        R, x, y = velocity_util.project2d_random(r_list)
+        # test with draw light 2d profile routine
+
+        # compare with 3d analytical solution vs histogram binned
+        bins = np.linspace(0.1, 10, 10)
+        hist, bins_hist = np.histogram(r_list, bins=bins, density=True)
+        bins_plot = (bins_hist[1:] + bins_hist[:-1]) / 2.
+        light3d = lightProfile.light_3d(r=bins_plot, kwargs_list=kwargs_profile)
+        light3d *= bins_plot ** 2
+        light3d /= np.sum(light3d)
+        hist /= np.sum(hist)
+        #import matplotlib.pyplot as plt
+        #plt.plot(bins_plot , light3d/light3d[5], label='3d reference power-law')
+        #plt.plot(bins_plot, hist / hist[5], label='hist')
+        #plt.legend()
+        #plt.show()
+        print(light3d / hist)
+        npt.assert_almost_equal(light3d / hist, 1, decimal=1)
+
+        # compare with 2d analytical solution vs histogram binned
+        #bins = np.linspace(0.1, 1, 10)
+        hist, bins_hist = np.histogram(R, bins=bins, density=True)
+        bins_plot = (bins_hist[1:] + bins_hist[:-1]) / 2.
+        light2d = lightProfile.light_2d_finite(R=bins_plot, kwargs_list=kwargs_profile)
+        light2d *= bins_plot ** 1
+        light2d /= np.sum(light2d)
+        hist /= np.sum(hist)
+        #import matplotlib.pyplot as plt
+        #plt.plot(bins_plot , light2d/light2d[5], label='2d reference power-law')
+        #plt.plot(bins_plot, hist / hist[5], label='hist')
+        #plt.legend()
+        #plt.show()
+        print(light2d / hist)
+        npt.assert_almost_equal(light2d / hist, 1, decimal=1)
 
     def test_ellipticity_in_profiles(self):
         np.random.seed(41)
@@ -110,6 +211,37 @@ class TestLightProfile(object):
         light_3d_exact = lightProfile.light_3d(r, kwargs_profile)
         for i in range(len(r)):
             npt.assert_almost_equal(light_3d[i]/light_3d_exact[i], 1, decimal=3)
+
+    def test_light_2d_finite(self):
+        interpol_grid_num = 5000
+        max_interpolate = 10
+        min_interpolate = 0.0001
+        lightProfile = LightProfile(profile_list=['HERNQUIST'], interpol_grid_num=interpol_grid_num,
+                                    max_interpolate=max_interpolate, min_interpolate=min_interpolate)
+        kwargs_profile = [{'amp': 1., 'Rs': 1.}]
+
+        # check whether projected light integral is the same as analytic expression
+        R = 1.
+
+        I_R = lightProfile.light_2d_finite(R, kwargs_profile)
+        out = integrate.quad(lambda x: lightProfile.light_3d(np.sqrt(R ** 2 + x ** 2), kwargs_profile),
+                             min_interpolate, np.sqrt(max_interpolate ** 2 - R ** 2))
+        l_R_quad = out[0] * 2
+
+        npt.assert_almost_equal(l_R_quad / I_R, 1, decimal=2)
+
+        l_R = lightProfile.light_2d(R, kwargs_profile)
+        npt.assert_almost_equal(l_R / I_R, 1, decimal=2)
+
+    def test_del_cache(self):
+        lightProfile = LightProfile(profile_list=['HERNQUIST'])
+        lightProfile._light_cdf = 1
+        lightProfile._light_cdf_log = 2
+        lightProfile._f_light_3d = 3
+        lightProfile.delete_cache()
+        assert hasattr(lightProfile, '_light_cdf') is False
+        assert hasattr(lightProfile, '_light_cdf_log') is False
+        assert hasattr(lightProfile, '_f_light_3d') is False
 
 
 if __name__ == '__main__':

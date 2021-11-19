@@ -5,6 +5,8 @@ from lenstronomy.Util import constants as const
 from lenstronomy.Cosmo.lens_cosmo import LensCosmo
 from lenstronomy.LensModel.lens_model import LensModel
 
+__all__ = ['LightCone', 'MassSlice']
+
 
 class LightCone(object):
     """
@@ -35,17 +37,20 @@ class LightCone(object):
         self._grid_spacing_list = grid_spacing_list
         self._redshift_list = redshift_list
 
-    def cone_instance(self, z_source, cosmo, multi_plane=True):
+    def cone_instance(self, z_source, cosmo, multi_plane=True, kwargs_interp=None):
         """
 
         :param z_source: redshift to where lensing quantities are computed
         :param cosmo: astropy.cosmology class
         :param multi_plane: boolean, if True, computes multi-plane ray-tracing
+        :param kwargs_interp: interpolation keyword arguments specifying the numerics.
+         See description in the Interpolate() class. Only applicable for 'INTERPOL' and 'INTERPOL_SCALED' models.
         :return: LensModel instance, keyword argument list of lens model
         """
         lens_model = LensModel(lens_model_list=['INTERPOL'] * len(self._mass_map_list),
                                lens_redshift_list=self._redshift_list, multi_plane=multi_plane,
-                               z_source_convention=z_source, cosmo=cosmo, z_source=z_source)
+                               z_source_convention=z_source, cosmo=cosmo, z_source=z_source,
+                               kwargs_interp=kwargs_interp)
         kwargs_lens = []
         for mass_slice in self._mass_slice_list:
             kwargs_lens.append(mass_slice.interpol_instance(z_source, cosmo))
@@ -86,14 +91,13 @@ class MassSlice(object):
          potential
         """
         lens_cosmo = LensCosmo(z_lens=self._redshift, z_source=z_source, cosmo=cosmo)
-        mpc2arcsec = lens_cosmo.D_d * const.arcsec
+        mpc2arcsec = lens_cosmo.dd * const.arcsec
         grid_arcsec = self._grid_spacing / mpc2arcsec
         x_axes = self._x_axes_mpc / mpc2arcsec  # units of arc seconds in grid spacing
         y_axes = self._y_axes_mpc / mpc2arcsec  # units of arc seconds in grid spacing
 
-        f_ = self._f_mass / lens_cosmo.epsilon_crit_angle / self._grid_spacing ** 2
-        f_x = self._f_x_mass / lens_cosmo.epsilon_crit_angle / self._grid_spacing ** 2 * mpc2arcsec
-        f_y = self._f_y_mass / lens_cosmo.epsilon_crit_angle / self._grid_spacing ** 2 * mpc2arcsec
+        f_ = self._f_mass / lens_cosmo.sigma_crit_angle / self._grid_spacing ** 2
+        f_x = self._f_x_mass / lens_cosmo.sigma_crit_angle / self._grid_spacing ** 2 * mpc2arcsec
+        f_y = self._f_y_mass / lens_cosmo.sigma_crit_angle / self._grid_spacing ** 2 * mpc2arcsec
         kwargs_interp = {'grid_interp_x': x_axes, 'grid_interp_y': y_axes, 'f_': f_, 'f_x': f_x, 'f_y': f_y}
-        print(lens_cosmo.epsilon_crit_angle, lens_cosmo.epsilon_crit, grid_arcsec, self._grid_spacing)
         return kwargs_interp

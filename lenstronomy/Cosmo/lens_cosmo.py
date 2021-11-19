@@ -1,11 +1,13 @@
 __author__ = 'sibirrer'
 
-#this file contains a class to convert units
+# this file contains a class to convert lensing and physical units
 
 import numpy as np
 import lenstronomy.Util.constants as const
 from lenstronomy.Cosmo.background import Background
 from lenstronomy.Cosmo.nfw_param import NFWParam
+
+__all__ = ['LensCosmo']
 
 
 class LensCosmo(object):
@@ -23,7 +25,7 @@ class LensCosmo(object):
         self.z_lens = z_lens
         self.z_source = z_source
         self.background = Background(cosmo=cosmo)
-        self.nfw_param = NFWParam()
+        self.nfw_param = NFWParam(cosmo=cosmo)
 
     def a_z(self, z):
         """
@@ -38,62 +40,63 @@ class LensCosmo(object):
         return self.background.cosmo.H(0).value / 100.
 
     @property
-    def D_d(self):
+    def dd(self):
         """
 
         :return: angular diameter distance to the deflector [Mpc]
         """
-        return self.background.D_xy(0, self.z_lens)
+        return self.background.d_xy(0, self.z_lens)
 
     @property
-    def D_s(self):
+    def ds(self):
         """
 
         :return: angular diameter distance to the source [Mpc]
         """
-        return self.background.D_xy(0, self.z_source)
+        return self.background.d_xy(0, self.z_source)
 
     @property
-    def D_ds(self):
+    def dds(self):
         """
 
         :return: angular diameter distance from deflector to source [Mpc]
         """
-        return self.background.D_xy(self.z_lens, self.z_source)
+        return self.background.d_xy(self.z_lens, self.z_source)
 
     @property
-    def D_dt(self):
+    def ddt(self):
         """
 
         :return: time delay distance [Mpc]
         """
-        return (1 + self.z_lens) * self.D_d * self.D_s / self.D_ds
+        return (1 + self.z_lens) * self.dd * self.ds / self.dds
 
     @property
-    def epsilon_crit(self):
+    def sigma_crit(self):
         """
-        returns the critical projected mass density in units of M_sun/Mpc^2 (physical units)
-        :return: critical projected mass density
+        returns the critical projected lensing mass density in units of M_sun/Mpc^2
+        :return: critical projected lensing mass density
         """
-        if not hasattr(self, '_Epsilon_Crit'):
-            const_SI = const.c ** 2 / (4 * np.pi * const.G)  #c^2/(4*pi*G) in units of [kg/m]
+        if not hasattr(self, '_sigma_crit_mpc'):
+            const_SI = const.c ** 2 / (4 * np.pi * const.G)  # c^2/(4*pi*G) in units of [kg/m]
             conversion = const.Mpc / const.M_sun  # converts [kg/m] to [M_sun/Mpc]
-            factor = const_SI*conversion   #c^2/(4*pi*G) in units of [M_sun/Mpc]
-            self._Epsilon_Crit = self.D_s/(self.D_d*self.D_ds) * factor #[M_sun/Mpc^2]
-        return self._Epsilon_Crit
+            factor = const_SI*conversion  # c^2/(4*pi*G) in units of [M_sun/Mpc]
+            self._sigma_crit_mpc = self.ds / (self.dd * self.dds) * factor  # [M_sun/Mpc^2]
+        return self._sigma_crit_mpc
 
     @property
-    def epsilon_crit_angle(self):
+    def sigma_crit_angle(self):
         """
-        returns the critical projected mass density in units of M_sun/arcsec^2 (in physical solar mass units)
+        returns the critical surface density in units of M_sun/arcsec^2 (in physical solar mass units)
+        when provided a physical mass per physical Mpc^2
         :return: critical projected mass density
         """
-        if not hasattr(self, '_Epsilon_Crit_arcsec'):
+        if not hasattr(self, '_sigma_crit_arcsec'):
             const_SI = const.c ** 2 / (4 * np.pi * const.G)  # c^2/(4*pi*G) in units of [kg/m]
             conversion = const.Mpc / const.M_sun  # converts [kg/m] to [M_sun/Mpc]
             factor = const_SI * conversion  # c^2/(4*pi*G) in units of [M_sun/Mpc]
-            self._Epsilon_Crit_arcsec = self.D_s / (self.D_d * self.D_ds) * factor * (self.D_d * const.arcsec)**2  # [M_sun/arcsec^2]
-        return self._Epsilon_Crit_arcsec
+            self._sigma_crit_arcsec = self.ds / (self.dd * self.dds) * factor * (self.dd * const.arcsec) ** 2  # [M_sun/arcsec^2]
+        return self._sigma_crit_arcsec
 
     def phys2arcsec_lens(self, phys):
         """
@@ -101,7 +104,7 @@ class LensCosmo(object):
         :param phys: physical distance [Mpc]
         :return: angular diameter [arcsec]
         """
-        return phys / self.D_d / const.arcsec
+        return phys / self.dd / const.arcsec
 
     def arcsec2phys_lens(self, arcsec):
         """
@@ -109,7 +112,7 @@ class LensCosmo(object):
         :param arcsec: angular size at lens plane [arcsec]
         :return: physical size at lens plane [Mpc]
         """
-        return arcsec * const.arcsec * self.D_d
+        return arcsec * const.arcsec * self.dd
 
     def arcsec2phys_source(self, arcsec):
         """
@@ -117,7 +120,7 @@ class LensCosmo(object):
         :param arcsec: angular size at source plane [arcsec]
         :return: physical size at source plane [Mpc]
         """
-        return arcsec * const.arcsec * self.D_s
+        return arcsec * const.arcsec * self.ds
 
     def kappa2proj_mass(self, kappa):
         """
@@ -125,7 +128,7 @@ class LensCosmo(object):
         :param kappa: lensing convergence
         :return: projected mass [M_sun/Mpc^2]
         """
-        return kappa * self.epsilon_crit
+        return kappa * self.sigma_crit
 
     def mass_in_theta_E(self, theta_E):
         """
@@ -133,7 +136,7 @@ class LensCosmo(object):
         :param theta_E: Einstein radius [arcsec]
         :return: mass within Einstein radius [M_sun]
         """
-        mass = self.arcsec2phys_lens(theta_E) ** 2 * np.pi * self.epsilon_crit
+        mass = self.arcsec2phys_lens(theta_E) ** 2 * np.pi * self.sigma_crit
         return mass
 
     def mass_in_coin(self, theta_E):
@@ -153,7 +156,7 @@ class LensCosmo(object):
         :param kappa_ext: unit-less external shear not accounted for in the Fermat potential
         :return: time delay in days
         """
-        D_dt = self.D_dt * (1. - kappa_ext) * const.Mpc  # eqn 7 in Suyu et al.
+        D_dt = self.ddt * (1. - kappa_ext) * const.Mpc  # eqn 7 in Suyu et al.
         return D_dt / const.c * fermat_pot / const.day_s * const.arcsec ** 2  # * self.arcsec2phys_lens(1.)**2
 
     def time_delay2fermat_pot(self, dt):
@@ -162,7 +165,7 @@ class LensCosmo(object):
         :param dt: time delay in units of days
         :return: Fermat potential in units arcsec**2 for a given cosmology
         """
-        D_dt = self.D_dt * const.Mpc
+        D_dt = self.ddt * const.Mpc
         return dt * const.c * const.day_s / D_dt / const.arcsec ** 2
 
     def nfw_angle2physical(self, Rs_angle, alpha_Rs):
@@ -170,52 +173,53 @@ class LensCosmo(object):
         converts the angular parameters into the physical ones for an NFW profile
 
         :param alpha_Rs: observed bending angle at the scale radius in units of arcsec
-        :param Rs: scale radius in units of arcsec
-        :return: M200, r200, Rs_physical, c
+        :param Rs_angle: scale radius in units of arcsec
+        :return: rho0 [Msun/Mpc^3], Rs [Mpc], c, r200 [Mpc], M200 [Msun]
         """
-        Rs = Rs_angle * const.arcsec * self.D_d
-        theta_scaled = alpha_Rs * self.epsilon_crit * self.D_d * const.arcsec
+        Rs = Rs_angle * const.arcsec * self.dd
+        theta_scaled = alpha_Rs * self.sigma_crit * self.dd * const.arcsec
         rho0 = theta_scaled / (4 * Rs ** 2 * (1 + np.log(1. / 2.)))
-        rho0_com = rho0 / self.h**2 * self.a_z(self.z_lens)**3
-        c = self.nfw_param.c_rho0(rho0_com)
+        rho0_com = rho0 / self.h**2
+        c = self.nfw_param.c_rho0(rho0_com, self.z_lens)
         r200 = c * Rs
-        M200 = self.nfw_param.M_r200(r200 * self.h / self.a_z(self.z_lens)) / self.h
+        M200 = self.nfw_param.M_r200(r200 * self.h, self.z_lens) / self.h
         return rho0, Rs, c, r200, M200
 
     def nfw_physical2angle(self, M, c):
         """
         converts the physical mass and concentration parameter of an NFW profile into the lensing quantities
 
-        :param M: mass enclosed 200 rho_crit in units of M_sun
+        :param M: mass enclosed 200 rho_crit in units of M_sun (physical units, meaning no little h)
         :param c: NFW concentration parameter (r200/r_s)
-        :return: alpha_Rs (observed bending angle at the scale radius, Rs_angle (angle at scale radius) (in units of arcsec)
+        :return: Rs_angle (angle at scale radius) (in units of arcsec), alpha_Rs (observed bending angle at the scale radius
         """
         rho0, Rs, r200 = self.nfwParam_physical(M, c)
-        Rs_angle = Rs / self.D_d / const.arcsec  # Rs in arcsec
+        Rs_angle = Rs / self.dd / const.arcsec  # Rs in arcsec
         alpha_Rs = rho0 * (4 * Rs ** 2 * (1 + np.log(1. / 2.)))
-        return Rs_angle,  alpha_Rs / self.epsilon_crit / self.D_d / const.arcsec
+        return Rs_angle, alpha_Rs / self.sigma_crit / self.dd / const.arcsec
 
     def nfwParam_physical(self, M, c):
         """
         returns the NFW parameters in physical units
+
         :param M: physical mass in M_sun
         :param c: concentration
-        :return:
+        :return: rho0 [Msun/Mpc^3], Rs [Mpc], r200 [Mpc]
         """
-        r200 = self.nfw_param.r200_M(M * self.h) / self.h * self.a_z(self.z_lens)  # physical radius r200
-        rho0 = self.nfw_param.rho0_c(c) * self.h**2 / self.a_z(self.z_lens)**3 # physical density in M_sun/Mpc**3
+        r200 = self.nfw_param.r200_M(M * self.h, self.z_lens) / self.h  # physical radius r200
+        rho0 = self.nfw_param.rho0_c(c, self.z_lens) * self.h**2  # physical density in M_sun/Mpc**3
         Rs = r200/c
         return rho0, Rs, r200
 
-    def nfw_M_theta_vir(self, M):
+    def nfw_M_theta_r200(self, M):
         """
-        returns virial radius in angular units of arc seconds on the sky
+        returns r200 radius in angular units of arc seconds on the sky
 
         :param M: physical mass in M_sun
-        :return: angle (in arc seconds) of the virial radius
+        :return: angle (in arc seconds) of the r200 radius
         """
-        r200 = self.nfw_param.r200_M(M * self.h) / self.h * self.a_z(self.z_lens)  # physical radius r200
-        theta_r200 = r200 / self.D_d / const.arcsec
+        r200 = self.nfw_param.r200_M(M * self.h, self.z_lens) / self.h  # physical radius r200
+        theta_r200 = r200 / self.dd / const.arcsec
         return theta_r200
 
     def sis_theta_E2sigma_v(self, theta_E):
@@ -224,7 +228,7 @@ class LensCosmo(object):
         :param theta_E: Einstein radius (in arcsec)
         :return: velocity dispersion in units (km/s)
         """
-        v_sigma_c2 = theta_E * const.arcsec / (4*np.pi) * self.D_s / self.D_ds
+        v_sigma_c2 = theta_E * const.arcsec / (4*np.pi) * self.ds / self.dds
         return np.sqrt(v_sigma_c2)*const.c / 1000
 
     def sis_sigma_v2theta_E(self, v_sigma):
@@ -233,5 +237,41 @@ class LensCosmo(object):
         :param v_sigma: velocity dispersion (km/s)
         :return: theta_E (arcsec)
         """
-        theta_E = 4 * np.pi * (v_sigma * 1000./const.c)**2 * self.D_ds / self.D_s / const.arcsec
+        theta_E = 4 * np.pi * (v_sigma * 1000./const.c) ** 2 * self.dds / self.ds / const.arcsec
         return theta_E
+
+    def uldm_angular2phys(self, kappa_0, theta_c):
+        """
+        converts the anguar parameters entering the LensModel Uldm() (Ultra Light
+        Dark Matter) class in physical masses, i.e. the total soliton mass and the
+        mass of the particle
+        :param kappa_0: central convergence of profile
+        :param theta_c: core radius (in arcseconds)
+        :return: m_eV_log10, M_sol_log10, the log10 of the masses, m in eV and M in M_sun
+        """
+        D_Lens = self.dd * 10**6 # in parsec
+        Sigma_c = self.sigma_crit * 10**(-12) # in M_sun / parsec^2
+        r_c = theta_c * const.arcsec * D_Lens
+        rho0 = 2048 * np.sqrt(0.091) * kappa_0 * Sigma_c / (429 * np.pi * r_c)
+        m_log10 = -22 + 0.5*np.log10(190 / rho0 * (r_c / 100)**(-4))
+        M_log10 = 9 + np.log10(160 * 1.4 / r_c) - 2 * (m_log10 + 22)
+        return m_log10, M_log10
+
+    def uldm_mphys2angular(self, m_log10, M_log10):
+        """
+        converts physical ULDM mass in the ones, in angular units, that enter
+        the LensModel Uldm() class
+        :param m_log10: exponent of ULDM mass in eV
+        :param M_log10: exponent of soliton mass in M_sun
+        :return: kappa_0, theta_c, the central convergence and core radius (in arcseconds)
+        """
+        D_Lens = self.dd * 10**6 # in parsec
+        Sigma_c = self.sigma_crit * 10**(-12) # in M_sun/parsec^2
+        m22 = 10**(m_log10 + 22)
+        M9 = 10**(M_log10 -9)
+        r_c = 160 * 1.4 * m22**(-2) * M9**(-1) # core radius in parsec
+        rho0 = 190 * m22**(-2) * (r_c / 100)**(-4) # central density in M_sun/parsec^3
+        kappa_0 = 429 * np.pi * rho0 * r_c / (2048 * np.sqrt(0.091) * Sigma_c)
+        theta_c = r_c / D_Lens / const.arcsec
+        return kappa_0, theta_c
+

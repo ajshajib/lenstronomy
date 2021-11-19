@@ -42,8 +42,8 @@ docs:
 	rm -f docs/lenstronomy.rst
 	rm -f docs/modules.rst
 	sphinx-apidoc -o docs/ lenstronomy
-	$(MAKE) -C docs clean
-	$(MAKE) -C docs html
+	MAKE -C docs clean
+	MAKE -C docs html
 	open docs/_build/html/index.html
 
 sdist: clean
@@ -52,6 +52,6 @@ sdist: clean
 	ls -l dist
 
 pypi-upload:
-    python setup.py sdist
-    twine upload --repository-url https://test.pypi.org/legacy/ dist/*
-    twine upload dist/*
+	python setup.py sdist
+	twine upload --repository-url https://test.pypi.org/legacy/ dist/*
+	twine upload dist/*

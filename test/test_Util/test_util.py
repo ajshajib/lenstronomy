@@ -60,15 +60,31 @@ def test_map_coord2pix():
 def test_make_grid():
     numPix = 11
     deltapix = 1.
+
     grid = util.make_grid(numPix, deltapix)
     assert grid[0][0] == -5
-    assert np.sum(grid[0]) == 0
+    assert np.sum(grid[0]) == 0.
+
     x_grid, y_grid = util.make_grid(numPix, deltapix, subgrid_res=2.)
-    print(np.sum(x_grid))
-    assert np.sum(x_grid) == 0
+    assert np.sum(x_grid) == 0.
     assert x_grid[0] == -5.25
 
     x_grid, y_grid = util.make_grid(numPix, deltapix, subgrid_res=1, left_lower=True)
+    assert x_grid[0] == 0.
+    assert y_grid[0] == 0.
+
+    # Similar tests for a non-rectangular grid
+
+    x_grid, y_grid = util.make_grid((numPix, numPix - 1), deltapix)
+    assert x_grid[0] == -5.
+    assert y_grid[0] == -4.5
+    assert np.sum(x_grid) == np.sum(y_grid) == 0
+
+    x_grid, y_grid = util.make_grid(numPix, deltapix, subgrid_res=2.)
+    assert np.sum(x_grid) == np.sum(y_grid) == 0
+    assert x_grid[0] == -5.25
+
+    x_grid, y_grid = util.make_grid(numPix, deltapix, left_lower=True)
     assert x_grid[0] == 0
     assert y_grid[0] == 0
 
@@ -139,7 +155,6 @@ def test_grid_with_coords():
     assert ra_at_xy_0 == 0
     assert dec_at_xy_0 == 0
 
-
 def test_array2image():
     array = np.linspace(1, 100, 100)
     image = util.array2image(array)
@@ -161,6 +176,31 @@ def test_image2array2image():
     array = util.image2array(image)
     image_new = util.array2image(array, nx, ny)
     assert image_new[1, 2] == image[1, 2]
+
+
+def test_array2cube():
+    array = np.linspace(1, 200, 200)
+    image = util.array2cube(array, 2, 100)
+    assert image[0][9][9] == 100
+    assert image[1][0][9] == 110
+
+
+def test_cube2array():
+    sube = np.zeros((2, 10, 10))
+    sube[1, 2, 2] = 1
+    array = util.cube2array(sube)
+    assert array[122] == 1
+
+
+def test_cube2array2cube():
+    cube = np.zeros((2, 10, 10))
+    ns, nx, ny = np.shape(cube)
+    assert nx == ny  # condition required
+    nxy = nx*ny
+    cube[1, 2, 2] = 1
+    array = util.cube2array(cube)
+    cube_new = util.array2cube(array, ns, nxy)
+    assert cube_new[1, 2, 2] == cube[1, 2, 2]
 
 
 def test_get_axes():
@@ -292,6 +332,7 @@ def test_make_subgrid():
     x_grid, y_grid = util.make_grid(numPix, deltapix, subgrid_res=1)
     x_sub_grid, y_sub_grid = util.make_subgrid(x_grid, y_grid, subgrid_res=2)
     assert np.sum(x_grid) == 0
+    assert len(x_grid) == 101*101
     assert x_sub_grid[0] == -50.25
     assert y_sub_grid[17] == -50.25
 
@@ -308,9 +349,13 @@ def test_fwhm2sigma():
 def test_points_on_circle():
     radius = 1
     points = 8
-    ra, dec = util.points_on_circle(radius, points)
+    ra, dec = util.points_on_circle(radius, points, connect_ends=True)
     assert ra[0] == 1
     assert dec[0] == 0
+
+    ra_, dec_ = util.points_on_circle(radius, points-1, connect_ends=False)
+    npt.assert_almost_equal(ra[:-1], ra_, decimal=8)
+    npt.assert_almost_equal(dec[:-1], dec_, decimal=8)
 
 
 def test_convert_bool_list():
@@ -340,12 +385,23 @@ def test_convert_bool_list():
     assert bool_list[0] is False
 
 
+def test_area():
+    r = 1
+    x_, y_ = util.points_on_circle(radius=r, connect_ends=True, num_points=1000)
+    vs = np.dstack([x_, y_])[0]
+    a = util.area(vs)
+    npt.assert_almost_equal(a, np.pi * r**2, decimal=3)
+
+
 class TestRaise(unittest.TestCase):
 
     def test_raise(self):
         with self.assertRaises(ValueError):
             array = np.ones(5)
             util.array2image(array)
+        with self.assertRaises(ValueError):
+            array = np.ones((2, 2))
+            util.array2cube(array, 2, 2)
         with self.assertRaises(ValueError):
             x, y = np.ones(6), np.ones(6)
             util.get_axes(x, y)
@@ -359,6 +415,12 @@ class TestRaise(unittest.TestCase):
             util.convert_bool_list(n=3, k=[True, True])
         with self.assertRaises(ValueError):
             util.convert_bool_list(n=2, k=[0.1, True])
+
+    def test_raise_make_grid(self):
+        with self.assertRaises(ValueError):
+            util.make_grid(numPix=1.1, deltapix=1)
+        with self.assertRaises(ValueError):
+            util.make_grid(numPix=[1.1, 1], deltapix=1)
 
 
 if __name__ == '__main__':

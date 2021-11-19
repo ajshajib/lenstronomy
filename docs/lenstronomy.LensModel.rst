@@ -7,8 +7,9 @@ Subpackages
 .. toctree::
 
     lenstronomy.LensModel.LightConeSim
-    lenstronomy.LensModel.Optimizer
+    lenstronomy.LensModel.MultiPlane
     lenstronomy.LensModel.Profiles
+    lenstronomy.LensModel.QuadOptimizer
     lenstronomy.LensModel.Solver
 
 Submodules
@@ -42,22 +43,6 @@ lenstronomy.LensModel.lens\_param module
 ----------------------------------------
 
 .. automodule:: lenstronomy.LensModel.lens_param
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-lenstronomy.LensModel.multi\_plane module
------------------------------------------
-
-.. automodule:: lenstronomy.LensModel.multi_plane
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-lenstronomy.LensModel.multi\_plane\_base module
------------------------------------------------
-
-.. automodule:: lenstronomy.LensModel.multi_plane_base
     :members:
     :undoc-members:
     :show-inheritance:

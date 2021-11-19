@@ -1,6 +1,8 @@
 import copy
 from lenstronomy.Sampling.parameters import Param
 
+__all__ = ['UpdateManager']
+
 
 class UpdateManager(object):
     """
@@ -12,10 +14,20 @@ class UpdateManager(object):
     def __init__(self, kwargs_model, kwargs_constraints, kwargs_likelihood, kwargs_params):
         """
 
-        :param kwargs_model:
-        :param kwargs_constraints:
-        :param kwargs_likelihood:
-        :param kwargs_params:
+        :param kwargs_model: keyword arguments to describe all model components used in
+         class_creator.create_class_instances()
+        :param kwargs_constraints: keyword arguments of the Param() class to handle parameter constraints during the
+         sampling (except upper and lower limits and sampling input mean and width)
+        :param kwargs_likelihood: keyword arguments of the Likelihood() class to handle parameters and settings of the
+         likelihood
+        :param kwargs_params: setting of the sampling bounds and initial guess mean and spread.
+         The argument is organized as:
+         'lens_model': [kwargs_init, kwargs_sigma, kwargs_fixed, kwargs_lower, kwargs_upper]
+         'source_model': [kwargs_init, kwargs_sigma, kwargs_fixed, kwargs_lower, kwargs_upper]
+         'lens_light_model': [kwargs_init, kwargs_sigma, kwargs_fixed, kwargs_lower, kwargs_upper]
+         'point_source_model': [kwargs_init, kwargs_sigma, kwargs_fixed, kwargs_lower, kwargs_upper]
+         'extinction_model': [kwargs_init, kwargs_sigma, kwargs_fixed, kwargs_lower, kwargs_upper]
+         'special': [kwargs_init, kwargs_sigma, kwargs_fixed, kwargs_lower, kwargs_upper]
 
         """
         self.kwargs_model = kwargs_model
@@ -55,16 +67,24 @@ class UpdateManager(object):
 
         self._kwargs_temp = self.init_kwargs
 
-    #TODO check compatibility with number of point sources provided as well as other parameter labelings
+    # TODO: check compatibility with number of point sources provided as well as other parameter labelings
 
     @property
     def init_kwargs(self):
+        """
+
+        :return: keyword arguments for all model components of the initial mean model proposition in the sampling
+        """
         return {'kwargs_lens': self._lens_init, 'kwargs_source': self._source_init,
                 'kwargs_lens_light': self._lens_light_init, 'kwargs_ps': self._ps_init,
                 'kwargs_special': self._special_init, 'kwargs_extinction': self._extinction_init}
 
     @property
     def sigma_kwargs(self):
+        """
+
+        :return: keyword arguments for all model components of the initial 1-sigma width proposition in the sampling
+        """
         return {'kwargs_lens': self._lens_sigma, 'kwargs_source': self._source_sigma,
                 'kwargs_lens_light': self._lens_light_sigma, 'kwargs_ps': self._ps_sigma,
                 'kwargs_special': self._special_sigma, 'kwargs_extinction': self._extinction_sigma}
@@ -98,6 +118,14 @@ class UpdateManager(object):
         return self._kwargs_temp
 
     def best_fit(self, bijective=False):
+        """
+        best fit (max likelihood) position for all the model parameters
+
+        :param bijective: boolean, if True, returns the parameters in the argument of the sampling that might deviate
+         from the convention of the ImSim module. For example, if parameterized in the image position, the parameters
+         remain in the image plane rather than being mapped to the source plane.
+        :return: kwargs_result with all the keyword arguments of the best fit for the model components
+        """
         lens_temp, source_temp, lens_light_temp, ps_temp, special_temp, extinction_temp = self._kwargs_temp['kwargs_lens'], \
                                                                          self._kwargs_temp['kwargs_source'], \
                                                                          self._kwargs_temp['kwargs_lens_light'], \
@@ -113,22 +141,47 @@ class UpdateManager(object):
     def update_param_state(self, kwargs_lens=None, kwargs_source=None, kwargs_lens_light=None, kwargs_ps=None,
                            kwargs_special=None, kwargs_extinction=None):
         """
-        updates the temporary state of the parameters being saved
+        updates the temporary state of the parameters being saved. ATTENTION: Any previous knowledge gets lost if you
+        call this function
 
         :param kwargs_lens:
         :param kwargs_source:
         :param kwargs_lens_light:
         :param kwargs_ps:
         :param kwargs_special:
+        :param kwargs_extinction:
         :return:
         """
         self._kwargs_temp = {'kwargs_lens': kwargs_lens, 'kwargs_source': kwargs_source,
                              'kwargs_lens_light': kwargs_lens_light, 'kwargs_ps': kwargs_ps,
                              'kwargs_special': kwargs_special, 'kwargs_extinction': kwargs_extinction}
 
+    def update_param_value(self, lens=[], source=[], lens_light=[], ps=[]):
+        """
+        Set a model parameter to a specific value.
+
+        :param lens: [[i_model, ['param1', 'param2',...], [...]]
+        :param source: [[i_model, ['param1', 'param2',...], [...]]
+        :param lens_light: [[i_model, ['param1', 'param2',...], [...]]
+        :param ps: [[i_model, ['param1', 'param2',...], [...]]
+        :return: 0, the value of the param is overwritten
+        """
+        for items, kwargs_key in zip([lens, source, lens_light, ps],
+            ['kwargs_lens', 'kwargs_source', 'kwargs_lens_light', 'kwargs_ps']):
+            for item in items:
+                index = item[0]
+                keys = item[1]
+                values = item[2]
+
+                for key, value in zip(keys, values):
+                    self._kwargs_temp[kwargs_key][index][key] = value
+
     @property
     def param_class(self):
         """
+        creating instance of lenstronomy Param() class. It uses the keyword arguments in self.kwargs_constraints as
+        __init__() arguments, as well as self.kwargs_model, and the set of kwargs_fixed___, kwargs_lower___,
+        kwargs_upper___ arguments for lens, lens_light, source, point source, extinction and special parameters.
 
         :return: instance of the Param class with the recent options and bounds
         """
@@ -152,32 +205,42 @@ class UpdateManager(object):
         updates the options by overwriting the kwargs with the new ones being added/changed
         WARNING: some updates may not be valid depending on the model options. Use carefully!
 
-        :param kwargs_model:
+        :param kwargs_model: keyword arguments to describe all model components used in
+         class_creator.create_class_instances() that are updated from previous arguments
         :param kwargs_constraints:
         :param kwargs_likelihood:
-        :return:
+        :return: kwargs_model, kwargs_constraints, kwargs_likelihood
         """
         kwargs_model_updated = self.kwargs_model.update(kwargs_model)
         kwargs_constraints_updated = self.kwargs_constraints.update(kwargs_constraints)
         kwargs_likelihood_updated = self.kwargs_likelihood.update(kwargs_likelihood)
         return kwargs_model_updated, kwargs_constraints_updated, kwargs_likelihood_updated
 
-    def update_limits(self, change_source_lower_limit=None, change_source_upper_limit=None):
+    def update_limits(self, change_source_lower_limit=None, change_source_upper_limit=None,
+                      change_lens_lower_limit=None, change_lens_upper_limit=None,):
         """
         updates the limits (lower and upper) of the update manager instance
 
         :param change_source_lower_limit: [[i_model, ['param_name', ...], [value1, value2, ...]]]
+        :param change_lens_lower_limit: [[i_model, ['param_name', ...], [value1, value2, ...]]]
+        :param change_source_upper_limit: [[i_model, ['param_name', ...], [value1, value2, ...]]]
+        :param change_lens_upper_limit: [[i_model, ['param_name', ...], [value1, value2, ...]]]
         :return: updates internal state of lower and upper limits accessible from outside
         """
         if not change_source_lower_limit is None:
             self._source_lower = self._update_limit(change_source_lower_limit, self._source_lower)
         if not change_source_upper_limit is None:
             self._source_upper = self._update_limit(change_source_upper_limit, self._source_upper)
+        if not change_lens_lower_limit is None:
+            self._lens_lower = self._update_limit(change_lens_lower_limit, self._lens_lower)
+        if not change_lens_upper_limit is None:
+            self._lens_upper = self._update_limit(change_lens_upper_limit, self._lens_upper)
 
-    def _update_limit(self, change_limit, kwargs_limit_previous):
+    @staticmethod
+    def _update_limit(change_limit, kwargs_limit_previous):
         """
 
-        :param change_limit: imput format of def update_limits
+        :param change_limit: input format of def update_limits
         :param kwargs_limit_previous: all limits of a model type
         :return: update limits
         """
@@ -190,22 +253,24 @@ class UpdateManager(object):
                 kwargs_limit_updated[i_model][param_name] = values[j]
         return kwargs_limit_updated
 
-    def update_fixed(self, lens_add_fixed=[],
-                     source_add_fixed=[], lens_light_add_fixed=[], ps_add_fixed=[], special_add_fixed=[], lens_remove_fixed=[],
-                     source_remove_fixed=[], lens_light_remove_fixed=[], ps_remove_fixed=[], special_remove_fixed=[]):
+    def update_fixed(self, lens_add_fixed=[], source_add_fixed=[], lens_light_add_fixed=[], ps_add_fixed=[],
+                     special_add_fixed=[], lens_remove_fixed=[], source_remove_fixed=[], lens_light_remove_fixed=[],
+                     ps_remove_fixed=[], special_remove_fixed=[]):
         """
-        adds the values of the keyword arguments that are stated in the _add_fixed to the existing fixed arguments.
+        adds or removes the values of the keyword arguments that are stated in the _add_fixed to the existing fixed
+        arguments. convention for input arguments are:
+        [[i_model, ['param_name1', 'param_name2', ...], [value1, value2, ... (optional)], [], ...]
 
-        :param kwargs_lens:
-        :param kwargs_source:
-        :param kwargs_lens_light:
-        :param kwargs_ps:
-        :param kwargs_cosmo:
-        :param lens_add_fixed:
-        :param source_add_fixed:
-        :param lens_light_add_fixed:
-        :param ps_add_fixed:
-        :param special_add_fixed:
+        :param lens_add_fixed: added fixed parameter in lens model
+        :param source_add_fixed: added fixed parameter in source model
+        :param lens_light_add_fixed: added fixed parameter in lens light model
+        :param ps_add_fixed: added fixed parameter in point source model
+        :param special_add_fixed: added fixed parameter in special model
+        :param lens_remove_fixed: remove fixed parameter in lens model
+        :param source_remove_fixed: remove fixed parameter in source model
+        :param lens_light_remove_fixed: remove fixed parameter in lens light model
+        :param ps_remove_fixed: remove fixed parameter in point source model
+        :param special_remove_fixed: remove fixed parameter in special model
         :return: updated kwargs fixed
         """
         lens_fixed = self._add_fixed(self._kwargs_temp['kwargs_lens'], self._lens_fixed, lens_add_fixed)
@@ -235,7 +300,7 @@ class UpdateManager(object):
         :param kwargs_model: model parameters
         :param kwargs_fixed: parameters that are held fixed (even before)
         :param add_fixed: additional fixed parameters [[i_model, ['param_name1', 'param_name2', ...], [value1, value2, ... (optional)], [], ...]
-        :return:
+        :return: updated kwargs_fixed
         """
         #fixed_kwargs = copy.deepcopy(kwargs_fixed)
         for i in range(len(add_fixed)):
@@ -257,7 +322,8 @@ class UpdateManager(object):
         """
 
         :param kwargs_fixed: fixed parameters (before)
-        :param remove_fixed: list of parameters to be removed from the fixed list and initialized by the valuye of kwargs_model [[i_model, ['param_name1', 'param_name2', ...]], [], ...]
+        :param remove_fixed: list of parameters to be removed from the fixed list and initialized by the valuye of
+         kwargs_model [[i_model, ['param_name1', 'param_name2', ...]], [], ...]
         :return: updated kwargs fixed parameters
         """
         for i in range(len(remove_fixed)):
@@ -274,6 +340,6 @@ class UpdateManager(object):
         constraint by the fitting of a sub-set of the images.
 
         :param image_index: index
-        :return:
+        :return: None
         """
         pass

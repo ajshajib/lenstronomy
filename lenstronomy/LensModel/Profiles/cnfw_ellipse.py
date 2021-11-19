@@ -8,6 +8,8 @@ from lenstronomy.LensModel.Profiles.cnfw import CNFW
 import lenstronomy.Util.param_util as param_util
 from lenstronomy.LensModel.Profiles.base_profile import LensProfileBase
 
+__all__ = ['CNFW_ELLIPSE']
+
 
 class CNFW_ELLIPSE(LensProfileBase):
     """
@@ -80,7 +82,7 @@ class CNFW_ELLIPSE(LensProfileBase):
         f_yy = dalpha_decdec
         f_xy = dalpha_radec
         f_yx = dalpha_decra
-        return f_xx, f_yy, f_xy
+        return f_xx, f_xy, f_yx, f_yy
 
     def mass_3d_lens(self, R, Rs, alpha_Rs, r_core, e1=0, e2=0):
         """

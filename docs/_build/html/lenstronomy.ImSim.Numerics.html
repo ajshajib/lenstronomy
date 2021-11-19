@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>lenstronomy.ImSim.Numerics package &#8212; lenstronomy 1.3.0 documentation</title>
+    <title>lenstronomy.ImSim.Numerics package &#8212; lenstronomy 1.9.1 documentation</title>
     <link rel="stylesheet" href="_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     
@@ -36,7 +36,7 @@
         <li class="right" >
           <a href="lenstronomy.ImSim.MultiBand.html" title="lenstronomy.ImSim.MultiBand package"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">lenstronomy 1.3.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="index.html">lenstronomy 1.9.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="lenstronomy.html" >lenstronomy package</a> &#187;</li>
           <li class="nav-item nav-item-2"><a href="lenstronomy.ImSim.html" accesskey="U">lenstronomy.ImSim package</a> &#187;</li> 
       </ul>
@@ -102,21 +102,64 @@ adaptive solution is 1 + 2 - 3</p>
 <div class="section" id="module-lenstronomy.ImSim.Numerics.convolution">
 <span id="lenstronomy-imsim-numerics-convolution-module"></span><h2>lenstronomy.ImSim.Numerics.convolution module<a class="headerlink" href="#module-lenstronomy.ImSim.Numerics.convolution" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
-<dt id="lenstronomy.ImSim.Numerics.convolution.FWHMGaussianConvolution">
-<em class="property">class </em><code class="descclassname">lenstronomy.ImSim.Numerics.convolution.</code><code class="descname">FWHMGaussianConvolution</code><span class="sig-paren">(</span><em>kernel</em>, <em>truncation=4</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lenstronomy/ImSim/Numerics/convolution.html#FWHMGaussianConvolution"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lenstronomy.ImSim.Numerics.convolution.FWHMGaussianConvolution" title="Permalink to this definition">¶</a></dt>
+<dt id="lenstronomy.ImSim.Numerics.convolution.PixelKernelConvolution">
+<em class="property">class </em><code class="descclassname">lenstronomy.ImSim.Numerics.convolution.</code><code class="descname">PixelKernelConvolution</code><span class="sig-paren">(</span><em>kernel</em>, <em>convolution_type='fft_static'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lenstronomy/ImSim/Numerics/convolution.html#PixelKernelConvolution"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lenstronomy.ImSim.Numerics.convolution.PixelKernelConvolution" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>uses a two-dimensional Gaussian function with same FWHM of given kernel as approximation</p>
+<p>class to compute convolutions for a given pixelized kernel (fft, grid)</p>
 <dl class="method">
-<dt id="lenstronomy.ImSim.Numerics.convolution.FWHMGaussianConvolution.convolution2d">
-<code class="descname">convolution2d</code><span class="sig-paren">(</span><em>image</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lenstronomy/ImSim/Numerics/convolution.html#FWHMGaussianConvolution.convolution2d"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lenstronomy.ImSim.Numerics.convolution.FWHMGaussianConvolution.convolution2d" title="Permalink to this definition">¶</a></dt>
-<dd><p>2d convolution</p>
+<dt id="lenstronomy.ImSim.Numerics.convolution.PixelKernelConvolution.convolution2d">
+<code class="descname">convolution2d</code><span class="sig-paren">(</span><em>image</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lenstronomy/ImSim/Numerics/convolution.html#PixelKernelConvolution.convolution2d"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lenstronomy.ImSim.Numerics.convolution.PixelKernelConvolution.convolution2d" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>image</strong> – 2d array (image) to be convolved</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">fft convolution</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="lenstronomy.ImSim.Numerics.convolution.PixelKernelConvolution.copy_transpose">
+<code class="descname">copy_transpose</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/lenstronomy/ImSim/Numerics/convolution.html#PixelKernelConvolution.copy_transpose"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lenstronomy.ImSim.Numerics.convolution.PixelKernelConvolution.copy_transpose" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">copy of the class with kernel set to the transpose of original one</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="lenstronomy.ImSim.Numerics.convolution.PixelKernelConvolution.pixel_kernel">
+<code class="descname">pixel_kernel</code><span class="sig-paren">(</span><em>num_pix=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lenstronomy/ImSim/Numerics/convolution.html#PixelKernelConvolution.pixel_kernel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lenstronomy.ImSim.Numerics.convolution.PixelKernelConvolution.pixel_kernel" title="Permalink to this definition">¶</a></dt>
+<dd><p>access pixelated kernel</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>image</strong> – 2d numpy array, image to be convolved</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>num_pix</strong> – size of returned kernel (odd number per axis). If None, return the original kernel.</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">convolved image, 2d numpy array</td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">pixel kernel centered</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="lenstronomy.ImSim.Numerics.convolution.PixelKernelConvolution.re_size_convolve">
+<code class="descname">re_size_convolve</code><span class="sig-paren">(</span><em>image_low_res</em>, <em>image_high_res=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lenstronomy/ImSim/Numerics/convolution.html#PixelKernelConvolution.re_size_convolve"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lenstronomy.ImSim.Numerics.convolution.PixelKernelConvolution.re_size_convolve" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>image_high_res</strong> – supersampled image/model to be convolved on a regular pixel grid</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">convolved and re-sized image</td>
 </tr>
 </tbody>
 </table>
@@ -125,33 +168,35 @@ adaptive solution is 1 + 2 - 3</p>
 </dd></dl>
 
 <dl class="class">
-<dt id="lenstronomy.ImSim.Numerics.convolution.MGEConvolution">
-<em class="property">class </em><code class="descclassname">lenstronomy.ImSim.Numerics.convolution.</code><code class="descname">MGEConvolution</code><span class="sig-paren">(</span><em>kernel</em>, <em>pixel_scale</em>, <em>order=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lenstronomy/ImSim/Numerics/convolution.html#MGEConvolution"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lenstronomy.ImSim.Numerics.convolution.MGEConvolution" title="Permalink to this definition">¶</a></dt>
+<dt id="lenstronomy.ImSim.Numerics.convolution.SubgridKernelConvolution">
+<em class="property">class </em><code class="descclassname">lenstronomy.ImSim.Numerics.convolution.</code><code class="descname">SubgridKernelConvolution</code><span class="sig-paren">(</span><em>kernel_supersampled</em>, <em>supersampling_factor</em>, <em>supersampling_kernel_size=None</em>, <em>convolution_type='fft_static'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lenstronomy/ImSim/Numerics/convolution.html#SubgridKernelConvolution"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lenstronomy.ImSim.Numerics.convolution.SubgridKernelConvolution" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>approximates a 2d kernel with an azimuthal Multi-Gaussian expansion</p>
+<p>class to compute the convolution on a supersampled grid with partial convolution computed on the regular grid</p>
 <dl class="method">
-<dt id="lenstronomy.ImSim.Numerics.convolution.MGEConvolution.convolution2d">
-<code class="descname">convolution2d</code><span class="sig-paren">(</span><em>image</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lenstronomy/ImSim/Numerics/convolution.html#MGEConvolution.convolution2d"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lenstronomy.ImSim.Numerics.convolution.MGEConvolution.convolution2d" title="Permalink to this definition">¶</a></dt>
+<dt id="lenstronomy.ImSim.Numerics.convolution.SubgridKernelConvolution.convolution2d">
+<code class="descname">convolution2d</code><span class="sig-paren">(</span><em>image</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lenstronomy/ImSim/Numerics/convolution.html#SubgridKernelConvolution.convolution2d"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lenstronomy.ImSim.Numerics.convolution.SubgridKernelConvolution.convolution2d" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>image</strong> – </td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>image</strong> – 2d array (high resoluton image) to be convolved and re-sized</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"></td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">convolved image</td>
 </tr>
 </tbody>
 </table>
 </dd></dl>
 
 <dl class="method">
-<dt id="lenstronomy.ImSim.Numerics.convolution.MGEConvolution.kernel_difference">
-<code class="descname">kernel_difference</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/lenstronomy/ImSim/Numerics/convolution.html#MGEConvolution.kernel_difference"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lenstronomy.ImSim.Numerics.convolution.MGEConvolution.kernel_difference" title="Permalink to this definition">¶</a></dt>
+<dt id="lenstronomy.ImSim.Numerics.convolution.SubgridKernelConvolution.re_size_convolve">
+<code class="descname">re_size_convolve</code><span class="sig-paren">(</span><em>image_low_res</em>, <em>image_high_res</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lenstronomy/ImSim/Numerics/convolution.html#SubgridKernelConvolution.re_size_convolve"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lenstronomy.ImSim.Numerics.convolution.SubgridKernelConvolution.re_size_convolve" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">difference between true kernel and MGE approximation</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>image_high_res</strong> – supersampled image/model to be convolved on a regular pixel grid</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">convolved and re-sized image</td>
 </tr>
 </tbody>
 </table>
@@ -216,35 +261,21 @@ relative to a pixelized kernel.</p>
 </dd></dl>
 
 <dl class="class">
-<dt id="lenstronomy.ImSim.Numerics.convolution.PixelKernelConvolution">
-<em class="property">class </em><code class="descclassname">lenstronomy.ImSim.Numerics.convolution.</code><code class="descname">PixelKernelConvolution</code><span class="sig-paren">(</span><em>kernel</em>, <em>convolution_type='fft_static'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lenstronomy/ImSim/Numerics/convolution.html#PixelKernelConvolution"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lenstronomy.ImSim.Numerics.convolution.PixelKernelConvolution" title="Permalink to this definition">¶</a></dt>
+<dt id="lenstronomy.ImSim.Numerics.convolution.FWHMGaussianConvolution">
+<em class="property">class </em><code class="descclassname">lenstronomy.ImSim.Numerics.convolution.</code><code class="descname">FWHMGaussianConvolution</code><span class="sig-paren">(</span><em>kernel</em>, <em>truncation=4</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lenstronomy/ImSim/Numerics/convolution.html#FWHMGaussianConvolution"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lenstronomy.ImSim.Numerics.convolution.FWHMGaussianConvolution" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>class to compute convolutions for a given pixelized kernel (fft, grid)</p>
+<p>uses a two-dimensional Gaussian function with same FWHM of given kernel as approximation</p>
 <dl class="method">
-<dt id="lenstronomy.ImSim.Numerics.convolution.PixelKernelConvolution.convolution2d">
-<code class="descname">convolution2d</code><span class="sig-paren">(</span><em>image</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lenstronomy/ImSim/Numerics/convolution.html#PixelKernelConvolution.convolution2d"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lenstronomy.ImSim.Numerics.convolution.PixelKernelConvolution.convolution2d" title="Permalink to this definition">¶</a></dt>
-<dd><table class="docutils field-list" frame="void" rules="none">
+<dt id="lenstronomy.ImSim.Numerics.convolution.FWHMGaussianConvolution.convolution2d">
+<code class="descname">convolution2d</code><span class="sig-paren">(</span><em>image</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lenstronomy/ImSim/Numerics/convolution.html#FWHMGaussianConvolution.convolution2d"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lenstronomy.ImSim.Numerics.convolution.FWHMGaussianConvolution.convolution2d" title="Permalink to this definition">¶</a></dt>
+<dd><p>2d convolution</p>
+<table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>image</strong> – 2d array (image) to be convolved</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>image</strong> – 2d numpy array, image to be convolved</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">fft convolution</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="lenstronomy.ImSim.Numerics.convolution.PixelKernelConvolution.re_size_convolve">
-<code class="descname">re_size_convolve</code><span class="sig-paren">(</span><em>image_low_res</em>, <em>image_high_res=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lenstronomy/ImSim/Numerics/convolution.html#PixelKernelConvolution.re_size_convolve"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lenstronomy.ImSim.Numerics.convolution.PixelKernelConvolution.re_size_convolve" title="Permalink to this definition">¶</a></dt>
-<dd><table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>image_high_res</strong> – supersampled image/model to be convolved on a regular pixel grid</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">convolved and re-sized image</td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">convolved image, 2d numpy array</td>
 </tr>
 </tbody>
 </table>
@@ -253,35 +284,33 @@ relative to a pixelized kernel.</p>
 </dd></dl>
 
 <dl class="class">
-<dt id="lenstronomy.ImSim.Numerics.convolution.SubgridKernelConvolution">
-<em class="property">class </em><code class="descclassname">lenstronomy.ImSim.Numerics.convolution.</code><code class="descname">SubgridKernelConvolution</code><span class="sig-paren">(</span><em>kernel_supersampled</em>, <em>supersampling_factor</em>, <em>supersampling_kernel_size=None</em>, <em>convolution_type='fft_static'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lenstronomy/ImSim/Numerics/convolution.html#SubgridKernelConvolution"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lenstronomy.ImSim.Numerics.convolution.SubgridKernelConvolution" title="Permalink to this definition">¶</a></dt>
+<dt id="lenstronomy.ImSim.Numerics.convolution.MGEConvolution">
+<em class="property">class </em><code class="descclassname">lenstronomy.ImSim.Numerics.convolution.</code><code class="descname">MGEConvolution</code><span class="sig-paren">(</span><em>kernel</em>, <em>pixel_scale</em>, <em>order=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lenstronomy/ImSim/Numerics/convolution.html#MGEConvolution"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lenstronomy.ImSim.Numerics.convolution.MGEConvolution" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>class to compute the convolution on a supersampled grid with partial convolution computed on the regular grid</p>
+<p>approximates a 2d kernel with an azimuthal Multi-Gaussian expansion</p>
 <dl class="method">
-<dt id="lenstronomy.ImSim.Numerics.convolution.SubgridKernelConvolution.convolution2d">
-<code class="descname">convolution2d</code><span class="sig-paren">(</span><em>image</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lenstronomy/ImSim/Numerics/convolution.html#SubgridKernelConvolution.convolution2d"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lenstronomy.ImSim.Numerics.convolution.SubgridKernelConvolution.convolution2d" title="Permalink to this definition">¶</a></dt>
+<dt id="lenstronomy.ImSim.Numerics.convolution.MGEConvolution.convolution2d">
+<code class="descname">convolution2d</code><span class="sig-paren">(</span><em>image</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lenstronomy/ImSim/Numerics/convolution.html#MGEConvolution.convolution2d"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lenstronomy.ImSim.Numerics.convolution.MGEConvolution.convolution2d" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>image</strong> – 2d array (high resoluton image) to be convolved and re-sized</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>image</strong> – </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">convolved image</td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"></td>
 </tr>
 </tbody>
 </table>
 </dd></dl>
 
 <dl class="method">
-<dt id="lenstronomy.ImSim.Numerics.convolution.SubgridKernelConvolution.re_size_convolve">
-<code class="descname">re_size_convolve</code><span class="sig-paren">(</span><em>image_low_res</em>, <em>image_high_res</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lenstronomy/ImSim/Numerics/convolution.html#SubgridKernelConvolution.re_size_convolve"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lenstronomy.ImSim.Numerics.convolution.SubgridKernelConvolution.re_size_convolve" title="Permalink to this definition">¶</a></dt>
+<dt id="lenstronomy.ImSim.Numerics.convolution.MGEConvolution.kernel_difference">
+<code class="descname">kernel_difference</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/lenstronomy/ImSim/Numerics/convolution.html#MGEConvolution.kernel_difference"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lenstronomy.ImSim.Numerics.convolution.MGEConvolution.kernel_difference" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>image_high_res</strong> – supersampled image/model to be convolved on a regular pixel grid</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">convolved and re-sized image</td>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">difference between true kernel and MGE approximation</td>
 </tr>
 </tbody>
 </table>
@@ -312,14 +341,20 @@ relative to a pixelized kernel.</p>
 
 <dl class="method">
 <dt id="lenstronomy.ImSim.Numerics.grid.AdaptiveGrid.flux_array2image_low_high">
-<code class="descname">flux_array2image_low_high</code><span class="sig-paren">(</span><em>flux_array</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lenstronomy/ImSim/Numerics/grid.html#AdaptiveGrid.flux_array2image_low_high"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lenstronomy.ImSim.Numerics.grid.AdaptiveGrid.flux_array2image_low_high" title="Permalink to this definition">¶</a></dt>
+<code class="descname">flux_array2image_low_high</code><span class="sig-paren">(</span><em>flux_array</em>, <em>high_res_return=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lenstronomy/ImSim/Numerics/grid.html#AdaptiveGrid.flux_array2image_low_high"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lenstronomy.ImSim.Numerics.grid.AdaptiveGrid.flux_array2image_low_high" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>flux_array</strong> – 1d array of low and high resolution flux values corresponding to the coordinates_evaluate order</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>flux_array</strong> – 1d array of low and high resolution flux values corresponding to the coordinates_evaluate order</li>
+<li><strong>high_res_return</strong> – bool, if True also returns the high resolution image
+(needs more computation and is only needed when convolution is performed on the supersampling level)</li>
+</ul>
+</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">2d array, 2d array, corresponding to (partial) images in low and high resolution (to be convolved)</td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">2d array, 2d array, corresponding to (partial) images in low and high resolution (to be convolved)</p>
+</td>
 </tr>
 </tbody>
 </table>
@@ -347,7 +382,7 @@ relative to a pixelized kernel.</p>
 
 <dl class="method">
 <dt id="lenstronomy.ImSim.Numerics.grid.RegularGrid.flux_array2image_low_high">
-<code class="descname">flux_array2image_low_high</code><span class="sig-paren">(</span><em>flux_array</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lenstronomy/ImSim/Numerics/grid.html#RegularGrid.flux_array2image_low_high"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lenstronomy.ImSim.Numerics.grid.RegularGrid.flux_array2image_low_high" title="Permalink to this definition">¶</a></dt>
+<code class="descname">flux_array2image_low_high</code><span class="sig-paren">(</span><em>flux_array</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lenstronomy/ImSim/Numerics/grid.html#RegularGrid.flux_array2image_low_high"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lenstronomy.ImSim.Numerics.grid.RegularGrid.flux_array2image_low_high" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -355,6 +390,33 @@ relative to a pixelized kernel.</p>
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>flux_array</strong> – 1d array of low and high resolution flux values corresponding to the coordinates_evaluate order</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">2d array, 2d array, corresponding to (partial) images in low and high resolution (to be convolved)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="lenstronomy.ImSim.Numerics.grid.RegularGrid.grid_points_spacing">
+<code class="descname">grid_points_spacing</code><a class="headerlink" href="#lenstronomy.ImSim.Numerics.grid.RegularGrid.grid_points_spacing" title="Permalink to this definition">¶</a></dt>
+<dd><p>effective spacing between coordinate points, after supersampling
+:return: sqrt(pixel_area)/supersampling_factor</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="lenstronomy.ImSim.Numerics.grid.RegularGrid.num_grid_points_axes">
+<code class="descname">num_grid_points_axes</code><a class="headerlink" href="#lenstronomy.ImSim.Numerics.grid.RegularGrid.num_grid_points_axes" title="Permalink to this definition">¶</a></dt>
+<dd><p>effective number of points along each axes, after supersampling
+:return: number of pixels per axis, nx*supersampling_factor ny*supersampling_factor</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="lenstronomy.ImSim.Numerics.grid.RegularGrid.supersampling_factor">
+<code class="descname">supersampling_factor</code><a class="headerlink" href="#lenstronomy.ImSim.Numerics.grid.RegularGrid.supersampling_factor" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">factor (per axis) of super-sampling relative to a pixel</td>
 </tr>
 </tbody>
 </table>
@@ -389,29 +451,6 @@ relative to a pixelized kernel.</p>
 
 </dd></dl>
 
-<dl class="class">
-<dt id="lenstronomy.ImSim.Numerics.numba_convolution.SubgridNumbaConvolution">
-<em class="property">class </em><code class="descclassname">lenstronomy.ImSim.Numerics.numba_convolution.</code><code class="descname">SubgridNumbaConvolution</code><span class="sig-paren">(</span><em>kernel_super</em>, <em>supersampling_factor</em>, <em>conv_pixels</em>, <em>compute_pixels=None</em>, <em>kernel_size=None</em>, <em>nopython=True</em>, <em>cache=True</em>, <em>parallel=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lenstronomy/ImSim/Numerics/numba_convolution.html#SubgridNumbaConvolution"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lenstronomy.ImSim.Numerics.numba_convolution.SubgridNumbaConvolution" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>class that inputs a supersampled grid and convolution kernel and computes the response on the regular grid
-This makes use of the regualr NumbaConvolution class as a loop through the different sub-pixel positions</p>
-<dl class="method">
-<dt id="lenstronomy.ImSim.Numerics.numba_convolution.SubgridNumbaConvolution.convolve2d">
-<code class="descname">convolve2d</code><span class="sig-paren">(</span><em>image_high_res</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/lenstronomy/ImSim/Numerics/numba_convolution.html#SubgridNumbaConvolution.convolve2d"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#lenstronomy.ImSim.Numerics.numba_convolution.SubgridNumbaConvolution.convolve2d" title="Permalink to this definition">¶</a></dt>
-<dd><table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>image_high_res</strong> – supersampled image/model to be convolved and re-bined to regular resolution</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">convolved and re-bind image</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-</dd></dl>
-
 </div>
 <div class="section" id="module-lenstronomy.ImSim.Numerics.numerics">
 <span id="lenstronomy-imsim-numerics-numerics-module"></span><h2>lenstronomy.ImSim.Numerics.numerics module<a class="headerlink" href="#module-lenstronomy.ImSim.Numerics.numerics" title="Permalink to this headline">¶</a></h2>
@@ -422,6 +461,19 @@ This makes use of the regualr NumbaConvolution class as a loop through the diffe
 <p>this classes manages the numerical options and computations of an image.
 The class has two main functions, re_size_convolve() and coordinates_evaluate()</p>
 <dl class="attribute">
+<dt id="lenstronomy.ImSim.Numerics.numerics.Numerics.convolution_class">
+<code class="descname">convolution_class</code><a class="headerlink" href="#lenstronomy.ImSim.Numerics.numerics.Numerics.convolution_class" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">convolution class (can be SubgridKernelConvolution, PixelKernelConvolution, MultiGaussianConvolution, …)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
 <dt id="lenstronomy.ImSim.Numerics.numerics.Numerics.coordinates_evaluate">
 <code class="descname">coordinates_evaluate</code><a class="headerlink" href="#lenstronomy.ImSim.Numerics.numerics.Numerics.coordinates_evaluate" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
@@ -429,6 +481,32 @@ The class has two main functions, re_size_convolve() and coordinates_evaluate()<
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">1d array of all coordinates being evaluated to perform the image computation</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="lenstronomy.ImSim.Numerics.numerics.Numerics.grid_class">
+<code class="descname">grid_class</code><a class="headerlink" href="#lenstronomy.ImSim.Numerics.numerics.Numerics.grid_class" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">grid class (can be RegularGrid, AdaptiveGrid)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="lenstronomy.ImSim.Numerics.numerics.Numerics.grid_supersampling_factor">
+<code class="descname">grid_supersampling_factor</code><a class="headerlink" href="#lenstronomy.ImSim.Numerics.numerics.Numerics.grid_supersampling_factor" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">supersampling factor set for higher resolution sub-pixel sampling of surface brightness</td>
 </tr>
 </tbody>
 </table>
@@ -664,7 +742,7 @@ a subset of pixels need to be know.</p>
         <li class="right" >
           <a href="lenstronomy.ImSim.MultiBand.html" title="lenstronomy.ImSim.MultiBand package"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">lenstronomy 1.3.0 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="index.html">lenstronomy 1.9.1 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="lenstronomy.html" >lenstronomy package</a> &#187;</li>
           <li class="nav-item nav-item-2"><a href="lenstronomy.ImSim.html" >lenstronomy.ImSim package</a> &#187;</li> 
       </ul>

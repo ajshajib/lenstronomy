@@ -19,12 +19,12 @@ class TestLensCosmo(object):
         self.lensCosmo = LensCosmo(z_L, z_S, cosmo=cosmo)
 
     def test_ang_dist(self):
-        npt.assert_almost_equal(self.lensCosmo.D_s, 1588.9213590743666, decimal=8)
-        npt.assert_almost_equal(self.lensCosmo.D_d, 1548.7055203661785, decimal=8)
-        npt.assert_almost_equal(self.lensCosmo.D_ds, 892.0038749095863, decimal=8)
+        npt.assert_almost_equal(self.lensCosmo.ds, 1588.9213590743666, decimal=8)
+        npt.assert_almost_equal(self.lensCosmo.dd, 1548.7055203661785, decimal=8)
+        npt.assert_almost_equal(self.lensCosmo.dds, 892.0038749095863, decimal=8)
 
     def test_epsilon_crit(self):
-        npt.assert_almost_equal(self.lensCosmo.epsilon_crit/1.9121e+15, 1, decimal=3)
+        npt.assert_almost_equal(self.lensCosmo.sigma_crit / 1.9121e+15, 1, decimal=3)
 
     def test_arcsec2phys(self):
         arcsec = np.array([1, 2]) # pixel coordinate from center
@@ -50,7 +50,7 @@ class TestLensCosmo(object):
     def test_kappa2proj_mass(self):
         kappa = 0.5
         mass = self.lensCosmo.kappa2proj_mass(kappa)
-        npt.assert_almost_equal(mass, kappa * self.lensCosmo.epsilon_crit, decimal=3)
+        npt.assert_almost_equal(mass, kappa * self.lensCosmo.sigma_crit, decimal=3)
 
     def test_mass_in_coin(self):
         theta_E = 1.
@@ -58,7 +58,7 @@ class TestLensCosmo(object):
         npt.assert_almost_equal(m_coin, 165279526936.52194, decimal=0)
 
     def test_D_dt_model(self):
-        D_dt = self.lensCosmo.D_dt
+        D_dt = self.lensCosmo.ddt
         npt.assert_almost_equal(D_dt, 4965.660384441859, decimal=8)
 
     def test_nfw_angle2physical(self):
@@ -87,6 +87,26 @@ class TestLensCosmo(object):
         dt_days = self.lensCosmo.time_delay_units(fermat_pot)
         fermat_pot_out = self.lensCosmo.time_delay2fermat_pot(dt_days)
         npt.assert_almost_equal(fermat_pot, fermat_pot_out, decimal=10)
+
+    def test_uldm_angular2phys(self):
+
+        kappa_0, theta_c = 0.1, 3
+        mlog10, Mlog10 = self.lensCosmo.uldm_angular2phys(kappa_0, theta_c)
+        npt.assert_almost_equal(mlog10, -24.3610006, decimal=5)
+        npt.assert_almost_equal(Mlog10, 11.7195843, decimal=5)
+
+    def test_uldm_mphys2angular(self):
+
+        m_log10, M_log10 = -24, 11
+        kappa_0, theta_c = self.lensCosmo.uldm_mphys2angular(m_log10, M_log10)
+        mcheck, Mcheck = self.lensCosmo.uldm_angular2phys(kappa_0, theta_c)
+        npt.assert_almost_equal(mcheck, m_log10, decimal=4)
+        npt.assert_almost_equal(Mcheck, M_log10, decimal=4)
+
+    def test_a_z(self):
+
+        a = self.lensCosmo.a_z(z=1)
+        npt.assert_almost_equal(a, 0.5)
 
 
 if __name__ == '__main__':

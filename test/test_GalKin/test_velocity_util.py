@@ -36,7 +36,7 @@ class TestVelocityUtil(object):
             r = velocity_util.draw_moffat_r(FWHM, beta)
             r_list.append(r)
         x_array = np.linspace(0, 4 * FWHM, num=100)
-        r_hist, bins = np.histogram(r_list, bins=x_array, normed=True)
+        r_hist, bins = np.histogram(r_list, bins=x_array, density=True)
         alpha = velocity_util.moffat_fwhm_alpha(FWHM, beta)
 
         x_ = x_array[1:] - x_array[1] + x_array[0]
@@ -57,9 +57,22 @@ class TestVelocityUtil(object):
         assert x_d != x
         assert y_d != y
 
+    def test_project_2d_random(self):
+        r = 1
+        R, x, y = velocity_util.project2d_random(r=r)
+        assert R <= r
 
-
-
+        num = 100000
+        r = np.ones(num)
+        R, x, y = velocity_util.project2d_random(r=r)
+        assert len(R) == num
+        #import matplotlib.pyplot as plt
+        #bins = np.linspace(0., 1, 100)
+        #hist, bins_hist = np.histogram(R, bins=bins, density=True)
+        #bins_plot = (bins_hist[1:] + bins_hist[:-1]) / 2.
+        #plt.plot(bins_plot, hist, label='regular')
+        #plt.legend()
+        #plt.show()
 
 
 if __name__ == '__main__':

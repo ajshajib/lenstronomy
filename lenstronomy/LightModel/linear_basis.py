@@ -5,20 +5,20 @@ __author__ = 'sibirrer'
 import numpy as np
 from lenstronomy.LightModel.light_model_base import LightModelBase
 
+__all__ = ['LinearBasis']
+
 
 class LinearBasis(LightModelBase):
     """
     class to handle source and lens light models
     """
 
-    def __init__(self, light_model_list, smoothing=0.0000001):
+    def __init__(self, **kwargs):
         """
 
-        :param light_model_list:
-        :param smoothing:
-        :param merge_with_other_list: list of indexes of models that are merged with other models with fixed amplitude ratio
+        :param kwargs: keyword arguments for LightModelBase class
         """
-        super(LinearBasis, self).__init__(light_model_list=light_model_list, smoothing=smoothing)
+        super(LinearBasis, self).__init__(**kwargs)
 
     @property
     def param_name_list(self):
@@ -72,6 +72,8 @@ class LinearBasis(LightModelBase):
                     kwargs_new.update(new)
                     response += self.func_list[i].function_split(x, y, **kwargs_new)
                     n += num_param
+                elif model in ['SLIT_STARLETS', 'SLIT_STARLETS_GEN2']:
+                    raise ValueError("'{}' model does not support function split".format(model))
                 else:
                     raise ValueError('model type %s not valid!' % model)
         return response, n
@@ -111,6 +113,11 @@ class LinearBasis(LightModelBase):
                 else:
                     num_param = int((n_max + 1) * (n_max + 2) / 2)
                 n_list += [num_param]
+            elif model in ['SLIT_STARLETS', 'SLIT_STARLETS_GEN2']:
+                n_scales = kwargs_list[i]['n_scales']
+                n_pixels = kwargs_list[i]['n_pixels']
+                num_param = int(n_scales * n_pixels)
+                n_list += [num_param]  # TODO : find a way to make it the number of source pixels
             else:
                 raise ValueError('model type %s not valid!' % model)
         return n_list
@@ -118,10 +125,11 @@ class LinearBasis(LightModelBase):
     def update_linear(self, param, i, kwargs_list):
         """
 
-        :param param:
-        :param i:
-        :param kwargs_list:
-        :return:
+        :param param: array of linear amplitude coefficients in the order of the linear minimization of the ImSim module
+        :param i: index of first coefficient to start reading out the linear parameters associated with the model
+         components of this class
+        :param kwargs_list: list of keyword arguments of the model components
+        :return: kwargs list with over-written or added 'amp' parameters according to the coefficients in param
         """
         for k, model in enumerate(self.profile_type_list):
             if model in ['SERSIC', 'SERSIC_ELLIPSE', 'CORE_SERSIC', 'HERNQUIST', 'PJAFFE', 'PJAFFE_ELLIPSE',
@@ -141,11 +149,17 @@ class LinearBasis(LightModelBase):
                     num_param = int((n_max + 1) * (n_max + 2) / 2)
                 kwargs_list[k]['amp'] = param[i:i+num_param]
                 i += num_param
+            elif model in ['SLIT_STARLETS', 'SLIT_STARLETS_GEN2']:
+                n_scales = kwargs_list[k]['n_scales']
+                n_pixels = kwargs_list[k]['n_pixels']
+                num_param = int(n_scales * n_pixels)
+                kwargs_list[k]['amp'] = param[i:i+num_param]
+                i += num_param
             else:
                 raise ValueError('model type %s not valid!' % model)
         return kwargs_list, i
 
-    def add_fixed_linear(self, kwargs_fixed_list):
+    def add_fixed_linear(self, kwargs_fixed_list, bool_list=None):
         """
 
         :param kwargs_fixed_list: list of fixed keyword arguments
@@ -158,3 +172,22 @@ class LinearBasis(LightModelBase):
                 if 'amp' not in kwargs_fixed:
                     kwargs_fixed['amp'] = 1
         return kwargs_fixed_list
+
+    def check_positive_flux_profile(self, kwargs_list):
+        """
+        check whether linear amplitude parameter are non-negative for specified list of lens models that have a
+         physical amplitude interpretation
+
+        :param kwargs_list: light model parameter keyword argument list
+        :return: bool, if True, no specified model has negative flux
+        """
+        pos_bool = True
+        for k, model in enumerate(self.profile_type_list):
+            if 'amp' in kwargs_list[k]:
+                if model in ['SERSIC', 'SERSIC_ELLIPSE', 'CORE_SERSIC', 'HERNQUIST', 'PJAFFE', 'PJAFFE_ELLIPSE',
+                             'HERNQUIST_ELLIPSE', 'GAUSSIAN', 'GAUSSIAN_ELLIPSE', 'POWER_LAW', 'NIE', 'CHAMELEON',
+                             'DOUBLE_CHAMELEON']:
+                    if kwargs_list[k]['amp'] < 0:
+                        pos_bool = False
+                        break
+        return pos_bool

@@ -170,3 +170,90 @@ History
 1.3.0 (2020-01-10)
 ++++++++++++++++++
 * image position likelihood description improved
+
+
+1.4.0 (2020-03-26)
+++++++++++++++++++
+* Major re-design of GalKin module, added new anisotropy modeling and IFU aperture type
+* Updated design of the Analysis.kinematicsAPI sub-module
+* Convention and redundancy in the Cosmo module changed
+* NIE, SIE and SPEMD model consistent with their ellipticity and Einstein radius definition
+* added cored-Sersic profile
+* dependency for PSO to CosmoHammer removed
+* MPI and multi-threading for PSO and MCMC improved and compatible with python3
+
+
+1.5.0 (2020-04-05)
+++++++++++++++++++
+* Re-naming SPEMD to PEMD, SPEMD_SMOOTH to SPEMD
+* adaptive numerics improvement
+* multi-processing improvements
+
+
+1.5.1 (2020-06-20)
+++++++++++++++++++
+* bug fix in Hession of POINT_SOURCE model
+* EPL model from Tessore et al. 2015 implemented
+* multi-observation mode for kinematics calculation
+
+
+1.6.0 (2020-09-07)
+++++++++++++++++++
+* SLITronomy integration
+* observation configuration templates and examples
+* lens equation solver arguments in single sub-kwargs
+* adapted imports to latest scipy release
+* iterative PSF reconstruction improved
+* multipole lens model
+
+
+1.7.0 (2020-12-16)
+++++++++++++++++++
+* cosmo.NFWParam mass definition changed
+* QuadOptimizer re-factored
+* interpol light model support for non-square grid
+* add functionality to psf error map
+* fix in multiband reconstruction
+* observational config for ZTF
+* short-hand class imports
+
+
+1.8.0 (2020-03-21)
+++++++++++++++++++
+* EPL numba version
+* numba configuration variables can be set globally with configuration file
+* Series of curved arc models available
+* single plane hessian return all for differentials
+* elliptical density slice lens model
+* vectorized lens and light interpolation models
+* updated installation description
+* fast caustic calculation replacing matplotlib with skitlearn
+* multi-patch illustration class and plotting routines
+* updated PSF iteration procedure with more settings
+
+1.8.1 (2020-04-19)
+++++++++++++++++++
+* illustration plots for curved arcs updated
+* documentation of elliptical lens models updated
+
+
+1.8.2 (2020-06-08)
+++++++++++++++++++
+* JOSS paper added
+* improved testing documentation and tox compatibility
+* TNFW_ELLIPSE lens model implemented
+* ULDM lens model implemented
+
+
+1.9.0 (2020-07-15)
+++++++++++++++++++
+* re-defined half light radius in Sersic profile
+* re-named parameter in 'CONVERGENCE' profile
+* improved numerics in Galkin
+* configuration import design changed
+
+
+1.9.1 (2020-08-27)
+++++++++++++++++++
+* re-defined amplitude normalization in NIE and CHAMELEON light profiles
+* bug fix in sky brightness errors (SimulationAPI)

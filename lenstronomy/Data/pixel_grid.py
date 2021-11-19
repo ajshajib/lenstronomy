@@ -1,6 +1,8 @@
 import numpy as np
 from lenstronomy.Data.coord_transforms import Coordinates, Coordinates1D
 
+__all__ = ['PixelGrid']
+
 
 class PixelGrid(Coordinates):
     """
@@ -56,7 +58,7 @@ class PixelGrid(Coordinates):
     def shift_coordinate_system(self, x_shift, y_shift, pixel_unit=False):
         """
         shifts the coordinate system
-        :param x_shif: shift in x (or RA)
+        :param x_shift: shift in x (or RA)
         :param y_shift: shift in y (or DEC)
         :param pixel_unit: bool, if True, units of pixels in input, otherwise RA/DEC
         :return: updated data class with change in coordinate system

@@ -52,7 +52,7 @@ class TestNFW(object):
         c = 1.
         logM = 13.
         M = 10 ** logM
-        theta_vir = self.nfw._lens_cosmo.nfw_M_theta_vir(M)
+        theta_vir = self.nfw._lens_cosmo.nfw_M_theta_r200(M)
         print(theta_vir, 'test theta_vir')
         print(theta_vir/c, 'theta_Rs')
 
@@ -64,7 +64,7 @@ class TestNFW(object):
         f = self.nfw._f(c)
         print(f, 'f')
         kappa_int = np.sum(kappa)
-        mass = kappa_int * self.lensCosmo.epsilon_crit_angle
+        mass = kappa_int * self.lensCosmo.sigma_crit_angle
         npt.assert_almost_equal(mass/M, 1, decimal=2)
 
     def test_radial_profile(self):

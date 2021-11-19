@@ -3,6 +3,8 @@ import numpy as np
 from lenstronomy.Data.pixel_grid import PixelGrid
 from lenstronomy.Data.image_noise import ImageNoise
 
+__all__ = ['ImageData']
+
 
 class ImageData(PixelGrid, ImageNoise):
     """
@@ -35,7 +37,7 @@ class ImageData(PixelGrid, ImageNoise):
 
 
     """
-    def __init__(self, image_data, exposure_time=None, background_rms=None, noise_map=None,
+    def __init__(self, image_data, exposure_time=None, background_rms=None, noise_map=None, gradient_boost_factor=None,
                  ra_at_xy_0=0, dec_at_xy_0=0, transform_pix2angle=None, ra_shift=0, dec_shift=0):
         """
 
@@ -44,6 +46,8 @@ class ImageData(PixelGrid, ImageNoise):
         (common for all pixels or individually for each individual pixel)
         :param background_rms: root-mean-square value of Gaussian background noise in units counts per second
         :param noise_map: int or array of size the data; joint noise sqrt(variance) of each individual pixel.
+        :param gradient_boost_factor: None or float, variance terms added in quadrature scaling with
+         gradient^2 * gradient_boost_factor
         :param transform_pix2angle: 2x2 matrix, mapping of pixel to coordinate
         :param ra_at_xy_0: ra coordinate at pixel (0,0)
         :param dec_at_xy_0: dec coordinate at pixel (0,0)
@@ -51,17 +55,16 @@ class ImageData(PixelGrid, ImageNoise):
         :param dec_shift: DEC shift of pixel grid
         """
         nx, ny = np.shape(image_data)
-        self._data = image_data
         if transform_pix2angle is None:
             transform_pix2angle = np.array([[1, 0], [0, 1]])
         PixelGrid.__init__(self, nx, ny, transform_pix2angle, ra_at_xy_0 + ra_shift, dec_at_xy_0 + dec_shift)
         ImageNoise.__init__(self, image_data, exposure_time=exposure_time, background_rms=background_rms,
-                            noise_map=noise_map, verbose=False)
+                            noise_map=noise_map, gradient_boost_factor=gradient_boost_factor, verbose=False)
 
     def update_data(self, image_data):
         """
 
-        update the data
+        update the data as well as the error matrix estimated from it when done so using the data
 
         :param image_data: 2d numpy array of same size as nx, ny
         :return: None
@@ -70,6 +73,8 @@ class ImageData(PixelGrid, ImageNoise):
         if not self._nx == nx and not self._ny == ny:
             raise ValueError("shape of new data %s %s must equal old data %s %s!" % (nx, ny, self._nx, self._ny))
         self._data = image_data
+        if hasattr(self, '_C_D') and self._noise_map is None:
+            del self._C_D
 
     @property
     def data(self):

@@ -1,8 +1,7 @@
-numpy>=1.13
+numpy>=1.17
 astropy>=2.0
 scipy>=0.19.1
 mpmath
-cosmohammer>=0.6.1
 emcee>=3.0.0
 matplotlib
 sklearn
@@ -10,8 +9,18 @@ numba>=0.43.1
 future
 dynesty
 pymultinest
-pypolychord
 nestcheck
-schwimmbad
+corner>=2.2.1
+h5py
+scikit-image
+pyyaml
+pyxdg
+
+#schwimmbad==0.3.0
+-e git://github.com/adrn/schwimmbad.git@master#egg=schwimmbad
 multiprocess>=0.70.8
 #-e git://github.com/sibirrer/fastell4py.git#egg=fastell4py
+slitronomy==0.3.2
+
+# requirements for tests
+colossus

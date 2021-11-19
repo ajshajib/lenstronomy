@@ -2,6 +2,8 @@ from lenstronomy.LensModel.Solver.solver2point import Solver2Point
 from lenstronomy.LensModel.Solver.solver4point import Solver4Point
 import numpy as np
 
+__all__ = ['Solver']
+
 
 class Solver(object):
     """
@@ -13,7 +15,7 @@ class Solver(object):
         """
 
         :param solver_type: string, option for specific solver type
-        see detailed instruction of the Solver4Point and Solver2Point classes
+         see detailed instruction of the Solver4Point and Solver2Point classes
         :param lensModel: instance of a LensModel() class
         :param num_images: int, number of images to be solved for
         """
@@ -37,6 +39,14 @@ class Solver(object):
         return self._solver.constraint_lensmodel(x_pos, y_pos, kwargs_list, xtol=xtol)
 
     def update_solver(self, kwargs_lens, x_pos, y_pos):
+        """
+
+
+        :param kwargs_lens:
+        :param x_pos:
+        :param y_pos:
+        :return:
+        """
 
         if not len(x_pos) == self._num_images:
             raise ValueError("Point source number %s must be as specified by the solver with number of images %s" %
@@ -60,9 +70,11 @@ class Solver(object):
     def add_fixed_lens(self, kwargs_fixed_lens, kwargs_lens_init):
         """
         returns kwargs that are kept fixed during run, depending on options
-        :param kwargs_options:
-        :param kwargs_lens:
-        :return:
+
+        :param kwargs_fixed_lens: keyword argument list of fixed parameters (indicated by fitting argument of the user)
+        :param kwargs_lens_init: Initial values of the full lens model keyword arguments
+        :return: updated kwargs_fixed_lens, added fixed parameters being added (and replaced later on) by the
+         non-linear solver.
         """
         kwargs_fixed_lens = self._solver.add_fixed_lens(kwargs_fixed_lens, kwargs_lens_init)
         return kwargs_fixed_lens

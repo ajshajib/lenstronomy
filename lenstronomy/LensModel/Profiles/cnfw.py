@@ -5,6 +5,8 @@ from scipy.integrate import quad
 from lenstronomy.LensModel.Profiles.nfw import NFW
 from lenstronomy.LensModel.Profiles.base_profile import LensProfileBase
 
+__all__ = ['CNFW']
+
 
 class CNFW(LensProfileBase):
     """
@@ -99,7 +101,7 @@ class CNFW(LensProfileBase):
         f_xx = kappa + gamma1
         f_yy = kappa - gamma1
         f_xy = gamma2
-        return f_xx, f_yy, f_xy
+        return f_xx, f_xy, f_xy, f_yy
 
     def density(self, R, Rs, rho0, r_core):
         """
