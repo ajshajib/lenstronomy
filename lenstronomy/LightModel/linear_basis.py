@@ -46,6 +46,7 @@ class LinearBasis(LightModelBase):
         for i, model in enumerate(self.profile_type_list):
             if bool_list[i] is True:
                 if model in ['SERSIC', 'SERSIC_ELLIPSE', 'CORE_SERSIC', 'HERNQUIST', 'HERNQUIST_ELLIPSE', 'PJAFFE',
+                             'DOUBLE_SERSIC_ELLIPSE',
                              'PJAFFE_ELLIPSE', 'GAUSSIAN', 'GAUSSIAN_ELLIPSE', 'POWER_LAW', 'NIE', 'CHAMELEON',
                              'DOUBLE_CHAMELEON', 'TRIPLE_CHAMELEON', 'UNIFORM', 'INTERPOL', 'ELLIPSOID']:
                     kwargs_new = kwargs_list[i].copy()
@@ -100,6 +101,7 @@ class LinearBasis(LightModelBase):
         n_list = []
         for i, model in enumerate(self.profile_type_list):
             if model in ['SERSIC', 'SERSIC_ELLIPSE', 'CORE_SERSIC', 'HERNQUIST', 'HERNQUIST_ELLIPSE', 'PJAFFE',
+                         'DOUBLE_SERSIC_ELLIPSE',
                              'PJAFFE_ELLIPSE', 'GAUSSIAN', 'GAUSSIAN_ELLIPSE', 'POWER_LAW', 'NIE', 'CHAMELEON',
                              'DOUBLE_CHAMELEON', 'TRIPLE_CHAMELEON', 'UNIFORM', 'INTERPOL', 'ELLIPSOID']:
                 n_list += [1]
@@ -133,6 +135,7 @@ class LinearBasis(LightModelBase):
         """
         for k, model in enumerate(self.profile_type_list):
             if model in ['SERSIC', 'SERSIC_ELLIPSE', 'CORE_SERSIC', 'HERNQUIST', 'PJAFFE', 'PJAFFE_ELLIPSE',
+                         'DOUBLE_SERSIC_ELLIPSE',
                          'HERNQUIST_ELLIPSE', 'GAUSSIAN', 'GAUSSIAN_ELLIPSE', 'POWER_LAW', 'NIE', 'CHAMELEON',
                          'DOUBLE_CHAMELEON', 'TRIPLE_CHAMELEON', 'UNIFORM', 'INTERPOL', 'ELLIPSOID']:
                 kwargs_list[k]['amp'] = param[i]
@@ -185,6 +188,7 @@ class LinearBasis(LightModelBase):
         for k, model in enumerate(self.profile_type_list):
             if 'amp' in kwargs_list[k]:
                 if model in ['SERSIC', 'SERSIC_ELLIPSE', 'CORE_SERSIC', 'HERNQUIST', 'PJAFFE', 'PJAFFE_ELLIPSE',
+                             'DOUBLE_SERSIC_ELLIPSE',
                              'HERNQUIST_ELLIPSE', 'GAUSSIAN', 'GAUSSIAN_ELLIPSE', 'POWER_LAW', 'NIE', 'CHAMELEON',
                              'DOUBLE_CHAMELEON']:
                     if kwargs_list[k]['amp'] < 0:

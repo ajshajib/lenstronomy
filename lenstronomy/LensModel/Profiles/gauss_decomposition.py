@@ -197,7 +197,7 @@ class GaussianEllipseKappaSet(LensProfileBase):
 
 
 @export
-class GaussDecompositionAbstract(metaclass=abc.ABCMeta):
+class GaussDecompositionAbstract(LensProfileBase, metaclass=abc.ABCMeta):
     """
     This abstract class sets up a template for computing lensing properties of
     an elliptical convergence through Shajib (2019)'s Gauss decomposition.
@@ -496,13 +496,14 @@ class SersicEllipseMLGradientGaussDec(GaussDecompositionAbstract):
     decomposition method.
     """
     param_names = ['k_eff', 'R_sersic', 'n_sersic', 'e1', 'e2', 'center_x',
-                   'center_y', 'ml_gradient_exponent']
+                   'center_y', 'log_ml_gradient_exponent']
     lower_limit_default = {'k_eff': 0., 'R_sersic': 0., 'n_sersic': 0.5,
                            'e1': -0.5, 'e2': -0.5, 'center_x': -100.,
-                           'center_y': -100., 'ml_gradient_exponent': 0.}
+                           'center_y': -100., 'log_ml_gradient_exponent': -8}
     upper_limit_default = {'k_eff': 100., 'R_sersic': 100., 'n_sersic': 8.,
                            'e1': 0.5, 'e2': 0.5, 'center_x': 100.,
-                           'center_y': 100., 'ml_gradient_exponent': 3.}
+                           'center_y': 100., 'log_ml_gradient_exponent': 
+                               np.log10(3.)}
 
     def get_kappa_1d(self, y, **kwargs):
         r"""
@@ -526,12 +527,12 @@ class SersicEllipseMLGradientGaussDec(GaussDecompositionAbstract):
         n_sersic = kwargs['n_sersic']
         R_sersic = kwargs['R_sersic']
         k_eff = kwargs['k_eff']
-        eta = kwargs['ml_gradient_exponent']
+        log_eta = kwargs['log_ml_gradient_exponent']
 
         bn = SersicUtil.b_n(n_sersic)
 
         return k_eff * np.exp(-bn * (y / R_sersic) ** (1. / n_sersic) + bn) *\
-               (y / R_sersic)**(-eta)
+               (y / R_sersic)**(-(10**log_eta))
 
     def get_scale(self, **kwargs):
         """
@@ -561,18 +562,19 @@ class DoubleSersicEllipseMLGradientGaussDec(GaussDecompositionAbstract):
     """
     param_names = ['k_eff', 'amp_ratio', 'R_sersic1', 'n_sersic1',
                    'R_sersic2', 'n_sersic2', 'e1', 'e2', 'center_x',
-                   'center_y', 'ml_gradient_exponent']
+                   'center_y', 'log_ml_gradient_exponent']
 
     lower_limit_default = {'k_eff': 0., 'R_sersic1': 0., 'n_sersic1': 0.5,
                            'amp_ratio': 1e-4, 'R_sersic2': 0.,
                            'n_sersic2': 0.5,
                            'e1': -0.5, 'e2': -0.5, 'center_x': -100.,
-                           'center_y': -100., 'ml_gradient_exponent': 0.}
+                           'center_y': -100., 'log_ml_gradient_exponent': -6}
     upper_limit_default = {'k_eff': 100., 'amp_ratio': 1e4,
                            'R_sersic1': 100., 'n_sersic1': 8.,
                            'R_sersic2': 100., 'n_sersic2': 8.,
                            'e1': 0.5, 'e2': 0.5, 'center_x': 100.,
-                           'center_y': 100., 'ml_gradient_exponent': 1.}
+                           'center_y': 100., 'log_ml_gradient_exponent':
+                               np.log10(3.)}
 
     def get_kappa_1d(self, y, **kwargs):
         r"""
@@ -599,7 +601,7 @@ class DoubleSersicEllipseMLGradientGaussDec(GaussDecompositionAbstract):
         R_sersic2 = kwargs['R_sersic2']
         k_eff = kwargs['k_eff']
         amp_ratio = kwargs['amp_ratio']
-        eta = kwargs['ml_gradient_exponent']
+        log_eta = kwargs['log_ml_gradient_exponent']
 
         bn1 = SersicUtil.b_n(n_sersic1)
         bn2 = SersicUtil.b_n(n_sersic1)
@@ -607,7 +609,8 @@ class DoubleSersicEllipseMLGradientGaussDec(GaussDecompositionAbstract):
         component1 = np.exp(-bn1 * (y / R_sersic1) ** (1. / n_sersic1) + bn1)
         component2 = np.exp(-bn2 * (y / R_sersic2) ** (1. / n_sersic2) + bn2)
 
-        return k_eff * (component1 + amp_ratio * component2) * (y)**(-eta)
+        return k_eff * (component1 + amp_ratio * component2) * (y)**(
+            -10**log_eta)
 
     def get_scale(self, **kwargs):
         """
@@ -626,7 +629,7 @@ class DoubleSersicEllipseMLGradientGaussDec(GaussDecompositionAbstract):
         :return: Sersic radius
         :rtype: ``float``
         """
-        return kwargs['R_sersic']
+        return kwargs['R_sersic1']
 
 
 class NFWEllipseGaussDec(GaussDecompositionAbstract):
@@ -760,7 +763,7 @@ class GeneralizedNFWEllipseGaussDec(GaussDecompositionAbstract):
         :param min_ellipticity: To be passed to ``class GaussianEllipseKappa``. Minimum ellipticity for Gaussian elliptical lensing calculation. For lower ellipticity than min_ellipticity the equations for the spherical case will be used.
         :type min_ellipticity: ``float``
         """
-        super(GNFWEllipseGaussDec, self).__init__(n_sigma=n_sigma,
+        super(GeneralizedNFWEllipseGaussDec, self).__init__(n_sigma=n_sigma,
                                                  sigma_start_mult=sigma_start_mult,
                                                  sigma_end_mult=sigma_end_mult,
                                                  precision=precision,
