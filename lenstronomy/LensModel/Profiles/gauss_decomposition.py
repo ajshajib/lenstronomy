@@ -576,6 +576,32 @@ class DoubleSersicEllipseMLGradientGaussDec(GaussDecompositionAbstract):
                            'center_y': 100., 'log_ml_gradient_exponent':
                                np.log10(3.)}
 
+    def __init__(self, n_sigma=20, sigma_start_mult=0.01, sigma_end_mult=50.,
+                 precision=10, use_scipy_wofz=False, min_ellipticity=1e-5):
+        """
+        Set up settings for the Gaussian decomposition. For more details about
+        the decomposition parameters, see Shajib (2019).
+
+        :param n_sigma: Number of Gaussian components
+        :type n_sigma: ``int``
+        :param sigma_start_mult: Lower range of logarithmically spaced sigmas
+        :type sigma_start_mult: ``float``
+        :param sigma_end_mult: Upper range of logarithmically spaced sigmas
+        :type sigma_end_mult: ``float``
+        :param precision: Numerical precision of Gaussian decomposition
+        :type precision: ``int``
+        :param use_scipy_wofz: To be passed to ``class GaussianEllipseKappa``. If ``True``, Gaussian lensing will use ``scipy.special.wofz`` function. Set ``False`` for lower precision, but faster speed.
+        :type use_scipy_wofz: ``bool``
+        :param min_ellipticity: To be passed to ``class GaussianEllipseKappa``. Minimum ellipticity for Gaussian elliptical lensing calculation. For lower ellipticity than min_ellipticity the equations for the spherical case will be used.
+        :type min_ellipticity: ``float``
+        """
+        super(DoubleSersicEllipseMLGradientGaussDec, self).__init__(n_sigma=n_sigma,
+                                                 sigma_start_mult=sigma_start_mult,
+                                                 sigma_end_mult=sigma_end_mult,
+                                                 precision=precision,
+                                                 use_scipy_wofz=use_scipy_wofz,
+                                                 min_ellipticity=min_ellipticity)
+
     def get_kappa_1d(self, y, **kwargs):
         r"""
         Compute the spherical Sersic profile at y.
@@ -744,7 +770,7 @@ class GeneralizedNFWEllipseGaussDec(GaussDecompositionAbstract):
     upper_limit_default = {'Rs': 100, 'alpha_Rs': 10, 'e1': 0.5, 'e2': 0.5,
                            'center_x': 100, 'center_y': 100, 'nfw_gamma': 2.5}
 
-    def __init__(self, n_sigma=20, sigma_start_mult=0.001, sigma_end_mult=50.,
+    def __init__(self, n_sigma=20, sigma_start_mult=0.001, sigma_end_mult=5.,
                  precision=10, use_scipy_wofz=False, min_ellipticity=1e-5):
         """
         Set up settings for the Gaussian decomposition. For more details about
