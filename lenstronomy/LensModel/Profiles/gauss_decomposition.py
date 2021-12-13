@@ -630,7 +630,7 @@ class DoubleSersicEllipseMLGradientGaussDec(GaussDecompositionAbstract):
         log_eta = kwargs['log_ml_gradient_exponent']
 
         bn1 = SersicUtil.b_n(n_sersic1)
-        bn2 = SersicUtil.b_n(n_sersic1)
+        bn2 = SersicUtil.b_n(n_sersic2)
 
         component1 = np.exp(-bn1 * (y / R_sersic1) ** (1. / n_sersic1) + bn1)
         component2 = np.exp(-bn2 * (y / R_sersic2) ** (1. / n_sersic2) + bn2)
