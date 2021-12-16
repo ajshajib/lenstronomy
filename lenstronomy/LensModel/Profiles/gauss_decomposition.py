@@ -9,10 +9,16 @@ __author__ = 'ajshajib'
 import numpy as np
 import abc
 from scipy.special import comb
+from scipy.special import hyp2f1
 
 from lenstronomy.LensModel.Profiles.gaussian_ellipse_kappa import GaussianEllipseKappa
 from lenstronomy.LensModel.Profiles.sersic_utils import SersicUtil
 from lenstronomy.LensModel.Profiles.base_profile import LensProfileBase
+from lenstronomy.Util.param_util import ellipticity2phi_q
+
+from lenstronomy.Conf import config_loader
+convention_conf = config_loader.conventions_conf()
+sersic_major_axis_conf = convention_conf.get('sersic_major_axis', False)
 
 from lenstronomy.Util.package_util import exporter
 export, __all__ = exporter()
@@ -248,7 +254,7 @@ class GaussDecompositionAbstract(LensProfileBase, metaclass=abc.ABCMeta):
         self.etas = (-1.) ** kes * epsilons * 10. ** (p / 3.) * 2. * \
                     _SQRT_2PI
 
-    def gauss_decompose(self, **kwargs):
+    def gauss_decompose(self, e1=.0, e2=0., **kwargs):
         r"""
         Compute the amplitudes and sigmas of Gaussian components using the
         integral transform with Gaussian kernel from Shajib (2019). The
@@ -260,15 +266,16 @@ class GaussDecompositionAbstract(LensProfileBase, metaclass=abc.ABCMeta):
         :return: Amplitudes and standard deviations of the Gaussian components
         :rtype: tuple ``(numpy.array, numpy.array)``
         """
-        sigma_start = self.sigma_start_mult*self.get_scale(**kwargs)
-        sigma_end = self.sigma_end_mult*self.get_scale(**kwargs)
+        sigma_start = self.sigma_start_mult*self.get_scale(e1=e1, e2=e2,
+                                                           **kwargs)
+        sigma_end = self.sigma_end_mult*self.get_scale(e1=e1, e2=e2, **kwargs)
 
         sigmas = np.logspace(np.log10(sigma_start), np.log10(sigma_end),
                            self.n_sigma)
 
         f_sigmas = np.sum(self.etas * self.get_kappa_1d(
                                 sigmas[:,np.newaxis]*self.betas[np.newaxis, :],
-                                **kwargs).real,
+                                e1=e1, e2=e2, **kwargs).real,
                           axis=1
                           )
 
@@ -296,7 +303,7 @@ class GaussDecompositionAbstract(LensProfileBase, metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def get_kappa_1d(self, y, **kwargs):
         r"""
-        Abstract method to compute the spherical Sersic profile at y.
+        Abstract method to compute the spherical convergence profile at y.
         The concrete method has to defined by the child class.
 
         :param y: y coordinate
@@ -326,7 +333,7 @@ class GaussDecompositionAbstract(LensProfileBase, metaclass=abc.ABCMeta):
         :return: Deflection potential
         :rtype: ``float``
         """
-        amps, sigmas = self.gauss_decompose(**kwargs)
+        amps, sigmas = self.gauss_decompose(e1=e1, e2=e2, **kwargs)
 
         # converting the amplitude convention A -> A/(2*pi*sigma^2)
         amps *= 2.*np.pi * sigmas * sigmas
@@ -357,7 +364,7 @@ class GaussDecompositionAbstract(LensProfileBase, metaclass=abc.ABCMeta):
         :return: Derivatives of deflection potential
         :rtype: tuple ``(type(x), type(x))``
         """
-        amps, sigmas = self.gauss_decompose(**kwargs)
+        amps, sigmas = self.gauss_decompose(e1=e1, e2=e2, **kwargs)
 
         # converting the amplitude convention A -> A/(2*pi*sigma^2)
         amps *= 2. * np.pi * sigmas * sigmas
@@ -389,7 +396,7 @@ class GaussDecompositionAbstract(LensProfileBase, metaclass=abc.ABCMeta):
         :return: Hessian of deflection potential
         :rtype: tuple ``(type(x), type(x), type(x))``
         """
-        amps, sigmas = self.gauss_decompose(**kwargs)
+        amps, sigmas = self.gauss_decompose(e1=e1, e2=e2, **kwargs)
 
         # converting the amplitude convention A -> A/(2*pi*sigma^2)
         amps *= 2. * np.pi * sigmas * sigmas
@@ -418,7 +425,7 @@ class GaussDecompositionAbstract(LensProfileBase, metaclass=abc.ABCMeta):
         :return: Convergence profile
         :rtype: ``type(x)``
         """
-        amps, sigmas = self.gauss_decompose(**kwargs)
+        amps, sigmas = self.gauss_decompose(e1=e1, e2=e2, **kwargs)
 
         # converting the amplitude convention A -> A/(2*pi*sigma^2)
         amps *= 2. * np.pi * sigmas * sigmas
@@ -428,7 +435,7 @@ class GaussDecompositionAbstract(LensProfileBase, metaclass=abc.ABCMeta):
 
 
 @export
-class SersicEllipseGaussDec(GaussDecompositionAbstract):
+class SersicEllipseGaussDec(GaussDecompositionAbstract, SersicUtil):
     """
     This class computes the lensing properties of an elliptical Sersic
     profile using the Shajib (2019)'s Gauss decomposition method.
@@ -463,9 +470,14 @@ class SersicEllipseGaussDec(GaussDecompositionAbstract):
         """
         n_sersic = kwargs['n_sersic']
         R_sersic = kwargs['R_sersic']
+
+        if sersic_major_axis_conf:
+            _, q = ellipticity2phi_q(kwargs['e1'], kwargs['e2'])
+            R_sersic *= np.sqrt(q)
+
         k_eff = kwargs['k_eff']
 
-        bn = SersicUtil.b_n(n_sersic)
+        bn = self.b_n(n_sersic)
 
         return k_eff * np.exp(-bn * (y / R_sersic) ** (1. / n_sersic) + bn)
 
@@ -486,7 +498,13 @@ class SersicEllipseGaussDec(GaussDecompositionAbstract):
         :return: Sersic radius
         :rtype: ``float``
         """
-        return kwargs['R_sersic']
+        R_sersic = kwargs['R_sersic']
+
+        if sersic_major_axis_conf:
+            _, q = ellipticity2phi_q(kwargs['e1'], kwargs['e2'])
+            R_sersic *= np.sqrt(q)
+
+        return R_sersic
 
 
 class SersicEllipseMLGradientGaussDec(GaussDecompositionAbstract):
@@ -526,6 +544,11 @@ class SersicEllipseMLGradientGaussDec(GaussDecompositionAbstract):
         """
         n_sersic = kwargs['n_sersic']
         R_sersic = kwargs['R_sersic']
+
+        if sersic_major_axis_conf:
+            _, q = ellipticity2phi_q(kwargs['e1'], kwargs['e2'])
+            R_sersic *= np.sqrt(q)
+
         k_eff = kwargs['k_eff']
         log_eta = kwargs['log_ml_gradient_exponent']
 
@@ -551,7 +574,13 @@ class SersicEllipseMLGradientGaussDec(GaussDecompositionAbstract):
         :return: Sersic radius
         :rtype: ``float``
         """
-        return kwargs['R_sersic']
+        R_sersic = kwargs['R_sersic']
+
+        if sersic_major_axis_conf:
+            _, q = ellipticity2phi_q(kwargs['e1'], kwargs['e2'])
+            R_sersic *= np.sqrt(q)
+
+        return R_sersic
 
 
 class DoubleSersicEllipseMLGradientGaussDec(GaussDecompositionAbstract):
@@ -629,14 +658,19 @@ class DoubleSersicEllipseMLGradientGaussDec(GaussDecompositionAbstract):
         amp_ratio = kwargs['amp_ratio']
         log_eta = kwargs['log_ml_gradient_exponent']
 
+        if sersic_major_axis_conf:
+            _, q = ellipticity2phi_q(kwargs['e1'], kwargs['e2'])
+            R_sersic1 *= np.sqrt(q)
+            R_sersic2 *= np.sqrt(q)
+
         bn1 = SersicUtil.b_n(n_sersic1)
         bn2 = SersicUtil.b_n(n_sersic2)
 
         component1 = np.exp(-bn1 * (y / R_sersic1) ** (1. / n_sersic1) + bn1)
         component2 = np.exp(-bn2 * (y / R_sersic2) ** (1. / n_sersic2) + bn2)
 
-        return k_eff * (component1 + amp_ratio * component2) * (y)**(
-            -10**log_eta)
+        return k_eff * (component1 + amp_ratio * component2) * (
+                                                y/R_sersic1)**(-10**log_eta)
 
     def get_scale(self, **kwargs):
         """
@@ -655,7 +689,13 @@ class DoubleSersicEllipseMLGradientGaussDec(GaussDecompositionAbstract):
         :return: Sersic radius
         :rtype: ``float``
         """
-        return kwargs['R_sersic1']
+        R_sersic = kwargs['R_sersic1']
+
+        if sersic_major_axis_conf:
+            _, q = ellipticity2phi_q(kwargs['e1'], kwargs['e2'])
+            R_sersic *= np.sqrt(q)
+
+        return R_sersic
 
 
 class NFWEllipseGaussDec(GaussDecompositionAbstract):
@@ -715,8 +755,7 @@ class NFWEllipseGaussDec(GaussDecompositionAbstract):
         R_s = kwargs['Rs']
         alpha_Rs = kwargs['alpha_Rs']
 
-        kappa_s = alpha_Rs / (4 * R_s * (1 - 0.30102999566))
-        # log2 = 0.30102999566
+        kappa_s = alpha_Rs / (4 * R_s * (1 - np.log(2.)))
 
         x = y/R_s
 
@@ -817,25 +856,32 @@ class GeneralizedNFWEllipseGaussDec(GaussDecompositionAbstract):
         alpha_Rs = kwargs['alpha_Rs']
         gamma = kwargs['nfw_gamma']
 
-        kappa_s = alpha_Rs / (4 * R_s * (1 - 0.30102999566))
-        # log2 = 0.30102999566
-
         x = y/R_s
 
         ys = np.linspace(0., 1., 1001)
-        dy = ys[1] - ys[0]
+        dy = (ys[1] - ys[0])
         ys = (ys + dy/2.)[:-1]
+        weights = np.ones_like(ys)
+        #weights[0] = 0.5
+        #weights[-1] = 0.5
+
+        integral = np.sum((ys + 1.)**(gamma - 3) * (1 - np.sqrt(1 - ys*ys)) /
+                          ys * weights) * dy
+
+        kappa_s = alpha_Rs / (4 * R_s * (hyp2f1(3.-gamma, 3.-gamma, 4.-gamma,
+                                                 -1.)/(3 - gamma) + integral))
 
         if np.isscalar(x):
             integral = np.sum(
                 np.sum.outer(ys, x) ** (gamma - 4.) * (1. - np.sqrt(1 -
-                                                            ys * ys))) * dy
+                                                            ys * ys))
+                * weights) * dy
         else:
             # if x is a ndarray, then using broadcasting to compute the integral
             # for each entry in x
             integral = np.sum(np.multiply(
-                (x[:, :, np.newaxis] + ys[np.newaxis, :]) ** (gamma - 4.),
-                (1. - np.sqrt(1 - ys * ys))), axis=2) * dy
+                (x[..., np.newaxis] + ys[np.newaxis, ...]) ** (gamma - 4.),
+                (1. - np.sqrt(1 - ys * ys)) * weights), axis=-1) * dy
 
         kappa = 2 * kappa_s * x**(1.-gamma) * ((1.+x)**(gamma-3.) +
                                                (3.-gamma)*integral)
