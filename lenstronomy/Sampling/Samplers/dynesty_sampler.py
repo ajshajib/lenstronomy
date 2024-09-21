@@ -118,6 +118,7 @@ class DynestySampler(NestedSampler):
         try:
             import dynesty
             import dynesty.utils as dyfunc
+            import dill
         except ImportError:
             print(
                 "Warning : dynesty not properly installed (results might be unexpected). \
@@ -128,3 +129,5 @@ class DynestySampler(NestedSampler):
             self._dynesty_installed = True
             self._dynesty = dynesty
             self._dyfunc = dyfunc
+
+            dyfunc.pickle_module = dill
