@@ -47,15 +47,9 @@ class NautilusSampler(NestedSampler):
         )
 
         if mpi:
-            from schwimmbad import MPIPool
-            import sys
+            from mpi4py.futures import MPIPoolExecutor
 
-            # use_dill=True not supported for some versions of schwimmbad
-            pool = MPIPool(use_dill=True)
-            if not pool.is_master():
-                pool.wait()
-                sys.exit(0)
-            kwargs["pool"] = pool
+            kwargs["pool"] = MPIPoolExecutor()
 
         keys = [p.name for p in signature(self._nautilus.Sampler).parameters.values()]
         kwargs = {key: kwargs[key] for key in kwargs.keys() & keys}
