@@ -88,7 +88,7 @@ class NautilusSampler(NestedSampler):
         self._sampler.run(**kwargs)
         points, log_w, log_l_weighted = self._sampler.posterior()
         log_z = self._sampler.log_z
-        log_z_err = log_z / np.sqrt(self._sampler.n_eff)
+        log_z_err = 1.0 / np.sqrt(self._sampler.n_eff)
 
         results = {
             "points": points,
@@ -116,7 +116,9 @@ class NautilusSampler(NestedSampler):
         try:
             import nautilus
         except ImportError:
-            print("Warning : nautilus not properly installed. \
-                  You can get it with $pip install nautilus-sampler.")
+            print(
+                "Warning : nautilus not properly installed. \
+                  You can get it with $pip install nautilus-sampler."
+            )
         else:
             self._nautilus = nautilus
